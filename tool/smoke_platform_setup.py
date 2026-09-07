@@ -31,13 +31,19 @@ with tempfile.TemporaryDirectory() as d:
     assert 'isCoreLibraryDesugaringEnabled = true' in gradle
     assert 'desugar_jdk_libs:2.1.4' in gradle
     assert (r/'android/app/src/main/res/raw/keep.xml').is_file()
-    assert (r/'android/app/src/main/kotlin/com/salahfocus/salah_focus/MainActivity.kt').is_file()
+    native_main_activity = r/'native/android/MainActivity.kt'
+    generated_main_activity = r/'android/app/src/main/kotlin/com/salahfocus/salah_focus/MainActivity.kt'
+    assert generated_main_activity.is_file() == native_main_activity.is_file()
 
     with (r/'ios/Runner/Info.plist').open('rb') as h:
         info=plistlib.load(h)
-    assert info['CFBundleDisplayName']=='SalahFocus'
+    assert info['CFBundleDisplayName']=='Salaty'
     assert 'NSLocationWhenInUseUsageDescription' in info
     assert "platform :ios, '16.0'" in (r/'ios/Podfile').read_text()
     assert 'IPHONEOS_DEPLOYMENT_TARGET = 16.0;' in (r/'ios/Runner.xcodeproj/project.pbxproj').read_text()
-    assert 'GeneratedPluginRegistrant.register' in (r/'ios/Runner/AppDelegate.swift').read_text()
+    app_delegate = (r/'ios/Runner/AppDelegate.swift').read_text()
+    if (r/'native/ios/AppDelegate.swift').is_file():
+        assert 'GeneratedPluginRegistrant.register' in app_delegate
+    else:
+        assert app_delegate == '// template'
 print('Platform patch smoke test passed')

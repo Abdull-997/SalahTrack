@@ -27,7 +27,7 @@ jobs:
       - name: Salaty Bootstrap ausführen
         run: |
           chmod +x tool/bootstrap.sh
-          ./tool/bootstrap.sh || true
+          ./tool/bootstrap.sh
 
       - name: iOS App kompilieren (Release, Unsigned)
         run: |

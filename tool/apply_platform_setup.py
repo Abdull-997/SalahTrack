@@ -63,9 +63,11 @@ def patch_android() -> None:
             raise RuntimeError("Could not locate </application> element")
     manifest.write_text(text, encoding="utf-8")
 
-    kotlin_target = ROOT / "android/app/src/main/kotlin/com/salahfocus/salah_focus/MainActivity.kt"
-    kotlin_target.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(ROOT / "native/android/MainActivity.kt", kotlin_target)
+    native_main_activity = ROOT / "native/android/MainActivity.kt"
+    if native_main_activity.exists():
+        kotlin_target = ROOT / "android/app/src/main/kotlin/com/salahfocus/salah_focus/MainActivity.kt"
+        kotlin_target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(native_main_activity, kotlin_target)
 
     gradle = ROOT / "android/app/build.gradle.kts"
     if gradle.exists():
@@ -89,7 +91,9 @@ def patch_android() -> None:
 
 
 def patch_ios() -> None:
-    shutil.copy2(ROOT / "native/ios/AppDelegate.swift", ROOT / "ios/Runner/AppDelegate.swift")
+    native_app_delegate = ROOT / "native/ios/AppDelegate.swift"
+    if native_app_delegate.exists():
+        shutil.copy2(native_app_delegate, ROOT / "ios/Runner/AppDelegate.swift")
 
     info_path = ROOT / "ios/Runner/Info.plist"
     with info_path.open("rb") as handle:
