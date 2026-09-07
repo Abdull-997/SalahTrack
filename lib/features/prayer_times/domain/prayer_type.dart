@@ -6,12 +6,12 @@ enum PrayerType {
   isha;
 
   String get apiKey => switch (this) {
-        PrayerType.fajr => 'Fajr',
-        PrayerType.dhuhr => 'Dhuhr',
-        PrayerType.asr => 'Asr',
-        PrayerType.maghrib => 'Maghrib',
-        PrayerType.isha => 'Isha',
-      };
+    PrayerType.fajr => 'Fajr',
+    PrayerType.dhuhr => 'Dhuhr',
+    PrayerType.asr => 'Asr',
+    PrayerType.maghrib => 'Maghrib',
+    PrayerType.isha => 'Isha',
+  };
 
   String localizedName(String languageCode) {
     const Map<String, Map<PrayerType, String>> values = {
@@ -35,6 +35,20 @@ enum PrayerType {
         PrayerType.asr: 'العصر',
         PrayerType.maghrib: 'المغرب',
         PrayerType.isha: 'العشاء',
+      },
+      'ur': {
+        PrayerType.fajr: 'فجر',
+        PrayerType.dhuhr: 'ظہر',
+        PrayerType.asr: 'عصر',
+        PrayerType.maghrib: 'مغرب',
+        PrayerType.isha: 'عشاء',
+      },
+      'ps': {
+        PrayerType.fajr: 'سهار',
+        PrayerType.dhuhr: 'غرمه',
+        PrayerType.asr: 'مازدیګر',
+        PrayerType.maghrib: 'ماښام',
+        PrayerType.isha: 'ماخوستن',
       },
     };
     return values[languageCode]?[this] ?? values['en']![this]!;

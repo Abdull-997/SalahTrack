@@ -10,10 +10,11 @@ import 'package:timezone/timezone.dart' as tz;
 
 class LocalNotificationService implements NotificationService {
   LocalNotificationService({FlutterLocalNotificationsPlugin? plugin})
-      : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+    : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
 
   final FlutterLocalNotificationsPlugin _plugin;
-  final StreamController<String> _payloadController = StreamController<String>.broadcast();
+  final StreamController<String> _payloadController =
+      StreamController<String>.broadcast();
   bool _initialized = false;
   String? _initialPayload;
 
@@ -22,31 +23,31 @@ class LocalNotificationService implements NotificationService {
 
   static const AndroidNotificationDetails _androidPrayerDetails =
       AndroidNotificationDetails(
-    'prayer_times',
-    'Prayer times',
-    channelDescription: 'Prayer-time reminders',
-    importance: Importance.high,
-    priority: Priority.high,
-    category: AndroidNotificationCategory.reminder,
-  );
+        'prayer_times',
+        'Prayer times',
+        channelDescription: 'Prayer-time reminders',
+        importance: Importance.high,
+        priority: Priority.high,
+        category: AndroidNotificationCategory.reminder,
+      );
 
   static const AndroidNotificationDetails _androidFocusDetails =
       AndroidNotificationDetails(
-    'prayer_focus',
-    'Prayer Focus',
-    channelDescription: 'Grace-period and snooze reminders',
-    importance: Importance.high,
-    priority: Priority.high,
-    category: AndroidNotificationCategory.reminder,
-  );
+        'prayer_focus',
+        'Prayer Focus',
+        channelDescription: 'Grace-period and snooze reminders',
+        importance: Importance.high,
+        priority: Priority.high,
+        category: AndroidNotificationCategory.reminder,
+      );
 
   static const DarwinNotificationDetails _darwinDetails =
       DarwinNotificationDetails(
-    presentAlert: true,
-    presentBanner: true,
-    presentList: true,
-    presentSound: true,
-  );
+        presentAlert: true,
+        presentBanner: true,
+        presentList: true,
+        presentSound: true,
+      );
 
   @override
   Future<void> initialize() async {
@@ -70,15 +71,16 @@ class LocalNotificationService implements NotificationService {
         }
       },
     );
-    final NotificationAppLaunchDetails? launchDetails =
-        await _plugin.getNotificationAppLaunchDetails();
+    final NotificationAppLaunchDetails? launchDetails = await _plugin
+        .getNotificationAppLaunchDetails();
     if (launchDetails?.didNotificationLaunchApp == true) {
       _initialPayload = launchDetails?.notificationResponse?.payload;
     }
     if (Platform.isAndroid) {
-      final AndroidFlutterLocalNotificationsPlugin? android =
-          _plugin.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
+      final AndroidFlutterLocalNotificationsPlugin? android = _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       await android?.createNotificationChannel(
         const AndroidNotificationChannel(
           'prayer_times',
@@ -111,15 +113,17 @@ class LocalNotificationService implements NotificationService {
   Future<bool> requestPermission() async {
     await initialize();
     if (Platform.isAndroid) {
-      final AndroidFlutterLocalNotificationsPlugin? android =
-          _plugin.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
+      final AndroidFlutterLocalNotificationsPlugin? android = _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       return await android?.requestNotificationsPermission() ?? true;
     }
     if (Platform.isIOS) {
-      final IOSFlutterLocalNotificationsPlugin? ios =
-          _plugin.resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>();
+      final IOSFlutterLocalNotificationsPlugin? ios = _plugin
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >();
       return await ios?.requestPermissions(
             alert: true,
             badge: true,
@@ -136,9 +140,10 @@ class LocalNotificationService implements NotificationService {
     if (!Platform.isAndroid) {
       return true;
     }
-    final AndroidFlutterLocalNotificationsPlugin? android =
-        _plugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+    final AndroidFlutterLocalNotificationsPlugin? android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     return await android?.requestExactAlarmsPermission() ?? false;
   }
 
@@ -147,9 +152,10 @@ class LocalNotificationService implements NotificationService {
     if (!Platform.isAndroid) {
       return true;
     }
-    final AndroidFlutterLocalNotificationsPlugin? android =
-        _plugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+    final AndroidFlutterLocalNotificationsPlugin? android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     return await android?.canScheduleExactNotifications() ?? false;
   }
 
@@ -224,8 +230,8 @@ class LocalNotificationService implements NotificationService {
     required String languageCode,
   }) async {
     final DateTime candidate = DateTime.now().toUtc().add(
-          const Duration(minutes: 45),
-        );
+      const Duration(minutes: 45),
+    );
     if (!candidate.isBefore(prayer.trackingEndsAtUtc)) {
       return;
     }
@@ -274,14 +280,17 @@ class LocalNotificationService implements NotificationService {
   }
 
   static String _text(String languageCode, String key, String prayerName) {
-    const Map<String, Map<String, String>> values = <String, Map<String, String>>{
+    const Map<String, Map<String, String>>
+    values = <String, Map<String, String>>{
       'de': <String, String>{
         'prayerTitle': '🕌 {prayer} ist da',
         'prayerBody': 'Es ist Zeit für dein Gebet.',
         'graceTitle': 'Zeit für {prayer}',
-        'graceBody': 'Du wolltest dir jetzt ein paar Minuten für dein Gebet nehmen.',
+        'graceBody':
+            'Du wolltest dir jetzt ein paar Minuten für dein Gebet nehmen.',
         'snoozeTitle': '{prayer} – Erinnerung',
-        'snoozeBody': 'Deine Snooze-Zeit ist vorbei. Nimm dir Zeit, wenn du kannst.',
+        'snoozeBody':
+            'Deine Snooze-Zeit ist vorbei. Nimm dir Zeit, wenn du kannst.',
         'softTitle': 'Eine kleine Erinnerung 🤍',
         'softBody': 'Nimm dir ein paar Minuten für {prayer}, wenn du kannst.',
       },
@@ -305,9 +314,33 @@ class LocalNotificationService implements NotificationService {
         'softTitle': 'تذكير لطيف 🤍',
         'softBody': 'خذ بضع دقائق من أجل {prayer} إن استطعت.',
       },
+      'ur': <String, String>{
+        'prayerTitle': '🕌 {prayer} کا وقت ہو گیا',
+        'prayerBody': 'آپ کی نماز کا وقت ہے۔',
+        'graceTitle': '{prayer} کا وقت',
+        'graceBody':
+            'آپ نے ابھی اپنی نماز کے لیے چند منٹ نکالنے کا ارادہ کیا تھا۔',
+        'snoozeTitle': '{prayer} – یاد دہانی',
+        'snoozeBody':
+            'موخر کرنے کا وقت ختم ہو گیا ہے۔ اگر ممکن ہو تو چند منٹ نکالیں۔',
+        'softTitle': 'نرم یاد دہانی 🤍',
+        'softBody': 'اگر ممکن ہو تو {prayer} کے لیے چند منٹ نکالیں۔',
+      },
+      'ps': <String, String>{
+        'prayerTitle': '🕌 د {prayer} وخت شو',
+        'prayerBody': 'ستاسو د لمانځه وخت دی.',
+        'graceTitle': 'د {prayer} وخت',
+        'graceBody': 'تاسو غوښتل اوس خپل لمانځه ته څو دقیقې ځانګړې کړئ.',
+        'snoozeTitle': '{prayer} – یادونه',
+        'snoozeBody': 'د ځنډ وخت پای ته ورسېد. که کولی شئ، څو دقیقې وخت واخلئ.',
+        'softTitle': 'نرمه یادونه 🤍',
+        'softBody': 'که کولی شئ، د {prayer} لپاره څو دقیقې وخت واخلئ.',
+      },
     };
-    return (values[languageCode]?[key] ?? values['en']![key] ?? key)
-        .replaceAll('{prayer}', prayerName);
+    return (values[languageCode]?[key] ?? values['en']![key] ?? key).replaceAll(
+      '{prayer}',
+      prayerName,
+    );
   }
 
   @override
@@ -322,8 +355,8 @@ class LocalNotificationService implements NotificationService {
   @override
   Future<void> cancelAllFuturePrayerNotifications() async {
     await initialize();
-    final List<PendingNotificationRequest> pending =
-        await _plugin.pendingNotificationRequests();
+    final List<PendingNotificationRequest> pending = await _plugin
+        .pendingNotificationRequests();
     for (final PendingNotificationRequest request in pending) {
       final String payload = request.payload ?? '';
       if (payload.startsWith('prayer:') || payload.startsWith('focus:')) {

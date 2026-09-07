@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AppStrings {
@@ -6,7 +6,8 @@ class AppStrings {
 
   final Locale locale;
 
-  static const LocalizationsDelegate<AppStrings> delegate = _AppStringsDelegate();
+  static const LocalizationsDelegate<AppStrings> delegate =
+      _AppStringsDelegate();
 
   static AppStrings of(BuildContext context) =>
       Localizations.of<AppStrings>(context, AppStrings)!;
@@ -15,6 +16,8 @@ class AppStrings {
     Locale('de'),
     Locale('en'),
     Locale('ar'),
+    Locale('ur'),
+    Locale('ps'),
   ];
 
   static const Map<String, Map<String, String>> _values = {
@@ -44,7 +47,8 @@ class AppStrings {
       'continue': 'Weiter',
       'back': 'Zurück',
       'prayerTimes': 'Gebetszeiten',
-      'timesQuestion': 'Stimmen diese Zeiten ungefähr mit deiner Moschee überein?',
+      'timesQuestion':
+          'Stimmen diese Zeiten ungefähr mit deiner Moschee überein?',
       'yes': 'Ja',
       'adjust': 'Anpassen',
       'graceQuestion': 'Wann sollen wir dich stärker erinnern?',
@@ -60,7 +64,8 @@ class AppStrings {
       'snoozeIn': 'In {minutes} Minuten erinnern',
       'skipToday': 'Heute überspringen',
       'skipConfirmTitle': 'Erinnerung beenden?',
-      'skipConfirmBody': 'Möchtest du die Erinnerung für dieses Gebet wirklich beenden?',
+      'skipConfirmBody':
+          'Möchtest du die Erinnerung für dieses Gebet wirklich beenden?',
       'noPrayLater': 'Nein, ich bete noch',
       'yesEnd': 'Ja, Erinnerung beenden',
       'emergencyUnlock': 'Notfall – Focus Mode beenden',
@@ -150,7 +155,8 @@ class AppStrings {
       'focusExplain': 'Prayer Focus helps you reduce distractions for a few minutes. You always remain in control.',
       'enableFocus': 'Enable Prayer Focus',
       'permissions': 'Permissions',
-      'permissionExplain': 'We only request permissions when a feature actually needs them.',
+      'permissionExplain':
+          'We only request permissions when a feature actually needs them.',
       'finish': 'Finish',
       'confirmPrayer': 'I have prayed',
       'snooze': 'Remind me in 20 minutes',
@@ -193,8 +199,10 @@ class AppStrings {
       'individualAppsOnly': 'Select only individual distracting apps. Whole categories are not blocked for safety. Leave Salaty and essential apps such as Phone, Maps or medical apps unselected.',
       'focusFallback': 'System-wide app shielding is not available on this device. Safe in-app Focus remains active.',
       'qiblaDirection': 'Qibla direction',
-      'calibrate': 'Move your phone in a figure eight if the compass seems inaccurate.',
-      'noCompass': 'No compass sensor is available. Qibla is still shown in degrees.',
+      'calibrate':
+          'Move your phone in a figure eight if the compass seems inaccurate.',
+      'noCompass':
+          'No compass sensor is available. Qibla is still shown in degrees.',
       'needLocation': 'Please set a location first.',
       'offlineCache': 'Using offline cache.',
       'retry': 'Try again',
@@ -207,7 +215,8 @@ class AppStrings {
       'genericError': 'Something went wrong. Please try again.',
       'locationError': 'Your location could not be determined. You can choose a city instead.',
       'networkError': 'Prayer times could not be loaded right now. Cached data will be used when available.',
-      'prayerDataError': 'Prayer times could not be processed reliably. Please try again.',
+      'prayerDataError':
+          'Prayer times could not be processed reliably. Please try again.',
       'snoozeUnavailable': 'This prayer cannot be snoozed any further.',
       'prayerFirst': 'Prayer first, phone second.',
       'heading': 'Heading',
@@ -258,7 +267,8 @@ class AppStrings {
       'noPrayLater': 'لا، سأصلي',
       'yesEnd': 'نعم، أنهِ التذكير',
       'emergencyUnlock': 'طوارئ – إنهاء وضع التركيز',
-      'emergencyBody': 'سيتم إنهاء وضع التركيز فورًا، ولن يتم تسجيل الصلاة على أنها متخطاة.',
+      'emergencyBody':
+          'سيتم إنهاء وضع التركيز فورًا، ولن يتم تسجيل الصلاة على أنها متخطاة.',
       'focusTitle': 'حان وقت {prayer}',
       'focusBody': 'أردت أن تخصص وقتًا للصلاة. اترك الهاتف لبضع دقائق وصلِّ.',
       'accepted': 'الحمد لله 🤍',
@@ -309,12 +319,219 @@ class AppStrings {
       'prayerFirst': 'الصلاة أولًا، ثم الهاتف.',
       'heading': 'اتجاه الهاتف',
     },
+    'ur': {
+      'appName': 'صلاتی',
+      'tagline': 'کم توجہ بھٹکنا۔ زیادہ نماز۔',
+      'getStarted': 'شروع کریں',
+      'home': 'ہوم',
+      'tracker': 'ریکارڈ',
+      'qibla': 'قبلہ',
+      'settings': 'ترتیبات',
+      'nextPrayer': 'اگلی نماز',
+      'today': 'آج',
+      'prayed': 'نماز پڑھی',
+      'snoozed': 'موخر',
+      'skipped': 'چھوڑ دیا',
+      'missed': 'تصدیق نہیں ہوئی',
+      'upcoming': 'آنے والی',
+      'active': 'فعال',
+      'pending': 'نماز توجہ',
+      'refresh': 'تازہ کریں',
+      'location': 'مقام',
+      'useLocation': 'میرا مقام استعمال کریں',
+      'chooseCity': 'شہر منتخب کریں',
+      'city': 'شہر',
+      'country': 'ملک',
+      'continue': 'جاری رکھیں',
+      'back': 'واپس',
+      'prayerTimes': 'نماز کے اوقات',
+      'timesQuestion': 'کیا یہ اوقات تقریباً آپ کی مقامی مسجد سے ملتے ہیں؟',
+      'yes': 'ہاں',
+      'adjust': 'تبدیل کریں',
+      'graceQuestion': 'ہم آپ کو زیادہ مضبوطی سے کب یاد دلائیں؟',
+      'minutesAfter': 'نماز شروع ہونے کے بعد منٹ',
+      'distractions': 'کون سی ایپس اکثر آپ کی توجہ بھٹکاتی ہیں؟',
+      'focusExplain': 'نماز توجہ چند منٹ کے لیے توجہ بھٹکنے سے بچاتی ہے۔ اختیار ہمیشہ آپ کے پاس ہے۔',
+      'enableFocus': 'نماز توجہ فعال کریں',
+      'permissions': 'اجازتیں',
+      'permissionExplain':
+          'ہم صرف اس وقت اجازت مانگتے ہیں جب کسی خصوصیت کو اس کی ضرورت ہو۔',
+      'finish': 'مکمل',
+      'confirmPrayer': 'میں نے نماز پڑھی ہے',
+      'snooze': '20 منٹ بعد یاد دلائیں',
+      'snoozeIn': '{minutes} منٹ بعد یاد دلائیں',
+      'skipToday': 'آج چھوڑ دیں',
+      'skipConfirmTitle': 'یاد دہانی بند کریں؟',
+      'skipConfirmBody':
+          'کیا آپ واقعی اس نماز کی یاد دہانیاں بند کرنا چاہتے ہیں؟',
+      'noPrayLater': 'نہیں، میں نماز پڑھوں گا',
+      'yesEnd': 'ہاں، یاد دہانی بند کریں',
+      'emergencyUnlock': 'ایمرجنسی – توجہ موڈ بند کریں',
+      'emergencyBody':
+          'نماز توجہ فوراً ختم ہو جائے گی۔ نماز کو چھوڑا ہوا نشان نہیں لگے گا۔',
+      'focusTitle': '{prayer} کا وقت',
+      'focusBody': 'آپ نے نماز کے لیے وقت نکالنا چاہا تھا۔ فون چند منٹ کے لیے رکھ دیں اور نماز پڑھیں۔',
+      'accepted': 'الحمدللہ 🤍',
+      'week': 'اس ہفتے',
+      'month': 'مہینہ',
+      'confirmedPrayers': 'تصدیق شدہ نمازیں',
+      'calculationMethod': 'حساب کا طریقہ',
+      'madhhab': 'عصر کا حساب',
+      'standard': 'معیاری',
+      'hanafi': 'حنفی',
+      'highLatitude': 'بلند عرض البلد کا اصول',
+      'gracePeriod': 'مہلت کی مدت',
+      'snoozeDuration': 'موخر کرنے کی مدت',
+      'confirmationText': 'تصدیقی متن',
+      'focusMode': 'نماز توجہ',
+      'softReminder': 'چھوڑنے کے بعد نرم یاد دہانی',
+      'theme': 'ظاہری شکل',
+      'system': 'سسٹم',
+      'light': 'روشن',
+      'dark': 'تاریک',
+      'language': 'زبان',
+      'german': 'جرمن',
+      'english': 'انگریزی',
+      'arabic': 'عربی',
+      'urdu': 'اردو',
+      'pashto': 'پشتو',
+      'notificationPermission': 'اطلاعات کی اجازت دیں',
+      'exactAlarmPermission': 'درست یاددہانیوں کی اجازت دیں',
+      'focusAuthorization': 'توجہ کی اجازت ترتیب دیں',
+      'selectApps': 'توجہ بھٹکانے والی ایپس منتخب کریں',
+      'individualAppsOnly': 'صرف انفرادی توجہ بھٹکانے والی ایپس منتخب کریں۔ حفاظت کے لیے پوری اقسام بلاک نہیں کی جاتیں۔ صلاتی اور فون، نقشے یا طبی ایپس جیسی ضروری ایپس کو منتخب نہ کریں۔',
+      'focusFallback': 'اس آلے پر سسٹم بھر میں ایپس کو روکنا دستیاب نہیں۔ محفوظ اندرونِ ایپ توجہ فعال رہتی ہے۔',
+      'qiblaDirection': 'قبلہ کی سمت',
+      'calibrate': 'اگر قطب نما غلط لگے تو فون کو آٹھ کی شکل میں حرکت دیں۔',
+      'noCompass': 'قطب نما سینسر دستیاب نہیں۔ قبلہ کی سمت پھر بھی درجوں میں دکھائی جاتی ہے۔',
+      'needLocation': 'پہلے ایک مقام مقرر کریں۔',
+      'offlineCache': 'آف لائن محفوظ ڈیٹا استعمال ہو رہا ہے۔',
+      'retry': 'دوبارہ کوشش کریں',
+      'noData': 'آج کے لیے نماز کے قابلِ اعتماد اوقات محفوظ نہیں ہیں۔',
+      'save': 'محفوظ کریں',
+      'cancel': 'منسوخ',
+      'manualAdjustments': 'منٹ کی تبدیلیاں',
+      'maxSnoozes': 'زیادہ سے زیادہ موخر کرنا',
+      'unlimited': 'لامحدود',
+      'genericError': 'کچھ غلط ہو گیا۔ براہ کرم دوبارہ کوشش کریں۔',
+      'locationError':
+          'آپ کا مقام معلوم نہیں ہو سکا۔ آپ اس کے بجائے شہر منتخب کر سکتے ہیں۔',
+      'networkError': 'نماز کے اوقات ابھی لوڈ نہیں ہو سکے۔ دستیاب ہونے پر محفوظ ڈیٹا استعمال ہوگا۔',
+      'prayerDataError': 'نماز کے اوقات قابل اعتماد طور پر پراسیس نہیں ہو سکے۔ براہ کرم دوبارہ کوشش کریں۔',
+      'snoozeUnavailable': 'اس نماز کو مزید موخر نہیں کیا جا سکتا۔',
+      'prayerFirst': 'پہلے نماز، پھر فون۔',
+      'heading': 'سمت',
+    },
+    'ps': {
+      'appName': 'صلاتي',
+      'tagline': 'لږ ګډوډي. ډېره لمونځ.',
+      'getStarted': 'پیل کړئ',
+      'home': 'کور',
+      'tracker': 'څارونکی',
+      'qibla': 'قبله',
+      'settings': 'امستنې',
+      'nextPrayer': 'راتلونکی لمونځ',
+      'today': 'نن',
+      'prayed': 'لمونځ وشو',
+      'snoozed': 'ځنډول شوی',
+      'skipped': 'تېر شوی',
+      'missed': 'تایید نه شو',
+      'upcoming': 'راتلونکی',
+      'active': 'فعال',
+      'pending': 'د لمانځه تمرکز',
+      'refresh': 'تازه کړئ',
+      'location': 'ځای',
+      'useLocation': 'زما ځای وکاروئ',
+      'chooseCity': 'ښار وټاکئ',
+      'city': 'ښار',
+      'country': 'هېواد',
+      'continue': 'دوام ورکړئ',
+      'back': 'بېرته',
+      'prayerTimes': 'د لمانځه وختونه',
+      'timesQuestion': 'ایا دا وختونه نږدې ستاسو له جومات سره سمون لري؟',
+      'yes': 'هو',
+      'adjust': 'سمول',
+      'graceQuestion': 'کله مو په ډېر ټینګار یاد کړو؟',
+      'minutesAfter': 'د لمانځه له پیله وروسته دقیقې',
+      'distractions': 'کوم اپلیکیشنونه مو ډېر پام اړوي؟',
+      'focusExplain': 'د لمانځه تمرکز له څو دقیقو لپاره ګډوډي کموي. کنټرول تل ستاسو په لاس کې دی.',
+      'enableFocus': 'د لمانځه تمرکز فعال کړئ',
+      'permissions': 'اجازې',
+      'permissionExplain':
+          'موږ یوازې هغه وخت اجازه غواړو چې کومه ځانګړنه ورته اړتیا ولري.',
+      'finish': 'پای',
+      'confirmPrayer': 'ما لمونځ کړی دی',
+      'snooze': 'په ۲۰ دقیقو کې مې یاد کړئ',
+      'snoozeIn': 'په {minutes} دقیقو کې مې یاد کړئ',
+      'skipToday': 'نن پرېږدئ',
+      'skipConfirmTitle': 'یادونه پای ته ورسوئ؟',
+      'skipConfirmBody': 'ایا رښتیا غواړئ د دې لمانځه یادونې پای ته ورسوئ؟',
+      'noPrayLater': 'نه، لمونځ به وکړم',
+      'yesEnd': 'هو، یادونه پای ته ورسوئ',
+      'emergencyUnlock': 'بیړنی – د تمرکز حالت بند کړئ',
+      'emergencyBody':
+          'د لمانځه تمرکز سمدستي ختمېږي. لمونځ به پرېښودل شوی ونه ګڼل شي.',
+      'focusTitle': 'د {prayer} وخت',
+      'focusBody': 'تاسو غوښتل لمانځه ته وخت ځانګړی کړئ. فون د څو دقیقو لپاره کېږدئ او لمونځ وکړئ.',
+      'accepted': 'الحمدلله 🤍',
+      'week': 'دا اونۍ',
+      'month': 'میاشت',
+      'confirmedPrayers': 'تایید شوي لمونځونه',
+      'calculationMethod': 'د محاسبې طریقه',
+      'madhhab': 'د مازدیګر محاسبه',
+      'standard': 'معیاري',
+      'hanafi': 'حنفي',
+      'highLatitude': 'د لوړې عرض البلد قاعده',
+      'gracePeriod': 'د ځنډ موده',
+      'snoozeDuration': 'د ځنډولو موده',
+      'confirmationText': 'د تایید متن',
+      'focusMode': 'د لمانځه تمرکز',
+      'softReminder': 'له پرېښودو وروسته نرمه یادونه',
+      'theme': 'بڼه',
+      'system': 'سیستم',
+      'light': 'روښانه',
+      'dark': 'تیاره',
+      'language': 'ژبه',
+      'german': 'جرمني',
+      'english': 'انګلیسي',
+      'arabic': 'عربي',
+      'urdu': 'اردو',
+      'pashto': 'پښتو',
+      'notificationPermission': 'خبرتیاوو ته اجازه ورکړئ',
+      'exactAlarmPermission': 'دقیقو یادونو ته اجازه ورکړئ',
+      'focusAuthorization': 'د تمرکز اجازه برابره کړئ',
+      'selectApps': 'ګډوډوونکي اپلیکیشنونه وټاکئ',
+      'individualAppsOnly': 'یوازې انفرادي ګډوډوونکي اپلیکیشنونه وټاکئ. د خوندیتوب لپاره ټولې کټګورۍ نه بندېږي. صلاتي او اړین اپلیکیشنونه لکه تلیفون، نقشې یا طبي اپلیکیشنونه مه ټاکئ.',
+      'focusFallback': 'په دې وسیله کې د ټول سیستم د اپلیکیشنونو بندول نشته. خوندي د اپلیکیشن دننه تمرکز فعال پاتې کېږي.',
+      'qiblaDirection': 'د قبلې لوری',
+      'calibrate': 'که قطب نما ناسمه ښکاري، فون د اته په بڼه وخوځوئ.',
+      'noCompass': 'د قطب نما حسګر نشته. د قبلې لوری بیا هم په درجو ښودل کېږي.',
+      'needLocation': 'لومړی یو ځای وټاکئ.',
+      'offlineCache': 'افلاین زیرمه کارول کېږي.',
+      'retry': 'بیا هڅه وکړئ',
+      'noData': 'د نن لپاره د لمانځه باوري وختونه نشته.',
+      'save': 'ساتل',
+      'cancel': 'لغوه',
+      'manualAdjustments': 'د دقیقو سمون',
+      'maxSnoozes': 'اعظمي ځنډول',
+      'unlimited': 'نامحدود',
+      'genericError': 'یوه ستونزه پېښه شوه. بیا هڅه وکړئ.',
+      'locationError': 'ستاسو ځای ونه موندل شو. پر ځای یې ښار ټاکلی شئ.',
+      'networkError': 'د لمانځه وختونه اوس نه شي پورته کېدای. که موجود وي زیرمه شوې معلومات کارېږي.',
+      'prayerDataError':
+          'د لمانځه وختونه په باوري توګه پروسس نه شول. بیا هڅه وکړئ.',
+      'snoozeUnavailable': 'دا لمونځ نور نه شي ځنډېدای.',
+      'prayerFirst': 'لومړی لمونځ، بیا فون.',
+      'heading': 'لوری',
+    },
   };
 
-  String t(String key, {Map<String, String> params = const <String, String>{}}) {
-    String value = _values[locale.languageCode]?[key] ??
-        _values['en']?[key] ??
-        key;
+  String t(
+    String key, {
+    Map<String, String> params = const <String, String>{},
+  }) {
+    String value =
+        _values[locale.languageCode]?[key] ?? _values['en']?[key] ?? key;
     for (final MapEntry<String, String> entry in params.entries) {
       value = value.replaceAll('{${entry.key}}', entry.value);
     }
@@ -326,11 +543,13 @@ class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {
   const _AppStringsDelegate();
 
   @override
-  bool isSupported(Locale locale) =>
-      AppStrings.supportedLocales.any((Locale item) => item.languageCode == locale.languageCode);
+  bool isSupported(Locale locale) => AppStrings.supportedLocales.any(
+    (Locale item) => item.languageCode == locale.languageCode,
+  );
 
   @override
-  Future<AppStrings> load(Locale locale) => SynchronousFuture<AppStrings>(AppStrings(locale));
+  Future<AppStrings> load(Locale locale) =>
+      SynchronousFuture<AppStrings>(AppStrings(locale));
 
   @override
   bool shouldReload(covariant LocalizationsDelegate<AppStrings> old) => false;

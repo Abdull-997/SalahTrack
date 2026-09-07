@@ -30,7 +30,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: <Widget>[
-          _SectionTitle(title: s.t('prayerTimes'), icon: Icons.schedule_rounded),
+          _SectionTitle(
+            title: s.t('prayerTimes'),
+            icon: Icons.schedule_rounded,
+          ),
           Card(
             child: Column(
               children: <Widget>[
@@ -45,7 +48,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.calculate_outlined),
                   title: Text(s.t('calculationMethod')),
-                  subtitle: Text(_calculationMethodName(settings.calculationMethodId)),
+                  subtitle: Text(
+                    _calculationMethodName(settings.calculationMethodId),
+                  ),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _chooseCalculationMethod(settings),
                 ),
@@ -53,7 +58,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.balance_rounded),
                   title: Text(s.t('madhhab')),
-                  subtitle: Text(settings.madhhab == AsrMadhhab.hanafi ? s.t('hanafi') : s.t('standard')),
+                  subtitle: Text(
+                    settings.madhhab == AsrMadhhab.hanafi
+                        ? s.t('hanafi')
+                        : s.t('standard'),
+                  ),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _chooseMadhhab(settings),
                 ),
@@ -77,7 +86,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 18),
-          _SectionTitle(title: s.t('permissions'), icon: Icons.notifications_active_outlined),
+          _SectionTitle(
+            title: s.t('permissions'),
+            icon: Icons.notifications_active_outlined,
+          ),
           Card(
             child: Column(
               children: <Widget>[
@@ -121,14 +133,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(height: 1),
                 ListTile(
                   title: Text(s.t('maxSnoozes')),
-                  subtitle: Text(settings.maxSnoozes?.toString() ?? s.t('unlimited')),
+                  subtitle: Text(
+                    settings.maxSnoozes?.toString() ?? s.t('unlimited'),
+                  ),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _chooseMaxSnoozes(settings),
                 ),
                 SwitchListTile(
                   title: Text(s.t('softReminder')),
                   value: settings.softReminderAfterSkip,
-                  onChanged: (bool value) => _savePrayerSettings(settings.copyWith(softReminderAfterSkip: value)),
+                  onChanged: (bool value) => _savePrayerSettings(
+                    settings.copyWith(softReminderAfterSkip: value),
+                  ),
                 ),
               ],
             ),
@@ -153,7 +169,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           if (value) {
                             await _authorizeFocus();
                           } else {
-                            await ref.read(prayerCoordinatorProvider).disableFocus();
+                            await ref
+                                .read(prayerCoordinatorProvider)
+                                .disableFocus();
                           }
                           await _savePrayerSettings(
                             settings.copyWith(focusEnabled: value),
@@ -183,7 +201,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 18),
-          _SectionTitle(title: s.t('confirmationText'), icon: Icons.check_circle_outline_rounded),
+          _SectionTitle(
+            title: s.t('confirmationText'),
+            icon: Icons.check_circle_outline_rounded,
+          ),
           Card(
             child: ListTile(
               title: Text(s.t('confirmationText')),
@@ -200,17 +221,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _RadioLikeTile(
                   title: s.t('system'),
                   selected: prefs.themeMode == ThemeMode.system.name,
-                  onTap: () => ref.read(settingsControllerProvider.notifier).setThemeMode(ThemeMode.system),
+                  onTap: () => ref
+                      .read(settingsControllerProvider.notifier)
+                      .setThemeMode(ThemeMode.system),
                 ),
                 _RadioLikeTile(
                   title: s.t('light'),
                   selected: prefs.themeMode == ThemeMode.light.name,
-                  onTap: () => ref.read(settingsControllerProvider.notifier).setThemeMode(ThemeMode.light),
+                  onTap: () => ref
+                      .read(settingsControllerProvider.notifier)
+                      .setThemeMode(ThemeMode.light),
                 ),
                 _RadioLikeTile(
                   title: s.t('dark'),
                   selected: prefs.themeMode == ThemeMode.dark.name,
-                  onTap: () => ref.read(settingsControllerProvider.notifier).setThemeMode(ThemeMode.dark),
+                  onTap: () => ref
+                      .read(settingsControllerProvider.notifier)
+                      .setThemeMode(ThemeMode.dark),
                 ),
               ],
             ),
@@ -220,9 +247,41 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Card(
             child: Column(
               children: <Widget>[
-                _RadioLikeTile(title: s.t('german'), selected: prefs.localeCode == 'de', onTap: () => ref.read(settingsControllerProvider.notifier).setLocale('de')),
-                _RadioLikeTile(title: s.t('english'), selected: prefs.localeCode == 'en', onTap: () => ref.read(settingsControllerProvider.notifier).setLocale('en')),
-                _RadioLikeTile(title: s.t('arabic'), selected: prefs.localeCode == 'ar', onTap: () => ref.read(settingsControllerProvider.notifier).setLocale('ar')),
+                _RadioLikeTile(
+                  title: s.t('german'),
+                  selected: prefs.localeCode == 'de',
+                  onTap: () => ref
+                      .read(settingsControllerProvider.notifier)
+                      .setLocale('de'),
+                ),
+                _RadioLikeTile(
+                  title: s.t('english'),
+                  selected: prefs.localeCode == 'en',
+                  onTap: () => ref
+                      .read(settingsControllerProvider.notifier)
+                      .setLocale('en'),
+                ),
+                _RadioLikeTile(
+                  title: s.t('arabic'),
+                  selected: prefs.localeCode == 'ar',
+                  onTap: () => ref
+                      .read(settingsControllerProvider.notifier)
+                      .setLocale('ar'),
+                ),
+                _RadioLikeTile(
+                  title: s.t('urdu'),
+                  selected: prefs.localeCode == 'ur',
+                  onTap: () => ref
+                      .read(settingsControllerProvider.notifier)
+                      .setLocale('ur'),
+                ),
+                _RadioLikeTile(
+                  title: s.t('pashto'),
+                  selected: prefs.localeCode == 'ps',
+                  onTap: () => ref
+                      .read(settingsControllerProvider.notifier)
+                      .setLocale('ps'),
+                ),
               ],
             ),
           ),
@@ -240,8 +299,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            ListTile(leading: const Icon(Icons.my_location_rounded), title: Text(s.t('useLocation')), onTap: () => Navigator.of(context).pop('gps')),
-            ListTile(leading: const Icon(Icons.location_city_rounded), title: Text(s.t('chooseCity')), onTap: () => Navigator.of(context).pop('manual')),
+            ListTile(
+              leading: const Icon(Icons.my_location_rounded),
+              title: Text(s.t('useLocation')),
+              onTap: () => Navigator.of(context).pop('gps'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.location_city_rounded),
+              title: Text(s.t('chooseCity')),
+              onTap: () => Navigator.of(context).pop('manual'),
+            ),
             const SizedBox(height: 12),
           ],
         ),
@@ -250,8 +317,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (!mounted || choice == null) return;
     if (choice == 'gps') {
       await _run(() async {
-        final UserLocation location = await ref.read(locationServiceProvider).currentLocation(ref.read(deviceTimezoneIdProvider));
-        await ref.read(settingsControllerProvider.notifier).setLocation(location);
+        final UserLocation location = await ref
+            .read(locationServiceProvider)
+            .currentLocation(ref.read(deviceTimezoneIdProvider));
+        await ref
+            .read(settingsControllerProvider.notifier)
+            .setLocation(location);
         ref.invalidate(todayPrayerDayProvider);
       });
       return;
@@ -263,21 +334,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final AppStrings s = AppStrings.of(context);
     final TextEditingController city = TextEditingController();
     final TextEditingController country = TextEditingController();
-    final bool accepted = await showDialog<bool>(
+    final bool accepted =
+        await showDialog<bool>(
           context: context,
           builder: (BuildContext context) => AlertDialog(
             title: Text(s.t('chooseCity')),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                TextField(controller: city, decoration: InputDecoration(labelText: s.t('city'))),
+                TextField(
+                  controller: city,
+                  decoration: InputDecoration(labelText: s.t('city')),
+                ),
                 const SizedBox(height: 10),
-                TextField(controller: country, decoration: InputDecoration(labelText: s.t('country'))),
+                TextField(
+                  controller: country,
+                  decoration: InputDecoration(labelText: s.t('country')),
+                ),
               ],
             ),
             actions: <Widget>[
-              TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(s.t('cancel'))),
-              FilledButton(onPressed: () => Navigator.of(context).pop(true), child: Text(s.t('save'))),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(s.t('cancel')),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(s.t('save')),
+              ),
             ],
           ),
         ) ??
@@ -288,7 +372,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     country.dispose();
     if (!accepted || cityValue.isEmpty || countryValue.isEmpty) return;
     await _run(() async {
-      final UserLocation location = await ref.read(locationServiceProvider).geocodeManual(
+      final UserLocation location = await ref
+          .read(locationServiceProvider)
+          .geocodeManual(
             city: cityValue,
             country: countryValue,
             deviceTimezoneId: ref.read(deviceTimezoneIdProvider),
@@ -312,17 +398,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (BuildContext context) => SimpleDialog(
         title: Text(AppStrings.of(context).t('calculationMethod')),
         children: methods.entries
-            .map((MapEntry<int, String> entry) => SimpleDialogOption(
-                  onPressed: () => Navigator.of(context).pop(entry.key),
-                  child: _DialogChoice(
-                    selected: entry.key == current.calculationMethodId,
-                    label: entry.value,
-                  ),
-                ))
+            .map(
+              (MapEntry<int, String> entry) => SimpleDialogOption(
+                onPressed: () => Navigator.of(context).pop(entry.key),
+                child: _DialogChoice(
+                  selected: entry.key == current.calculationMethodId,
+                  label: entry.value,
+                ),
+              ),
+            )
             .toList(),
       ),
     );
-    if (selected != null) await _savePrayerSettings(current.copyWith(calculationMethodId: selected));
+    if (selected != null)
+      await _savePrayerSettings(
+        current.copyWith(calculationMethodId: selected),
+      );
   }
 
   Future<void> _chooseMadhhab(PrayerSettings current) async {
@@ -349,7 +440,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
       ),
     );
-    if (selected != null) await _savePrayerSettings(current.copyWith(madhhab: selected));
+    if (selected != null)
+      await _savePrayerSettings(current.copyWith(madhhab: selected));
   }
 
   Future<void> _chooseHighLatitude(PrayerSettings current) async {
@@ -358,71 +450,97 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (BuildContext context) => SimpleDialog(
         title: Text(AppStrings.of(context).t('highLatitude')),
         children: HighLatitudeRule.values
-            .map((HighLatitudeRule rule) => SimpleDialogOption(
-                  onPressed: () => Navigator.of(context).pop(rule),
-                  child: _DialogChoice(
-                    selected: rule == current.highLatitudeRule,
-                    label: _highLatitudeName(rule),
-                  ),
-                ))
+            .map(
+              (HighLatitudeRule rule) => SimpleDialogOption(
+                onPressed: () => Navigator.of(context).pop(rule),
+                child: _DialogChoice(
+                  selected: rule == current.highLatitudeRule,
+                  label: _highLatitudeName(rule),
+                ),
+              ),
+            )
             .toList(),
       ),
     );
-    if (selected != null) await _savePrayerSettings(current.copyWith(highLatitudeRule: selected));
+    if (selected != null)
+      await _savePrayerSettings(current.copyWith(highLatitudeRule: selected));
   }
 
   Future<void> _editAdjustments(PrayerSettings current) async {
-    final Map<PrayerType, int> values = <PrayerType, int>{for (final PrayerType type in PrayerType.values) type: current.adjustmentFor(type)};
-    final bool accepted = await showDialog<bool>(
+    final Map<PrayerType, int> values = <PrayerType, int>{
+      for (final PrayerType type in PrayerType.values)
+        type: current.adjustmentFor(type),
+    };
+    final bool accepted =
+        await showDialog<bool>(
           context: context,
           builder: (BuildContext context) => StatefulBuilder(
-            builder: (BuildContext context, StateSetter setDialogState) => AlertDialog(
-              title: Text(AppStrings.of(context).t('manualAdjustments')),
-              content: SizedBox(
-                width: 420,
-                child: ListView(
-                  shrinkWrap: true,
-                  children: PrayerType.values
-                      .map((PrayerType type) => Row(
-                            children: <Widget>[
-                              Expanded(child: Text(type.localizedName(Localizations.localeOf(context).languageCode))),
-                              IconButton(
-                                onPressed: (values[type] ?? 0) <= -60
-                                    ? null
-                                    : () => setDialogState(
-                                          () => values[type] = (values[type] ?? 0) - 1,
-                                        ),
-                                icon: const Icon(Icons.remove_rounded),
-                              ),
-                              SizedBox(
-                                width: 64,
-                                child: Text(
-                                  '${values[type] ?? 0} min',
-                                  textAlign: TextAlign.center,
+            builder: (BuildContext context, StateSetter setDialogState) =>
+                AlertDialog(
+                  title: Text(AppStrings.of(context).t('manualAdjustments')),
+                  content: SizedBox(
+                    width: 420,
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: PrayerType.values
+                          .map(
+                            (PrayerType type) => Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Text(
+                                    type.localizedName(
+                                      Localizations.localeOf(context)
+                                          .languageCode,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              IconButton(
-                                onPressed: (values[type] ?? 0) >= 60
-                                    ? null
-                                    : () => setDialogState(
-                                          () => values[type] = (values[type] ?? 0) + 1,
+                                IconButton(
+                                  onPressed: (values[type] ?? 0) <= -60
+                                      ? null
+                                      : () => setDialogState(
+                                          () => values[type] =
+                                              (values[type] ?? 0) - 1,
                                         ),
-                                icon: const Icon(Icons.add_rounded),
-                              ),
-                            ],
-                          ))
-                      .toList(),
+                                  icon: const Icon(Icons.remove_rounded),
+                                ),
+                                SizedBox(
+                                  width: 64,
+                                  child: Text(
+                                    '${values[type] ?? 0} min',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: (values[type] ?? 0) >= 60
+                                      ? null
+                                      : () => setDialogState(
+                                          () => values[type] =
+                                              (values[type] ?? 0) + 1,
+                                        ),
+                                  icon: const Icon(Icons.add_rounded),
+                                ),
+                              ],
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: Text(AppStrings.of(context).t('cancel')),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: Text(AppStrings.of(context).t('save')),
+                    ),
+                  ],
                 ),
-              ),
-              actions: <Widget>[
-                TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(AppStrings.of(context).t('cancel'))),
-                FilledButton(onPressed: () => Navigator.of(context).pop(true), child: Text(AppStrings.of(context).t('save'))),
-              ],
-            ),
           ),
         ) ??
         false;
-    if (accepted) await _savePrayerSettings(current.copyWith(adjustments: values));
+    if (accepted)
+      await _savePrayerSettings(current.copyWith(adjustments: values));
   }
 
   Future<void> _chooseMaxSnoozes(PrayerSettings current) async {
@@ -431,8 +549,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (BuildContext context) => SimpleDialog(
         title: Text(AppStrings.of(context).t('maxSnoozes')),
         children: <Widget>[
-          SimpleDialogOption(onPressed: () => Navigator.of(context).pop(-1), child: Text(AppStrings.of(context).t('unlimited'))),
-          for (int count = 1; count <= 5; count++) SimpleDialogOption(onPressed: () => Navigator.of(context).pop(count), child: Text('$count')),
+          SimpleDialogOption(
+            onPressed: () => Navigator.of(context).pop(-1),
+            child: Text(AppStrings.of(context).t('unlimited')),
+          ),
+          for (int count = 1; count <= 5; count++)
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(context).pop(count),
+              child: Text('$count'),
+            ),
         ],
       ),
     );
@@ -445,56 +570,76 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _editConfirmationText(PrayerSettings current) async {
-    final TextEditingController controller = TextEditingController(text: current.confirmationText);
-    final bool accepted = await showDialog<bool>(
+    final TextEditingController controller = TextEditingController(
+      text: current.confirmationText,
+    );
+    final bool accepted =
+        await showDialog<bool>(
           context: context,
           builder: (BuildContext context) => AlertDialog(
             title: Text(AppStrings.of(context).t('confirmationText')),
-            content: TextField(controller: controller, maxLength: 80, decoration: InputDecoration(hintText: AppStrings.of(context).t('confirmPrayer'))),
+            content: TextField(
+              controller: controller,
+              maxLength: 80,
+              decoration: InputDecoration(
+                hintText: AppStrings.of(context).t('confirmPrayer'),
+              ),
+            ),
             actions: <Widget>[
-              TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(AppStrings.of(context).t('cancel'))),
-              FilledButton(onPressed: () => Navigator.of(context).pop(true), child: Text(AppStrings.of(context).t('save'))),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(AppStrings.of(context).t('cancel')),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(AppStrings.of(context).t('save')),
+              ),
             ],
           ),
         ) ??
         false;
     final String text = controller.text.trim();
     controller.dispose();
-    if (accepted && text.isNotEmpty) await _savePrayerSettings(current.copyWith(confirmationText: text));
+    if (accepted && text.isNotEmpty)
+      await _savePrayerSettings(current.copyWith(confirmationText: text));
   }
 
   Future<void> _requestNotifications() async => _run(() async {
-        final service = ref.read(notificationServiceProvider);
-        await service.initialize();
-        await service.requestPermission();
-      });
+    final service = ref.read(notificationServiceProvider);
+    await service.initialize();
+    await service.requestPermission();
+  });
 
   Future<void> _requestExactAlarms() async => _run(() async {
-        final service = ref.read(notificationServiceProvider);
-        await service.initialize();
-        await service.requestExactAlarmPermission();
-      });
+    final service = ref.read(notificationServiceProvider);
+    await service.initialize();
+    await service.requestExactAlarmPermission();
+  });
 
   Future<void> _authorizeFocus() async => _run(() async {
-        final PrayerFocusService focus = ref.read(prayerFocusServiceProvider);
-        _capabilities = await focus.capabilities();
-        if (_capabilities!.appShieldingSupported) await focus.requestAuthorization();
-        if (mounted) setState(() {});
-      });
+    final PrayerFocusService focus = ref.read(prayerFocusServiceProvider);
+    _capabilities = await focus.capabilities();
+    if (_capabilities!.appShieldingSupported)
+      await focus.requestAuthorization();
+    if (mounted) setState(() {});
+  });
 
   Future<void> _selectApps() async => _run(() async {
-        final PrayerFocusService focus = ref.read(prayerFocusServiceProvider);
-        _capabilities ??= await focus.capabilities();
-        if (_capabilities!.appSelectionSupported) {
-          final bool authorized = !_capabilities!.appShieldingSupported ||
-              await focus.requestAuthorization();
-          if (authorized) await focus.selectBlockedApps();
-        }
-        if (mounted) setState(() {});
-      });
+    final PrayerFocusService focus = ref.read(prayerFocusServiceProvider);
+    _capabilities ??= await focus.capabilities();
+    if (_capabilities!.appSelectionSupported) {
+      final bool authorized =
+          !_capabilities!.appShieldingSupported ||
+          await focus.requestAuthorization();
+      if (authorized) await focus.selectBlockedApps();
+    }
+    if (mounted) setState(() {});
+  });
 
   Future<void> _savePrayerSettings(PrayerSettings settings) async {
-    await ref.read(settingsControllerProvider.notifier).setPrayerSettings(settings);
+    await ref
+        .read(settingsControllerProvider.notifier)
+        .setPrayerSettings(settings);
     ref.invalidate(todayPrayerDayProvider);
   }
 
@@ -504,38 +649,48 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     try {
       await action();
     } catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(userErrorMessage(context, error))));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(userErrorMessage(context, error))),
+        );
     } finally {
       if (mounted) setState(() => _working = false);
     }
   }
 
   String _calculationMethodName(int id) => switch (id) {
-        1 => 'University of Karachi',
-        2 => 'ISNA',
-        4 => 'Umm Al-Qura, Makkah',
-        5 => 'Egyptian General Authority',
-        13 => 'Diyanet İşleri Başkanlığı',
-        _ => 'Muslim World League',
-      };
+    1 => 'University of Karachi',
+    2 => 'ISNA',
+    4 => 'Umm Al-Qura, Makkah',
+    5 => 'Egyptian General Authority',
+    13 => 'Diyanet İşleri Başkanlığı',
+    _ => 'Muslim World League',
+  };
 
   String _highLatitudeName(HighLatitudeRule rule) => switch (rule) {
-        HighLatitudeRule.middleOfNight => 'Middle of the Night',
-        HighLatitudeRule.oneSeventh => 'One Seventh',
-        HighLatitudeRule.angleBased => 'Angle Based',
-      };
+    HighLatitudeRule.middleOfNight => 'Middle of the Night',
+    HighLatitudeRule.oneSeventh => 'One Seventh',
+    HighLatitudeRule.angleBased => 'Angle Based',
+  };
 
-  String _adjustmentsSummary(PrayerSettings settings) => PrayerType.values
-      .where((PrayerType type) => settings.adjustmentFor(type) != 0)
-      .map((PrayerType type) => '${type.name} ${settings.adjustmentFor(type) >= 0 ? '+' : ''}${settings.adjustmentFor(type)}')
-      .join(' · ')
-      .trim()
-      .isEmpty
+  String _adjustmentsSummary(PrayerSettings settings) =>
+      PrayerType.values
+          .where((PrayerType type) => settings.adjustmentFor(type) != 0)
+          .map(
+            (PrayerType type) =>
+                '${type.name} ${settings.adjustmentFor(type) >= 0 ? '+' : ''}${settings.adjustmentFor(type)}',
+          )
+          .join(' · ')
+          .trim()
+          .isEmpty
       ? '0 min'
       : PrayerType.values
-          .where((PrayerType type) => settings.adjustmentFor(type) != 0)
-          .map((PrayerType type) => '${type.name} ${settings.adjustmentFor(type) >= 0 ? '+' : ''}${settings.adjustmentFor(type)}')
-          .join(' · ');
+            .where((PrayerType type) => settings.adjustmentFor(type) != 0)
+            .map(
+              (PrayerType type) =>
+                  '${type.name} ${settings.adjustmentFor(type) >= 0 ? '+' : ''}${settings.adjustmentFor(type)}',
+            )
+            .join(' · ');
 }
 
 class _SectionTitle extends StatelessWidget {
@@ -545,9 +700,19 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
-        child: Row(children: <Widget>[Icon(icon, size: 20), const SizedBox(width: 8), Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900))]),
-      );
+    padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
+    child: Row(
+      children: <Widget>[
+        Icon(icon, size: 20),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.w900),
+        ),
+      ],
+    ),
+  );
 }
 
 class _DialogChoice extends StatelessWidget {
@@ -558,19 +723,27 @@ class _DialogChoice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-        children: <Widget>[
-          Icon(
-            selected ? Icons.check_circle_rounded : Icons.circle_outlined,
-            size: 20,
-          ),
-          const SizedBox(width: 12),
-          Expanded(child: Text(label)),
-        ],
-      );
+    children: <Widget>[
+      Icon(
+        selected ? Icons.check_circle_rounded : Icons.circle_outlined,
+        size: 20,
+      ),
+      const SizedBox(width: 12),
+      Expanded(child: Text(label)),
+    ],
+  );
 }
 
 class _SliderTile extends StatelessWidget {
-  const _SliderTile({required this.title, required this.valueLabel, required this.value, required this.min, required this.max, required this.divisions, required this.onChanged});
+  const _SliderTile({
+    required this.title,
+    required this.valueLabel,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.divisions,
+    required this.onChanged,
+  });
   final String title;
   final String valueLabel;
   final double value;
@@ -581,27 +754,51 @@ class _SliderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
           children: <Widget>[
-            Row(children: <Widget>[Expanded(child: Text(title)), Text(valueLabel, style: const TextStyle(fontWeight: FontWeight.w800))]),
-            Slider(value: value.clamp(min, max).toDouble(), min: min, max: max, divisions: divisions, label: valueLabel, onChanged: onChanged),
+            Expanded(child: Text(title)),
+            Text(
+              valueLabel,
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
           ],
         ),
-      );
+        Slider(
+          value: value.clamp(min, max).toDouble(),
+          min: min,
+          max: max,
+          divisions: divisions,
+          label: valueLabel,
+          onChanged: onChanged,
+        ),
+      ],
+    ),
+  );
 }
 
 class _RadioLikeTile extends StatelessWidget {
-  const _RadioLikeTile({required this.title, required this.selected, required this.onTap});
+  const _RadioLikeTile({
+    required this.title,
+    required this.selected,
+    required this.onTap,
+  });
   final String title;
   final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) => ListTile(
-        title: Text(title),
-        leading: Icon(selected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded, color: selected ? Theme.of(context).colorScheme.primary : null),
-        onTap: onTap,
-      );
+    title: Text(title),
+    leading: Icon(
+      selected
+          ? Icons.radio_button_checked_rounded
+          : Icons.radio_button_unchecked_rounded,
+      color: selected ? Theme.of(context).colorScheme.primary : null,
+    ),
+    onTap: onTap,
+  );
 }

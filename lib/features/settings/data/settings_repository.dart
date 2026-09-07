@@ -69,9 +69,7 @@ class SettingsRepository {
       try {
         final Object? decoded = jsonDecode(locationJson);
         if (decoded is Map) {
-          location = UserLocation.fromJson(
-            Map<String, Object?>.from(decoded),
-          );
+          location = UserLocation.fromJson(Map<String, Object?>.from(decoded));
         }
       } on Object {
         location = null;
@@ -83,7 +81,7 @@ class SettingsRepository {
     return AppPreferences(
       prayerSettings: prayerSettings,
       location: location,
-      localeCode: <String>{'de', 'en', 'ar'}.contains(storedLocale)
+      localeCode: <String>{'de', 'en', 'ar', 'ur', 'ps'}.contains(storedLocale)
           ? storedLocale
           : 'de',
       themeMode: <String>{'system', 'light', 'dark'}.contains(storedTheme)
