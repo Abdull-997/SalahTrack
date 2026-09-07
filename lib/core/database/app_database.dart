@@ -19,7 +19,7 @@ class PrayerDayMeta {
 }
 
 class AppDatabase {
-  AppDatabase({Database? database}) : _database = database;
+  AppDatabase([this._database]);
 
   Database? _database;
 

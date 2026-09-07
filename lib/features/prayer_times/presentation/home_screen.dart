@@ -119,6 +119,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
                 sliver: SliverList.list(
                   children: <Widget>[
+                    Text(
+                      s.date(
+                        TimezoneService.toLocal(_nowUtc, day.timezoneId),
+                        pattern: 'EEEE, d MMMM y',
+                      ),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
                     _NextPrayerCard(day: day, nowUtc: _nowUtc),
                     const SizedBox(height: 14),
                     if (day.hijriDate != null)

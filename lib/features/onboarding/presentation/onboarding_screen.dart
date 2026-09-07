@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
+import 'package:salah_focus/core/location/location_suggestions.dart';
 import 'package:salah_focus/core/location/location_service.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
@@ -118,12 +119,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _next() {
     if (_page >= 5) return;
-    setState(() => _page += 1);
+    final int nextPage = _page + 1;
+    setState(() => _page = nextPage);
     _pageController.animateToPage(
       _page,
       duration: const Duration(milliseconds: 280),
       curve: Curves.easeOutCubic,
     );
+    if (nextPage == 2 && ref.read(settingsControllerProvider).location == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _useAutomaticLocation());
+    }
   }
 
   Future<void> _setInitialLocale(String languageCode) =>
@@ -157,34 +162,54 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final TextEditingController country = TextEditingController();
     final bool? submit = await showDialog<bool>(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(s.t('chooseCity')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            TextField(
-              controller: city,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(labelText: s.t('city')),
+      builder: (BuildContext context) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setDialogState) => AlertDialog(
+          title: Text(s.t('chooseCity')),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextField(
+                  controller: city,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: InputDecoration(labelText: s.t('city')),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: country,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: InputDecoration(labelText: s.t('country')),
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: locationSuggestions
+                      .map(
+                        (LocationSuggestion suggestion) => ActionChip(
+                          label: Text(suggestion.label),
+                          onPressed: () => setDialogState(() {
+                            city.text = suggestion.city;
+                            country.text = suggestion.country;
+                          }),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: country,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(labelText: s.t('country')),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(s.t('cancel')),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(s.t('save')),
             ),
           ],
         ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(s.t('cancel')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(s.t('save')),
-          ),
-        ],
       ),
     );
     if (submit != true || !mounted) {
@@ -407,7 +432,7 @@ class _PrayerPreviewPage extends StatelessWidget {
                 if (day == null) return Center(child: Text(s.t('noData')));
                 return ListView.separated(
                   itemCount: day.entries.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (_, _) => const Divider(height: 1),
                   itemBuilder: (BuildContext context, int index) {
                     final entry = day.entries[index];
                     final DateTime local = TimezoneService.toLocal(

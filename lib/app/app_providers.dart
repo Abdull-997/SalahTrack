@@ -54,10 +54,10 @@ final Provider<ClockService> clockServiceProvider =
 final Provider<PrayerCoordinator> prayerCoordinatorProvider =
     Provider<PrayerCoordinator>(
   (Ref ref) => PrayerCoordinator(
-    repository: ref.watch(prayerTimesRepositoryProvider),
-    database: ref.watch(appDatabaseProvider),
-    notifications: ref.watch(notificationServiceProvider),
-    clock: ref.watch(clockServiceProvider),
+    ref.watch(prayerTimesRepositoryProvider),
+    ref.watch(appDatabaseProvider),
+    ref.watch(notificationServiceProvider),
+    ref.watch(clockServiceProvider),
   ),
 );
 

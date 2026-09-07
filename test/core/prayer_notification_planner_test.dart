@@ -71,6 +71,9 @@ class FakeNotificationService implements NotificationService {
   Future<bool> requestPermission() async => true;
 
   @override
+  Future<bool> notificationsAllowed() async => true;
+
+  @override
   Future<void> scheduleGraceReminder(PrayerEntry prayer, String prayerName, {required String languageCode}) async => grace.add(prayer.id);
 
   @override

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
+import 'package:salah_focus/core/location/location_suggestions.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
@@ -315,33 +316,55 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final bool accepted =
         await showDialog<bool>(
           context: context,
-          builder: (BuildContext context) => AlertDialog(
-            title: Text(s.t('chooseCity')),
-            content: Column(
+      builder: (BuildContext context) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setDialogState) => AlertDialog(
+          title: Text(s.t('chooseCity')),
+          content: SingleChildScrollView(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 TextField(
                   controller: city,
+                  textCapitalization: TextCapitalization.words,
                   decoration: InputDecoration(labelText: s.t('city')),
                 ),
                 const SizedBox(height: 10),
                 TextField(
                   controller: country,
+                  textCapitalization: TextCapitalization.words,
                   decoration: InputDecoration(labelText: s.t('country')),
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: locationSuggestions
+                      .map(
+                        (LocationSuggestion suggestion) => ActionChip(
+                          label: Text(suggestion.label),
+                          onPressed: () => setDialogState(() {
+                            city.text = suggestion.city;
+                            country.text = suggestion.country;
+                          }),
+                        ),
+                      )
+                      .toList(),
                 ),
               ],
             ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: Text(s.t('cancel')),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: Text(s.t('save')),
-              ),
-            ],
           ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(s.t('cancel')),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(s.t('save')),
+            ),
+          ],
+        ),
+      ),
         ) ??
         false;
     final String cityValue = city.text.trim();
@@ -392,10 +415,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             .toList(),
       ),
     );
-    if (selected != null)
+    if (selected != null) {
       await _savePrayerSettings(
         current.copyWith(calculationMethodId: selected),
       );
+    }
   }
 
   Future<void> _chooseMadhhab(PrayerSettings current) async {
@@ -422,8 +446,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
       ),
     );
-    if (selected != null)
+    if (selected != null) {
       await _savePrayerSettings(current.copyWith(madhhab: selected));
+    }
   }
 
   Future<void> _chooseHighLatitude(PrayerSettings current) async {
@@ -447,8 +472,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             .toList(),
       ),
     );
-    if (selected != null)
+    if (selected != null) {
       await _savePrayerSettings(current.copyWith(highLatitudeRule: selected));
+    }
   }
 
   Future<void> _editAdjustments(PrayerSettings current) async {
@@ -525,8 +551,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ) ??
         false;
-    if (accepted)
+    if (accepted) {
       await _savePrayerSettings(current.copyWith(adjustments: values));
+    }
   }
 
   Future<void> _chooseMaxSnoozes(PrayerSettings current) async {
@@ -586,8 +613,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         false;
     final String text = controller.text.trim();
     controller.dispose();
-    if (accepted && text.isNotEmpty)
+    if (accepted && text.isNotEmpty) {
       await _savePrayerSettings(current.copyWith(confirmationText: text));
+    }
   }
 
   Future<void> _requestNotifications() async => _run(() async {
@@ -615,48 +643,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     try {
       await action();
     } catch (error) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(userErrorMessage(context, error))),
         );
+      }
     } finally {
-      if (mounted) setState(() => _working = false);
+      if (mounted) {
+        setState(() => _working = false);
+      }
     }
   }
-
-  String legacyCalculationMethodName(int id) => switch (id) {
-    1 => 'University of Karachi',
-    2 => 'ISNA',
-    4 => 'Umm Al-Qura, Makkah',
-    5 => 'Egyptian General Authority',
-    13 => 'Diyanet İşleri Başkanlığı',
-    _ => 'Muslim World League',
-  };
-
-  String legacyHighLatitudeName(HighLatitudeRule rule) => switch (rule) {
-    HighLatitudeRule.middleOfNight => 'Middle of the Night',
-    HighLatitudeRule.oneSeventh => 'One Seventh',
-    HighLatitudeRule.angleBased => 'Angle Based',
-  };
-
-  String legacyAdjustmentsSummary(PrayerSettings settings) =>
-      PrayerType.values
-          .where((PrayerType type) => settings.adjustmentFor(type) != 0)
-          .map(
-            (PrayerType type) =>
-                '${type.name} ${settings.adjustmentFor(type) >= 0 ? '+' : ''}${settings.adjustmentFor(type)}',
-          )
-          .join(' · ')
-          .trim()
-          .isEmpty
-      ? '0 min'
-      : PrayerType.values
-            .where((PrayerType type) => settings.adjustmentFor(type) != 0)
-            .map(
-              (PrayerType type) =>
-                  '${type.name} ${settings.adjustmentFor(type) >= 0 ? '+' : ''}${settings.adjustmentFor(type)}',
-            )
-            .join(' · ');
 
   String _localizedCalculationMethodName(int id, String language) {
     final Map<int, String> names = switch (language) {

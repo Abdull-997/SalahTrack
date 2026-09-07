@@ -6,6 +6,11 @@ abstract interface class LocationService {
     required String languageCode,
   });
 
+  Stream<UserLocation> automaticLocationUpdates({
+    required String deviceTimezoneId,
+    required String languageCode,
+  });
+
   Future<UserLocation> geocodeManual({
     required String city,
     required String country,

@@ -117,19 +117,42 @@ class LocalNotificationService implements NotificationService {
           .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin
           >();
-      return await android?.requestNotificationsPermission() ?? true;
+      await android?.requestNotificationsPermission();
+      return notificationsAllowed();
     }
     if (Platform.isIOS) {
       final IOSFlutterLocalNotificationsPlugin? ios = _plugin
           .resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin
           >();
-      return await ios?.requestPermissions(
+      await ios?.requestPermissions(
             alert: true,
             badge: true,
             sound: true,
-          ) ??
-          false;
+          );
+      return notificationsAllowed();
+    }
+    return true;
+  }
+
+  @override
+  Future<bool> notificationsAllowed() async {
+    await initialize();
+    if (Platform.isAndroid) {
+      final AndroidFlutterLocalNotificationsPlugin? android = _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      return await android?.areNotificationsEnabled() ?? false;
+    }
+    if (Platform.isIOS) {
+      final IOSFlutterLocalNotificationsPlugin? ios = _plugin
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >();
+      final NotificationsEnabledOptions? permissions = await ios
+          ?.checkPermissions();
+      return permissions?.isEnabled ?? false;
     }
     return true;
   }
@@ -259,6 +282,7 @@ class LocalNotificationService implements NotificationService {
     required String payload,
   }) async {
     await initialize();
+    if (!await notificationsAllowed()) return;
     final DateTime now = DateTime.now().toUtc();
     if (!whenUtc.isAfter(now)) {
       return;

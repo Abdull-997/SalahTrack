@@ -77,7 +77,7 @@ class AppStrings {
       'standard': 'Standard',
       'hanafi': 'Hanafi',
       'highLatitude': 'Hohe Breitengrade',
-      'gracePeriod': 'Grace Period',
+      'gracePeriod': 'Erinnerungsfrist',
       'snoozeDuration': 'Snooze-Dauer',
       'confirmationText': 'Bestätigungstext',
       'softReminder': 'Sanfte Erinnerung nach Überspringen',

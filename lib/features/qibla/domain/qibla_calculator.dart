@@ -18,8 +18,12 @@ class QiblaCalculator {
 
   static double relativeAngle({required double qiblaBearing, required double heading}) {
     double angle = qiblaBearing - heading;
-    while (angle > 180) angle -= 360;
-    while (angle < -180) angle += 360;
+    while (angle > 180) {
+      angle -= 360;
+    }
+    while (angle < -180) {
+      angle += 360;
+    }
     return angle;
   }
 

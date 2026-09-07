@@ -126,13 +126,12 @@ class _TrackerContent extends StatelessWidget {
       byDay.putIfAbsent(entry.localDate, () => <PrayerEntry>[]).add(entry);
     }
 
-    final int prayed = entries
+    final List<PrayerEntry> todayEntries =
+        byDay[today] ?? const <PrayerEntry>[];
+    final int prayed = todayEntries
         .where((PrayerEntry entry) => entry.status == PrayerStatus.prayed)
         .length;
-    final int resolved = entries
-        .where((PrayerEntry entry) => entry.status.isFinal)
-        .length;
-    final double ratio = resolved == 0 ? 0 : prayed / resolved;
+    final double ratio = prayed / 5;
     final DateTime weekStart = DateTime(
       now.year,
       now.month,
@@ -145,7 +144,7 @@ class _TrackerContent extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(18, 10, 18, 28),
         children: <Widget>[
-          _StatsCard(prayed: prayed, resolved: resolved, ratio: ratio),
+          _StatsCard(prayed: prayed, ratio: ratio),
           const SizedBox(height: 22),
           Text(
             s.t('today'),
@@ -153,7 +152,7 @@ class _TrackerContent extends StatelessWidget {
                 ?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
-          _DayCard(date: today, entries: byDay[today] ?? const <PrayerEntry>[]),
+          _DayCard(date: today, entries: todayEntries),
           const SizedBox(height: 24),
           Text(
             s.t('week'),
@@ -189,12 +188,10 @@ class _TrackerContent extends StatelessWidget {
 class _StatsCard extends StatelessWidget {
   const _StatsCard({
     required this.prayed,
-    required this.resolved,
     required this.ratio,
   });
 
   final int prayed;
-  final int resolved;
   final double ratio;
 
   @override
@@ -227,7 +224,12 @@ class _StatsCard extends StatelessWidget {
                         ?.copyWith(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 5),
-                  Text('${s.number(prayed)} / ${s.number(resolved)}'),
+                  Text(
+                    '${s.number(prayed)}/${s.number(5)}',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                   Text(
                     '${s.number((ratio * 100).round())} %',
                     style: Theme.of(context).textTheme.headlineSmall

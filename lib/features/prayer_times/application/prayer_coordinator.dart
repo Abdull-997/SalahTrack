@@ -12,16 +12,12 @@ import 'package:salah_focus/features/prayer_times/domain/prayer_times_repository
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 
 class PrayerCoordinator {
-  PrayerCoordinator({
-    required PrayerTimesRepository repository,
-    required AppDatabase database,
-    required NotificationService notifications,
-    required ClockService clock,
-  })  : _repository = repository,
-        _database = database,
-        _notifications = notifications,
-        _clock = clock,
-        _planner = PrayerNotificationPlanner(notifications);
+  PrayerCoordinator(
+    this._repository,
+    this._database,
+    this._notifications,
+    this._clock,
+  ) : _planner = PrayerNotificationPlanner(_notifications);
 
   final PrayerTimesRepository _repository;
   final AppDatabase _database;

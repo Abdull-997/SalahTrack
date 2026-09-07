@@ -9,6 +9,8 @@ abstract interface class NotificationService {
 
   Future<bool> requestPermission();
 
+  Future<bool> notificationsAllowed();
+
   Future<bool> requestExactAlarmPermission();
 
   Future<bool> canScheduleExactly();

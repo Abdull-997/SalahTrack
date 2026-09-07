@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/app/router/app_router.dart';
 import 'package:salah_focus/core/theme/app_theme.dart';
+import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
 
 class SalahFocusApp extends ConsumerStatefulWidget {
@@ -16,10 +19,21 @@ class SalahFocusApp extends ConsumerStatefulWidget {
 }
 
 class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
+  StreamSubscription<UserLocation>? _automaticLocationSubscription;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _handleLaunchPayload());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _handleLaunchPayload();
+      _syncAutomaticLocationUpdates();
+    });
+  }
+
+  @override
+  void dispose() {
+    _automaticLocationSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -29,6 +43,7 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
     ref.listen<AsyncValue<String>>(notificationPayloadProvider, (_, AsyncValue<String> next) {
       next.whenData((String payload) => _routePayload(router, payload));
     });
+    ref.listen(settingsControllerProvider, (_, _) => _syncAutomaticLocationUpdates());
 
     final ThemeMode themeMode = switch (preferences.themeMode) {
       'light' => ThemeMode.light,
@@ -51,6 +66,29 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
       ],
       routerConfig: router,
     );
+  }
+
+  Future<void> _syncAutomaticLocationUpdates() async {
+    await _automaticLocationSubscription?.cancel();
+    _automaticLocationSubscription = null;
+    final preferences = ref.read(settingsControllerProvider);
+    final UserLocation? location = preferences.location;
+    if (location == null || !location.isAutomatic) return;
+    _automaticLocationSubscription = ref
+        .read(locationServiceProvider)
+        .automaticLocationUpdates(
+          deviceTimezoneId: ref.read(deviceTimezoneIdProvider),
+          languageCode: preferences.localeCode,
+        )
+        .listen((UserLocation updated) async {
+          final UserLocation? current = ref.read(settingsControllerProvider).location;
+          if (current == null || !current.isAutomatic ||
+              (current.latitude - updated.latitude).abs() > 0.005 ||
+              (current.longitude - updated.longitude).abs() > 0.005) {
+            await ref.read(settingsControllerProvider.notifier).setLocation(updated);
+            ref.invalidate(todayPrayerDayProvider);
+          }
+        });
   }
 
   Future<void> _handleLaunchPayload() async {
