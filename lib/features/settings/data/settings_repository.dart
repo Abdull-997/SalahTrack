@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui' show PlatformDispatcher;
 
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
@@ -76,7 +77,8 @@ class SettingsRepository {
       }
     }
 
-    final String storedLocale = prefs.getString(_localeKey) ?? 'de';
+    final String? savedLocale = prefs.getString(_localeKey);
+    final String storedLocale = savedLocale ?? _systemLocaleCode();
     final String storedTheme = prefs.getString(_themeKey) ?? 'system';
     return AppPreferences(
       prayerSettings: prayerSettings,
@@ -114,5 +116,12 @@ class SettingsRepository {
   Future<void> markOnboardingComplete() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_onboardingKey, true);
+  }
+
+  String _systemLocaleCode() {
+    final String languageCode = PlatformDispatcher.instance.locale.languageCode;
+    return <String>{'de', 'en', 'ar', 'ur', 'ps'}.contains(languageCode)
+        ? languageCode
+        : 'en';
   }
 }

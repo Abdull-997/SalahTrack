@@ -23,8 +23,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Timer? _timer;
   DateTime _nowUtc = DateTime.now().toUtc();
   int _lastMinute = -1;
-  String? _focusNavigationQueuedFor;
-  bool _focusLookupRunning = false;
 
   @override
   void initState() {
@@ -88,7 +86,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                         if (preferences.location != null)
                           Text(
-                            preferences.location!.label,
+                            preferences.location!.label.isEmpty
+                                ? s.t('currentLocation')
+                                : preferences.location!.label,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.bodySmall,
@@ -115,7 +115,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 );
               }
-              _queuePendingFocus(day);
               return SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
                 sliver: SliverList.list(
@@ -126,7 +125,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Text(
-                          day.hijriDate!,
+                          s.hijriDate(day.hijriDate!),
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
@@ -164,32 +163,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void _queuePendingFocus(PrayerDay day) {
-    if (_focusLookupRunning) return;
-    _focusLookupRunning = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        if (!mounted) return;
-        final PrayerEntry? target = await ref
-            .read(prayerCoordinatorProvider)
-            .focusCandidateForNow(day);
-        if (!mounted ||
-            target == null ||
-            _focusNavigationQueuedFor == target.id) {
-          return;
-        }
-        _focusNavigationQueuedFor = target.id;
-        final bool shouldOpen = await ref
-            .read(prayerCoordinatorProvider)
-            .shouldOpenFocus(target);
-        if (shouldOpen && mounted) {
-          context.push('/focus/${Uri.encodeComponent(target.id)}');
-        }
-      } finally {
-        _focusLookupRunning = false;
-      }
-    });
-  }
 }
 
 class _NextPrayerCard extends StatelessWidget {
@@ -313,7 +286,7 @@ class _PrayerTile extends ConsumerWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
         onTap: actionable
-            ? () => context.push('/focus/${Uri.encodeComponent(prayer.id)}')
+            ? () => context.push('/reminder/${Uri.encodeComponent(prayer.id)}')
             : null,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
@@ -383,7 +356,7 @@ class _StatusIcon extends StatelessWidget {
         Icons.notifications_active_outlined,
         scheme.tertiary,
       ),
-      PrayerStatus.pending => (Icons.shield_outlined, scheme.error),
+      PrayerStatus.pending => (Icons.notifications_active_outlined, scheme.error),
       PrayerStatus.snoozed => (Icons.snooze_rounded, scheme.secondary),
       PrayerStatus.skipped => (Icons.remove_rounded, scheme.outline),
       PrayerStatus.missed => (Icons.circle_outlined, scheme.outline),

@@ -1,4 +1,4 @@
-﻿import 'package:geocoding/geocoding.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:salah_focus/core/errors/app_exception.dart';
 import 'package:salah_focus/core/location/location_service.dart';
@@ -8,7 +8,10 @@ class LocationServiceImpl implements LocationService {
   // Zeile 8 (final Geocoding _geocoding = Geocoding();) wurde restlos entfernt, da in v3 nicht mehr benötigt
 
   @override
-  Future<UserLocation> currentLocation(String deviceTimezoneId) async {
+  Future<UserLocation> currentLocation({
+    required String deviceTimezoneId,
+    required String languageCode,
+  }) async {
     try {
       final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -36,13 +39,14 @@ class LocationServiceImpl implements LocationService {
       String country = '';
       try {
         // Hier wurde _geocoding. entfernt
-        final List<Placemark> placemarks =
-            await placemarkFromCoordinates(
+        await setLocaleIdentifier(_localeIdentifier(languageCode));
+        final List<Placemark> placemarks = await placemarkFromCoordinates(
           position.latitude,
           position.longitude,
         );
         if (placemarks.isNotEmpty) {
-          city = placemarks.first.locality ??
+          city =
+              placemarks.first.locality ??
               placemarks.first.subAdministrativeArea ??
               '';
           country = placemarks.first.country ?? '';
@@ -54,7 +58,7 @@ class LocationServiceImpl implements LocationService {
       return UserLocation(
         latitude: position.latitude,
         longitude: position.longitude,
-        city: city.isEmpty ? 'Aktueller Standort' : city,
+        city: city,
         country: country,
         timezoneId: deviceTimezoneId,
         isAutomatic: true,
@@ -71,6 +75,7 @@ class LocationServiceImpl implements LocationService {
     required String city,
     required String country,
     required String deviceTimezoneId,
+    required String languageCode,
   }) async {
     final String cleanedCity = city.trim();
     final String cleanedCountry = country.trim();
@@ -79,8 +84,10 @@ class LocationServiceImpl implements LocationService {
     }
     try {
       // Hier wurde _geocoding. entfernt
-      final List<Location> matches =
-          await locationFromAddress('$cleanedCity, $cleanedCountry');
+      await setLocaleIdentifier(_localeIdentifier(languageCode));
+      final List<Location> matches = await locationFromAddress(
+        '$cleanedCity, $cleanedCountry',
+      );
       if (matches.isEmpty) {
         throw const LocationException('Dieser Ort wurde nicht gefunden.');
       }
@@ -99,4 +106,38 @@ class LocationServiceImpl implements LocationService {
       throw LocationException('Ort konnte nicht aufgelöst werden: $error');
     }
   }
+
+  @override
+  Future<UserLocation> localizeLocation(
+    UserLocation location, {
+    required String languageCode,
+  }) async {
+    try {
+      await setLocaleIdentifier(_localeIdentifier(languageCode));
+      final List<Placemark> placemarks = await placemarkFromCoordinates(
+        location.latitude,
+        location.longitude,
+      );
+      if (placemarks.isEmpty) return location;
+      final Placemark place = placemarks.first;
+      return UserLocation(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        city: place.locality ?? place.subAdministrativeArea ?? location.city,
+        country: place.country ?? location.country,
+        timezoneId: location.timezoneId,
+        isAutomatic: location.isAutomatic,
+      );
+    } on Object {
+      return location;
+    }
+  }
+
+  String _localeIdentifier(String languageCode) => switch (languageCode) {
+    'ar' => 'ar_SA',
+    'ur' => 'ur_PK',
+    'ps' => 'ps_AF',
+    'de' => 'de_DE',
+    _ => 'en_US',
+  };
 }

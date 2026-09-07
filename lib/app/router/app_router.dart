@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salah_focus/features/onboarding/presentation/onboarding_screen.dart';
-import 'package:salah_focus/features/prayer_focus/presentation/prayer_focus_screen.dart';
+import 'package:salah_focus/features/prayer_times/presentation/prayer_reminder_screen.dart';
 import 'package:salah_focus/features/prayer_times/presentation/home_screen.dart';
 import 'package:salah_focus/features/prayer_tracker/presentation/tracker_screen.dart';
 import 'package:salah_focus/features/qibla/presentation/qibla_screen.dart';
@@ -41,8 +41,8 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
         ],
       ),
       GoRoute(
-        path: '/focus/:prayerId',
-        builder: (context, state) => PrayerFocusScreen(
+        path: '/reminder/:prayerId',
+        builder: (context, state) => PrayerReminderScreen(
           prayerId: state.pathParameters['prayerId']!,
         ),
       ),

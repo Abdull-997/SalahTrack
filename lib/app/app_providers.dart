@@ -6,8 +6,6 @@ import 'package:salah_focus/core/location/location_service_impl.dart';
 import 'package:salah_focus/core/notifications/local_notification_service.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/core/time/clock_service.dart';
-import 'package:salah_focus/features/prayer_focus/data/platform_prayer_focus_service.dart';
-import 'package:salah_focus/features/prayer_focus/domain/prayer_focus_service.dart';
 import 'package:salah_focus/features/prayer_times/application/prayer_coordinator.dart';
 import 'package:salah_focus/features/prayer_times/data/aladhan_prayer_times_provider.dart';
 import 'package:salah_focus/features/prayer_times/data/prayer_times_provider.dart';
@@ -50,9 +48,6 @@ final notificationPayloadProvider = StreamProvider<String>(
   (Ref ref) => ref.watch(notificationServiceProvider).payloads,
 );
 
-final Provider<PrayerFocusService> prayerFocusServiceProvider =
-    Provider<PrayerFocusService>((Ref ref) => PlatformPrayerFocusService());
-
 final Provider<ClockService> clockServiceProvider =
     Provider<ClockService>((Ref ref) => const SystemClockService());
 
@@ -62,7 +57,6 @@ final Provider<PrayerCoordinator> prayerCoordinatorProvider =
     repository: ref.watch(prayerTimesRepositoryProvider),
     database: ref.watch(appDatabaseProvider),
     notifications: ref.watch(notificationServiceProvider),
-    focusService: ref.watch(prayerFocusServiceProvider),
     clock: ref.watch(clockServiceProvider),
   ),
 );

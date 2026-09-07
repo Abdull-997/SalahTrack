@@ -3,15 +3,11 @@ import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/core/notifications/prayer_notification_planner.dart';
 import 'package:salah_focus/core/time/clock_service.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
-import 'package:salah_focus/features/prayer_focus/domain/prayer_focus_policy.dart';
-import 'package:salah_focus/features/prayer_focus/domain/prayer_focus_service.dart';
-import 'package:salah_focus/features/prayer_focus/domain/prayer_focus_session.dart';
 import 'package:salah_focus/features/prayer_times/data/prayer_cache_key.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_state_machine.dart';
-import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_times_repository.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 
@@ -20,23 +16,19 @@ class PrayerCoordinator {
     required PrayerTimesRepository repository,
     required AppDatabase database,
     required NotificationService notifications,
-    required PrayerFocusService focusService,
     required ClockService clock,
   })  : _repository = repository,
         _database = database,
         _notifications = notifications,
-        _focusService = focusService,
         _clock = clock,
         _planner = PrayerNotificationPlanner(notifications);
 
   final PrayerTimesRepository _repository;
   final AppDatabase _database;
   final NotificationService _notifications;
-  final PrayerFocusService _focusService;
   final ClockService _clock;
   final PrayerNotificationPlanner _planner;
   final PrayerStateMachine _stateMachine = const PrayerStateMachine();
-  final PrayerFocusPolicy _focusPolicy = const PrayerFocusPolicy();
   final Set<String> _syncedKeys = <String>{};
 
   Future<PrayerDay?> loadToday({
@@ -103,34 +95,6 @@ class PrayerCoordinator {
       nowUtc: nowUtc,
     );
 
-    if (settings.focusEnabled) {
-      // DeviceActivity can reject excessive/tightly packed monitoring. Keep
-      // native shields on a conservative rolling window while notifications
-      // remain planned farther ahead.
-      final DateTime nativeFocusHorizon = nowUtc.add(const Duration(days: 2));
-      await _focusService.cancelAllScheduledFocus();
-      for (final PrayerEntry entry in upcoming) {
-        if (entry.status.isFinal ||
-            !entry.graceEndsAtUtc.isAfter(nowUtc) ||
-            !entry.graceEndsAtUtc.isBefore(nativeFocusHorizon)) {
-          continue;
-        }
-        final DateTime maximumEnd = _focusPolicy.maximumEnd(entry);
-        if (maximumEnd.isAfter(entry.graceEndsAtUtc)) {
-          await _focusService.scheduleFocus(
-            identifier: entry.id,
-            startUtc: entry.graceEndsAtUtc,
-            endUtc: maximumEnd,
-          );
-        }
-      }
-    } else {
-      // A disabled switch must also remove schedules created on an earlier
-      // run. This is intentionally fail-open.
-      await _focusService.stopFocus();
-      await _focusService.cancelAllScheduledFocus();
-      await _database.endAllFocusSessions();
-    }
     return day;
   }
 
@@ -193,11 +157,7 @@ class PrayerCoordinator {
     final PrayerEntry updated =
         _stateMachine.confirm(prayer, _clock.nowUtc());
     await _repository.saveEntry(updated);
-    await _database.clearFocusBypass(updated.id);
     await _notifications.cancelPrayer(updated);
-    await _focusService.stopFocus();
-    await _focusService.cancelScheduledFocus(updated.id);
-    await _database.endAllFocusSessions();
     return updated;
   }
 
@@ -214,22 +174,8 @@ class PrayerCoordinator {
       maximumSnoozes: settings.maxSnoozes,
     );
     await _repository.saveEntry(updated);
-    await _database.clearFocusBypass(updated.id);
     await _notifications.cancelPrayer(prayer);
     await _notifications.scheduleSnoozeReminder(updated, prayerName, languageCode: languageCode);
-    await _focusService.stopFocus();
-    await _database.endAllFocusSessions();
-    final DateTime? snoozedUntil = updated.snoozedUntilUtc;
-    if (settings.focusEnabled && snoozedUntil != null) {
-      final DateTime maximumEnd = _focusPolicy.maximumEnd(updated);
-      if (maximumEnd.isAfter(snoozedUntil)) {
-        await _focusService.scheduleFocus(
-          identifier: updated.id,
-          startUtc: snoozedUntil,
-          endUtc: maximumEnd,
-        );
-      }
-    }
     return updated;
   }
 
@@ -241,89 +187,11 @@ class PrayerCoordinator {
   ) async {
     final PrayerEntry updated = _stateMachine.skip(prayer);
     await _repository.saveEntry(updated);
-    await _database.clearFocusBypass(updated.id);
     await _notifications.cancelPrayer(prayer);
     if (settings.softReminderAfterSkip) {
       await _notifications.scheduleSoftReminder(updated, prayerName, languageCode: languageCode);
     }
-    await _focusService.stopFocus();
-    await _focusService.cancelScheduledFocus(updated.id);
-    await _database.endAllFocusSessions();
     return updated;
-  }
-
-  Future<bool> shouldOpenFocus(PrayerEntry prayer) async {
-    final DateTime now = _clock.nowUtc();
-    if (prayer.status != PrayerStatus.pending || !now.isBefore(prayer.trackingEndsAtUtc)) {
-      return false;
-    }
-    if (await _database.isFocusBypassed(prayer.id, now)) {
-      return false;
-    }
-    final DateTime maximumEnd = _focusPolicy.maximumEnd(prayer);
-    if (!now.isBefore(maximumEnd)) {
-      await _focusService.stopFocus();
-      await _focusService.cancelScheduledFocus(prayer.id);
-      await _database.endAllFocusSessions();
-      await _database.setFocusBypass(prayer.id, prayer.trackingEndsAtUtc);
-      return false;
-    }
-    return true;
-  }
-
-  Future<void> startFocus(PrayerEntry prayer) async {
-    final DateTime now = _clock.nowUtc();
-    if (!await shouldOpenFocus(prayer)) {
-      return;
-    }
-    final DateTime maximumEnd = _focusPolicy.maximumEnd(prayer);
-    await _database.saveFocusSession(
-      PrayerFocusSession(
-        prayerEntryId: prayer.id,
-        startedAtUtc: now,
-        maximumEndAtUtc: maximumEnd,
-      ),
-    );
-    await _focusService.startFocus(maximumEndUtc: maximumEnd);
-  }
-
-  Future<void> emergencyUnlock(PrayerEntry prayer) async {
-    await _focusService.stopFocus();
-    await _focusService.cancelScheduledFocus(prayer.id);
-    await _database.endAllFocusSessions();
-    await _database.setFocusBypass(prayer.id, prayer.trackingEndsAtUtc);
-  }
-
-
-  Future<void> disableFocus() async {
-    await _focusService.stopFocus();
-    await _focusService.cancelAllScheduledFocus();
-    await _database.endAllFocusSessions();
-  }
-
-  Future<PrayerEntry?> focusCandidateForNow(PrayerDay today) async {
-    final DateTime now = _clock.nowUtc();
-    final DateTime localNow = TimezoneService.toLocal(now, today.timezoneId);
-    final String previousDate = _isoDate(localNow.subtract(const Duration(days: 1)));
-    final List<PrayerEntry> candidates = await _repository.entriesBetween(
-      previousDate,
-      today.localDate,
-    );
-
-    PrayerEntry? best;
-    for (final PrayerEntry entry in candidates) {
-      final PrayerEntry advanced = _stateMachine.advance(entry, now);
-      await _repository.saveEntry(advanced);
-      if (advanced.status != PrayerStatus.pending ||
-          !now.isBefore(advanced.trackingEndsAtUtc) ||
-          await _database.isFocusBypassed(advanced.id, now)) {
-        continue;
-      }
-      if (best == null || advanced.scheduledAtUtc.isAfter(best.scheduledAtUtc)) {
-        best = advanced;
-      }
-    }
-    return best;
   }
 
   Future<List<PrayerEntry>> entriesBetween(String start, String end) async {

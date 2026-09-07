@@ -6,7 +6,6 @@ import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/location/location_service.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
-import 'package:salah_focus/features/prayer_focus/domain/prayer_focus_service.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
@@ -24,7 +23,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _page = 0;
   bool _working = false;
-  PrayerFocusCapabilities? _focusCapabilities;
 
   @override
   void dispose() {
@@ -43,18 +41,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         actions: <Widget>[
           Padding(
             padding: const EdgeInsetsDirectional.only(end: 16),
-            child: Center(child: Text('${_page + 1}/7')),
+            child: Center(child: Text('${_page + 1}/6')),
           ),
         ],
       ),
       body: Column(
         children: <Widget>[
-          LinearProgressIndicator(value: (_page + 1) / 7),
+          LinearProgressIndicator(value: (_page + 1) / 6),
           Expanded(
             child: PageView(
               controller: _pageController,
               physics: const NeverScrollableScrollPhysics(),
               children: <Widget>[
+                _LanguagePage(
+                  selectedLanguage: prefs.localeCode,
+                  onSelected: _setInitialLocale,
+                  onContinue: _next,
+                ),
                 _WelcomePage(onContinue: _next),
                 _LocationPage(
                   location: prefs.location,
@@ -70,16 +73,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   minutes: prefs.prayerSettings.gracePeriodMinutes,
                   onChanged: _setGracePeriod,
                 ),
-                _DistractionPage(
-                  capabilities: _focusCapabilities,
-                  working: _working,
-                  onSelectApps: _selectApps,
-                ),
-                _FocusExplainPage(
-                  capabilities: _focusCapabilities,
-                  working: _working,
-                  onEnable: _enableFocus,
-                ),
                 _PermissionsPage(
                   working: _working,
                   onNotifications: _requestNotifications,
@@ -89,7 +82,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ],
             ),
           ),
-          if (_page > 0 && _page < 6)
+          if (_page > 0 && _page < 5)
             SafeArea(
               top: false,
               child: Padding(
@@ -119,12 +112,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   bool _canContinue(UserLocation? location) {
-    if (_page == 1 || _page == 2) return location != null;
+    if (_page == 2 || _page == 3) return location != null;
     return true;
   }
 
   void _next() {
-    if (_page >= 6) return;
+    if (_page >= 5) return;
     setState(() => _page += 1);
     _pageController.animateToPage(
       _page,
@@ -132,6 +125,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       curve: Curves.easeOutCubic,
     );
   }
+
+  Future<void> _setInitialLocale(String languageCode) =>
+      ref.read(settingsControllerProvider.notifier).setLocale(languageCode);
 
   void _back() {
     if (_page <= 0) return;
@@ -147,7 +143,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     await _run(() async {
       final LocationService service = ref.read(locationServiceProvider);
       final UserLocation location = await service.currentLocation(
-        ref.read(deviceTimezoneIdProvider),
+        deviceTimezoneId: ref.read(deviceTimezoneIdProvider),
+        languageCode: AppStrings.of(context).locale.languageCode,
       );
       await ref.read(settingsControllerProvider.notifier).setLocation(location);
       ref.invalidate(todayPrayerDayProvider);
@@ -208,6 +205,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             city: cityValue,
             country: countryValue,
             deviceTimezoneId: ref.read(deviceTimezoneIdProvider),
+            languageCode: AppStrings.of(context).locale.languageCode,
           );
       await ref.read(settingsControllerProvider.notifier).setLocation(location);
       ref.invalidate(todayPrayerDayProvider);
@@ -222,40 +220,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         .read(settingsControllerProvider.notifier)
         .setPrayerSettings(current.copyWith(gracePeriodMinutes: minutes));
     ref.invalidate(todayPrayerDayProvider);
-  }
-
-  Future<void> _selectApps() async {
-    await _run(() async {
-      final PrayerFocusService focus = ref.read(prayerFocusServiceProvider);
-      _focusCapabilities ??= await focus.capabilities();
-      if (_focusCapabilities!.appSelectionSupported) {
-        final bool authorized =
-            !_focusCapabilities!.appShieldingSupported ||
-            await focus.requestAuthorization();
-        if (authorized) {
-          await focus.selectBlockedApps();
-        }
-      }
-      if (mounted) setState(() {});
-    });
-  }
-
-  Future<void> _enableFocus() async {
-    await _run(() async {
-      final PrayerFocusService focus = ref.read(prayerFocusServiceProvider);
-      _focusCapabilities ??= await focus.capabilities();
-      bool enabled = true;
-      if (_focusCapabilities!.appShieldingSupported) {
-        enabled = await focus.requestAuthorization();
-      }
-      final PrayerSettings current = ref
-          .read(settingsControllerProvider)
-          .prayerSettings;
-      await ref
-          .read(settingsControllerProvider.notifier)
-          .setPrayerSettings(current.copyWith(focusEnabled: enabled));
-      if (mounted) setState(() {});
-    });
   }
 
   Future<void> _requestNotifications() async {
@@ -300,6 +264,51 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 }
 
+class _LanguagePage extends StatelessWidget {
+  const _LanguagePage({
+    required this.selectedLanguage,
+    required this.onSelected,
+    required this.onContinue,
+  });
+
+  final String selectedLanguage;
+  final ValueChanged<String> onSelected;
+  final VoidCallback onContinue;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppStrings s = AppStrings.of(context);
+    const List<(String, String)> languages = <(String, String)>[
+      ('de', 'Deutsch'),
+      ('en', 'English'),
+      ('ar', 'العربية'),
+      ('ur', 'اردو'),
+      ('ps', 'پښتو'),
+    ];
+    return _CenteredPage(
+      icon: Icons.language_rounded,
+      title: s.t('language'),
+      body: s.t('languageChoose'),
+      child: Column(
+        children: <Widget>[
+          for (final (String code, String name) in languages)
+            ListTile(
+              title: Text(name),
+              leading: Icon(
+                code == selectedLanguage
+                    ? Icons.radio_button_checked_rounded
+                    : Icons.radio_button_unchecked_rounded,
+              ),
+              onTap: () => onSelected(code),
+            ),
+          const SizedBox(height: 12),
+          FilledButton(onPressed: onContinue, child: Text(s.t('continue'))),
+        ],
+      ),
+    );
+  }
+}
+
 class _WelcomePage extends StatelessWidget {
   const _WelcomePage({required this.onContinue});
   final VoidCallback onContinue;
@@ -336,10 +345,15 @@ class _LocationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppStrings s = AppStrings.of(context);
+    final UserLocation? currentLocation = location;
     return _CenteredPage(
       icon: Icons.location_on_outlined,
       title: s.t('location'),
-      body: location?.label ?? s.t('needLocation'),
+      body: currentLocation == null
+          ? s.t('needLocation')
+          : currentLocation.label.isEmpty
+          ? s.t('currentLocation')
+          : currentLocation.label,
       child: Column(
         children: <Widget>[
           FilledButton.icon(
@@ -463,62 +477,6 @@ class _GracePage extends StatelessWidget {
               ),
             )
             .toList(),
-      ),
-    );
-  }
-}
-
-class _DistractionPage extends StatelessWidget {
-  const _DistractionPage({
-    required this.capabilities,
-    required this.working,
-    required this.onSelectApps,
-  });
-  final PrayerFocusCapabilities? capabilities;
-  final bool working;
-  final VoidCallback onSelectApps;
-
-  @override
-  Widget build(BuildContext context) {
-    final AppStrings s = AppStrings.of(context);
-    return _CenteredPage(
-      icon: Icons.apps_rounded,
-      title: s.t('distractions'),
-      body: capabilities?.appSelectionSupported == false
-          ? s.t('focusFallback')
-          : s.t('individualAppsOnly'),
-      child: OutlinedButton.icon(
-        onPressed: working ? null : onSelectApps,
-        icon: const Icon(Icons.checklist_rounded),
-        label: Text(s.t('selectApps')),
-      ),
-    );
-  }
-}
-
-class _FocusExplainPage extends StatelessWidget {
-  const _FocusExplainPage({
-    required this.capabilities,
-    required this.working,
-    required this.onEnable,
-  });
-  final PrayerFocusCapabilities? capabilities;
-  final bool working;
-  final VoidCallback onEnable;
-
-  @override
-  Widget build(BuildContext context) {
-    final AppStrings s = AppStrings.of(context);
-    return _CenteredPage(
-      icon: Icons.shield_outlined,
-      title: s.t('focusMode'),
-      body: capabilities?.appShieldingSupported == false
-          ? s.t('focusFallback')
-          : s.t('focusExplain'),
-      child: FilledButton.icon(
-        onPressed: working ? null : onEnable,
-        icon: const Icon(Icons.shield_rounded),
-        label: Text(s.t('enableFocus')),
       ),
     );
   }

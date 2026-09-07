@@ -12,7 +12,6 @@ class PrayerSettings {
     this.gracePeriodMinutes = 60,
     this.snoozeMinutes = 20,
     this.maxSnoozes = 2,
-    this.focusEnabled = true,
     this.softReminderAfterSkip = true,
     this.confirmationText = 'Wallah, ich habe gebetet',
     this.adjustments = const <PrayerType, int>{},
@@ -24,7 +23,6 @@ class PrayerSettings {
   final int gracePeriodMinutes;
   final int snoozeMinutes;
   final int? maxSnoozes;
-  final bool focusEnabled;
   final bool softReminderAfterSkip;
   final String confirmationText;
   final Map<PrayerType, int> adjustments;
@@ -59,7 +57,6 @@ class PrayerSettings {
     int? snoozeMinutes,
     int? maxSnoozes,
     bool clearMaxSnoozes = false,
-    bool? focusEnabled,
     bool? softReminderAfterSkip,
     String? confirmationText,
     Map<PrayerType, int>? adjustments,
@@ -71,7 +68,6 @@ class PrayerSettings {
       gracePeriodMinutes: gracePeriodMinutes ?? this.gracePeriodMinutes,
       snoozeMinutes: snoozeMinutes ?? this.snoozeMinutes,
       maxSnoozes: clearMaxSnoozes ? null : maxSnoozes ?? this.maxSnoozes,
-      focusEnabled: focusEnabled ?? this.focusEnabled,
       softReminderAfterSkip:
           softReminderAfterSkip ?? this.softReminderAfterSkip,
       confirmationText: confirmationText ?? this.confirmationText,
@@ -86,7 +82,6 @@ class PrayerSettings {
     'gracePeriodMinutes': gracePeriodMinutes,
     'snoozeMinutes': snoozeMinutes,
     'maxSnoozes': maxSnoozes,
-    'focusEnabled': focusEnabled,
     'softReminderAfterSkip': softReminderAfterSkip,
     'confirmationText': confirmationText,
     'adjustments': <String, int>{
@@ -126,7 +121,6 @@ class PrayerSettings {
       gracePeriodMinutes: _clampInt(rawGrace, 0, 120),
       snoozeMinutes: _clampInt(rawSnooze, 5, 30),
       maxSnoozes: rawMaxSnoozes == null ? null : _clampInt(rawMaxSnoozes, 1, 5),
-      focusEnabled: (json['focusEnabled'] as bool?) ?? true,
       softReminderAfterSkip: (json['softReminderAfterSkip'] as bool?) ?? true,
       confirmationText: rawConfirmation.isEmpty
           ? 'Wallah, ich habe gebetet'

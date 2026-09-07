@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
-import 'package:salah_focus/features/prayer_focus/domain/prayer_focus_service.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
@@ -17,7 +16,6 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  PrayerFocusCapabilities? _capabilities;
   bool _working = false;
 
   @override
@@ -40,7 +38,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.location_on_outlined),
                   title: Text(s.t('location')),
-                  subtitle: Text(prefs.location?.label ?? s.t('needLocation')),
+                  subtitle: Text(
+                    prefs.location == null
+                        ? s.t('needLocation')
+                        : prefs.location!.label.isEmpty
+                        ? s.t('currentLocation')
+                        : prefs.location!.label,
+                  ),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: _working ? null : _changeLocation,
                 ),
@@ -158,57 +162,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 18),
-          _SectionTitle(title: s.t('focusMode'), icon: Icons.shield_outlined),
-          Card(
-            child: Column(
-              children: <Widget>[
-                SwitchListTile(
-                  secondary: const Icon(Icons.shield_rounded),
-                  title: Text(s.t('focusMode')),
-                  subtitle: Text(
-                    _capabilities?.appShieldingSupported == false
-                        ? s.t('focusFallback')
-                        : s.t('focusExplain'),
-                  ),
-                  value: settings.focusEnabled,
-                  onChanged: _working
-                      ? null
-                      : (bool value) async {
-                          if (value) {
-                            await _authorizeFocus();
-                          } else {
-                            await ref
-                                .read(prayerCoordinatorProvider)
-                                .disableFocus();
-                          }
-                          await _savePrayerSettings(
-                            settings.copyWith(focusEnabled: value),
-                          );
-                        },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.verified_user_outlined),
-                  title: Text(s.t('focusAuthorization')),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: _working ? null : _authorizeFocus,
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.apps_rounded),
-                  title: Text(s.t('selectApps')),
-                  subtitle: Text(
-                    _capabilities?.appSelectionSupported == false
-                        ? s.t('focusFallback')
-                        : s.t('individualAppsOnly'),
-                  ),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: _working ? null : _selectApps,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 18),
           _SectionTitle(
             title: s.t('confirmationText'),
             icon: Icons.check_circle_outline_rounded,
@@ -258,37 +211,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _RadioLikeTile(
                   title: s.t('german'),
                   selected: prefs.localeCode == 'de',
-                  onTap: () => ref
-                      .read(settingsControllerProvider.notifier)
-                      .setLocale('de'),
+                  onTap: () => _setLocale('de'),
                 ),
                 _RadioLikeTile(
                   title: s.t('english'),
                   selected: prefs.localeCode == 'en',
-                  onTap: () => ref
-                      .read(settingsControllerProvider.notifier)
-                      .setLocale('en'),
+                  onTap: () => _setLocale('en'),
                 ),
                 _RadioLikeTile(
                   title: s.t('arabic'),
                   selected: prefs.localeCode == 'ar',
-                  onTap: () => ref
-                      .read(settingsControllerProvider.notifier)
-                      .setLocale('ar'),
+                  onTap: () => _setLocale('ar'),
                 ),
                 _RadioLikeTile(
                   title: s.t('urdu'),
                   selected: prefs.localeCode == 'ur',
-                  onTap: () => ref
-                      .read(settingsControllerProvider.notifier)
-                      .setLocale('ur'),
+                  onTap: () => _setLocale('ur'),
                 ),
                 _RadioLikeTile(
                   title: s.t('pashto'),
                   selected: prefs.localeCode == 'ps',
-                  onTap: () => ref
-                      .read(settingsControllerProvider.notifier)
-                      .setLocale('ps'),
+                  onTap: () => _setLocale('ps'),
                 ),
               ],
             ),
@@ -327,7 +270,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       await _run(() async {
         final UserLocation location = await ref
             .read(locationServiceProvider)
-            .currentLocation(ref.read(deviceTimezoneIdProvider));
+            .currentLocation(
+              deviceTimezoneId: ref.read(deviceTimezoneIdProvider),
+              languageCode: AppStrings.of(context).locale.languageCode,
+            );
         await ref
             .read(settingsControllerProvider.notifier)
             .setLocation(location);
@@ -336,6 +282,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       return;
     }
     await _manualLocationDialog();
+  }
+
+  Future<void> _setLocale(String languageCode) async {
+    if (_working ||
+        ref.read(settingsControllerProvider).localeCode == languageCode) {
+      return;
+    }
+    await _run(() async {
+      await ref
+          .read(settingsControllerProvider.notifier)
+          .setLocale(languageCode);
+      final UserLocation? location = ref
+          .read(settingsControllerProvider)
+          .location;
+      if (location != null) {
+        final UserLocation localized = await ref
+            .read(locationServiceProvider)
+            .localizeLocation(location, languageCode: languageCode);
+        await ref
+            .read(settingsControllerProvider.notifier)
+            .setLocation(localized);
+      }
+      ref.invalidate(todayPrayerDayProvider);
+    });
   }
 
   Future<void> _manualLocationDialog() async {
@@ -386,6 +356,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             city: cityValue,
             country: countryValue,
             deviceTimezoneId: ref.read(deviceTimezoneIdProvider),
+            languageCode: AppStrings.of(context).locale.languageCode,
           );
       await ref.read(settingsControllerProvider.notifier).setLocation(location);
       ref.invalidate(todayPrayerDayProvider);
@@ -629,26 +600,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final service = ref.read(notificationServiceProvider);
     await service.initialize();
     await service.requestExactAlarmPermission();
-  });
-
-  Future<void> _authorizeFocus() async => _run(() async {
-    final PrayerFocusService focus = ref.read(prayerFocusServiceProvider);
-    _capabilities = await focus.capabilities();
-    if (_capabilities!.appShieldingSupported)
-      await focus.requestAuthorization();
-    if (mounted) setState(() {});
-  });
-
-  Future<void> _selectApps() async => _run(() async {
-    final PrayerFocusService focus = ref.read(prayerFocusServiceProvider);
-    _capabilities ??= await focus.capabilities();
-    if (_capabilities!.appSelectionSupported) {
-      final bool authorized =
-          !_capabilities!.appShieldingSupported ||
-          await focus.requestAuthorization();
-      if (authorized) await focus.selectBlockedApps();
-    }
-    if (mounted) setState(() {});
   });
 
   Future<void> _savePrayerSettings(PrayerSettings settings) async {

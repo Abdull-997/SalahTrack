@@ -1,5 +1,4 @@
 import 'package:path/path.dart' as p;
-import 'package:salah_focus/features/prayer_focus/domain/prayer_focus_session.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -37,14 +36,6 @@ class AppDatabase {
         await db.execute('PRAGMA foreign_keys = ON');
       },
       onUpgrade: (Database db, int oldVersion, int newVersion) async {
-        if (oldVersion < 2) {
-          await db.execute('''
-            CREATE TABLE IF NOT EXISTS focus_bypasses (
-              prayer_entry_id TEXT PRIMARY KEY,
-              bypass_until_utc TEXT NOT NULL
-            )
-          ''');
-        }
         if (oldVersion < 3) {
           await db.execute(
             "ALTER TABLE prayer_day_meta ADD COLUMN source_key TEXT NOT NULL DEFAULT ''",
@@ -79,20 +70,6 @@ class AppDatabase {
             sunrise_utc TEXT,
             fetched_at_utc TEXT NOT NULL,
             source_key TEXT NOT NULL
-          )
-        ''');
-        await db.execute('''
-          CREATE TABLE focus_sessions (
-            prayer_entry_id TEXT PRIMARY KEY,
-            started_at_utc TEXT NOT NULL,
-            maximum_end_at_utc TEXT NOT NULL,
-            is_active INTEGER NOT NULL
-          )
-        ''');
-        await db.execute('''
-          CREATE TABLE focus_bypasses (
-            prayer_entry_id TEXT PRIMARY KEY,
-            bypass_until_utc TEXT NOT NULL
           )
         ''');
       },
@@ -258,93 +235,6 @@ class AppDatabase {
     );
     return ((rows.first['count'] as int?) ?? 0) >= 27;
   }
-
-
-
-  Future<void> setFocusBypass(String prayerEntryId, DateTime untilUtc) async {
-    final Database db = await database;
-    await db.insert(
-      'focus_bypasses',
-      <String, Object?>{
-        'prayer_entry_id': prayerEntryId,
-        'bypass_until_utc': untilUtc.toUtc().toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  Future<bool> isFocusBypassed(String prayerEntryId, DateTime nowUtc) async {
-    final Database db = await database;
-    final List<Map<String, Object?>> rows = await db.query(
-      'focus_bypasses',
-      where: 'prayer_entry_id = ?',
-      whereArgs: <Object?>[prayerEntryId],
-      limit: 1,
-    );
-    if (rows.isEmpty) {
-      return false;
-    }
-    final DateTime until =
-        DateTime.parse(rows.first['bypass_until_utc']! as String).toUtc();
-    if (!nowUtc.toUtc().isBefore(until)) {
-      await db.delete(
-        'focus_bypasses',
-        where: 'prayer_entry_id = ?',
-        whereArgs: <Object?>[prayerEntryId],
-      );
-      return false;
-    }
-    return true;
-  }
-
-  Future<void> clearFocusBypass(String prayerEntryId) async {
-    final Database db = await database;
-    await db.delete(
-      'focus_bypasses',
-      where: 'prayer_entry_id = ?',
-      whereArgs: <Object?>[prayerEntryId],
-    );
-  }
-
-  Future<void> saveFocusSession(PrayerFocusSession session) async {
-    final Database db = await database;
-    await db.insert(
-      'focus_sessions',
-      session.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  Future<PrayerFocusSession?> activeFocusSession() async {
-    final Database db = await database;
-    final List<Map<String, Object?>> rows = await db.query(
-      'focus_sessions',
-      where: 'is_active = 1',
-      orderBy: 'started_at_utc DESC',
-      limit: 1,
-    );
-    if (rows.isEmpty) {
-      return null;
-    }
-    final Map<String, Object?> row = rows.first;
-    return PrayerFocusSession(
-      prayerEntryId: row['prayer_entry_id']! as String,
-      startedAtUtc: DateTime.parse(row['started_at_utc']! as String).toUtc(),
-      maximumEndAtUtc:
-          DateTime.parse(row['maximum_end_at_utc']! as String).toUtc(),
-      isActive: (row['is_active']! as int) == 1,
-    );
-  }
-
-  Future<void> endAllFocusSessions() async {
-    final Database db = await database;
-    await db.update(
-      'focus_sessions',
-      <String, Object?>{'is_active': 0},
-      where: 'is_active = 1',
-    );
-  }
-
   Future<void> close() async {
     final Database? db = _database;
     if (db != null) {

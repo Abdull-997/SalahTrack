@@ -22,7 +22,6 @@ void main() {
       gracePeriodMinutes: 45,
       snoozeMinutes: 15,
       maxSnoozes: 3,
-      focusEnabled: true,
       softReminderAfterSkip: false,
       confirmationText: 'Alhamdulillah, erledigt',
       adjustments: const <PrayerType, int>{
@@ -38,7 +37,6 @@ void main() {
     expect(decoded.gracePeriodMinutes, 45);
     expect(decoded.snoozeMinutes, 15);
     expect(decoded.maxSnoozes, 3);
-    expect(decoded.focusEnabled, isTrue);
     expect(decoded.adjustmentFor(PrayerType.fajr), 2);
     expect(decoded.adjustmentFor(PrayerType.isha), -2);
   });

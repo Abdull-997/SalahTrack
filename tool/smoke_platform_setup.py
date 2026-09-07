@@ -39,5 +39,5 @@ with tempfile.TemporaryDirectory() as d:
     assert 'NSLocationWhenInUseUsageDescription' in info
     assert "platform :ios, '16.0'" in (r/'ios/Podfile').read_text()
     assert 'IPHONEOS_DEPLOYMENT_TARGET = 16.0;' in (r/'ios/Runner.xcodeproj/project.pbxproj').read_text()
-    assert 'PrayerFocusBridge' in (r/'ios/Runner/AppDelegate.swift').read_text()
+    assert 'GeneratedPluginRegistrant.register' in (r/'ios/Runner/AppDelegate.swift').read_text()
 print('Platform patch smoke test passed')

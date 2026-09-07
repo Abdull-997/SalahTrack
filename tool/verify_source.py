@@ -24,14 +24,9 @@ REQUIRED = [
     "lib/app/app.dart",
     "lib/features/prayer_times/application/prayer_coordinator.dart",
     "lib/features/prayer_times/domain/prayer_state_machine.dart",
-    "lib/features/prayer_focus/domain/prayer_focus_service.dart",
     "lib/features/prayer_tracker/presentation/tracker_screen.dart",
     "lib/features/qibla/presentation/qibla_screen.dart",
     "lib/features/settings/presentation/settings_screen.dart",
-    "native/android/MainActivity.kt",
-    "native/ios/AppDelegate.swift",
-    "native/ios/PrayerDeviceActivityMonitor/PrayerDeviceActivityMonitor.swift",
-    "native/ios/PrayerDeviceActivityMonitor/Info.plist",
 ]
 
 
@@ -47,7 +42,7 @@ def check_required_files() -> None:
 
 
 def check_pubspec() -> None:
-    text = (ROOT / "pubspec.yaml").read_text(encoding="utf-8")
+    text = (ROOT / "pubspec.yaml").read_text(encoding="utf-8-sig")
     if not re.search(r"(?m)^name:\s*salah_focus\s*$", text):
         fail("pubspec project name must be salah_focus")
     for dep in (
@@ -104,21 +99,6 @@ def check_localizations() -> None:
             fail(f"localization key mismatch for {code}; missing={missing}, extra={extra}")
 
 
-def check_native_safety() -> None:
-    android = (ROOT / "native/android/MainActivity.kt").read_text(encoding="utf-8")
-    ios = (ROOT / "native/ios/AppDelegate.swift").read_text(encoding="utf-8")
-    monitor = (ROOT / "native/ios/PrayerDeviceActivityMonitor/PrayerDeviceActivityMonitor.swift").read_text(encoding="utf-8")
-    setup = (ROOT / "tool/apply_platform_setup.py").read_text(encoding="utf-8")
-    forbidden = ("android.permission.SYSTEM_ALERT_WINDOW", "android.permission.QUERY_ALL_PACKAGES", "android.permission.BIND_ACCESSIBILITY_SERVICE")
-    for token in forbidden:
-        if token in setup:
-            fail(f"unsafe/unsupported Android permission found in platform setup: {token}")
-    if "store.shield.applicationCategories = nil" not in ios or "store.shield.applicationCategories = nil" not in monitor:
-        fail("iOS category shielding must stay disabled for the MVP safety model")
-    if "clearAllSettings()" not in ios or "clearAllSettings()" not in monitor:
-        fail("iOS fail-open shield cleanup is missing")
-
-
 def check_no_placeholders() -> None:
     hits: list[str] = []
     pattern = re.compile(r"\b(TODO|FIXME|IMPLEMENT_ME)\b")
@@ -137,7 +117,6 @@ def main() -> int:
     check_pubspec()
     check_local_imports()
     check_localizations()
-    check_native_safety()
     check_no_placeholders()
     dart_files = len(list((ROOT / "lib").rglob("*.dart")))
     tests = len(list((ROOT / "test").rglob("*_test.dart"))) + len(

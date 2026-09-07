@@ -31,10 +31,10 @@ class LocalNotificationService implements NotificationService {
         category: AndroidNotificationCategory.reminder,
       );
 
-  static const AndroidNotificationDetails _androidFocusDetails =
+  static const AndroidNotificationDetails _androidReminderDetails =
       AndroidNotificationDetails(
-        'prayer_focus',
-        'Prayer Focus',
+        'prayer_reminders',
+        'Prayer reminders',
         channelDescription: 'Grace-period and snooze reminders',
         importance: Importance.high,
         priority: Priority.high,
@@ -91,8 +91,8 @@ class LocalNotificationService implements NotificationService {
       );
       await android?.createNotificationChannel(
         const AndroidNotificationChannel(
-          'prayer_focus',
-          'Prayer Focus',
+          'prayer_reminders',
+          'Prayer reminders',
           description: 'Grace-period and snooze reminders',
           importance: Importance.high,
         ),
@@ -192,10 +192,10 @@ class LocalNotificationService implements NotificationService {
       title: _text(languageCode, 'graceTitle', prayerName),
       body: _text(languageCode, 'graceBody', prayerName),
       details: const NotificationDetails(
-        android: _androidFocusDetails,
+        android: _androidReminderDetails,
         iOS: _darwinDetails,
       ),
-      payload: 'focus:${prayer.id}',
+      payload: 'reminder:${prayer.id}',
     );
   }
 
@@ -216,10 +216,10 @@ class LocalNotificationService implements NotificationService {
       title: _text(languageCode, 'snoozeTitle', prayerName),
       body: _text(languageCode, 'snoozeBody', prayerName),
       details: const NotificationDetails(
-        android: _androidFocusDetails,
+        android: _androidReminderDetails,
         iOS: _darwinDetails,
       ),
-      payload: 'focus:${prayer.id}',
+      payload: 'reminder:${prayer.id}',
     );
   }
 
@@ -242,7 +242,7 @@ class LocalNotificationService implements NotificationService {
       title: _text(languageCode, 'softTitle', prayerName),
       body: _text(languageCode, 'softBody', prayerName),
       details: const NotificationDetails(
-        android: _androidFocusDetails,
+        android: _androidReminderDetails,
         iOS: _darwinDetails,
       ),
       payload: 'soft:${prayer.id}',
@@ -359,7 +359,7 @@ class LocalNotificationService implements NotificationService {
         .pendingNotificationRequests();
     for (final PendingNotificationRequest request in pending) {
       final String payload = request.payload ?? '';
-      if (payload.startsWith('prayer:') || payload.startsWith('focus:')) {
+      if (payload.startsWith('prayer:') || payload.startsWith('reminder:')) {
         await _plugin.cancel(id: request.id);
       }
     }

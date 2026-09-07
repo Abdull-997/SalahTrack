@@ -61,10 +61,15 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
   }
 
   void _routePayload(GoRouter router, String payload) {
-    if (payload.startsWith('focus:')) {
-      final String prayerId = payload.substring('focus:'.length);
+    final String? prayerId = switch (payload) {
+      String value when value.startsWith('prayer:') => value.substring(7),
+      String value when value.startsWith('reminder:') => value.substring(9),
+      String value when value.startsWith('soft:') => value.substring(5),
+      _ => null,
+    };
+    if (prayerId != null) {
       if (prayerId.isNotEmpty) {
-        router.go('/focus/${Uri.encodeComponent(prayerId)}');
+        router.go('/reminder/${Uri.encodeComponent(prayerId)}');
         return;
       }
     }
