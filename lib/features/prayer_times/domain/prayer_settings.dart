@@ -29,6 +29,21 @@ class PrayerSettings {
   final String confirmationText;
   final Map<PrayerType, int> adjustments;
 
+  static const Map<String, String> _defaultConfirmationTexts = <String, String>{
+    'de': 'Wallah, ich habe gebetet',
+    'en': 'I have prayed',
+    'ar': 'لقد صليت',
+    'ur': 'میں نے نماز پڑھی ہے',
+    'ps': 'ما لمونځ کړی دی',
+  };
+
+  static String defaultConfirmationText(String languageCode) =>
+      _defaultConfirmationTexts[languageCode] ??
+      _defaultConfirmationTexts['de']!;
+
+  bool get usesDefaultConfirmationText =>
+      _defaultConfirmationTexts.values.contains(confirmationText);
+
   int adjustmentFor(PrayerType type) {
     final int value = adjustments[type] ?? 0;
     if (value < -60) return -60;
@@ -65,20 +80,20 @@ class PrayerSettings {
   }
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'calculationMethodId': calculationMethodId,
-        'madhhab': madhhab.name,
-        'highLatitudeRule': highLatitudeRule.name,
-        'gracePeriodMinutes': gracePeriodMinutes,
-        'snoozeMinutes': snoozeMinutes,
-        'maxSnoozes': maxSnoozes,
-        'focusEnabled': focusEnabled,
-        'softReminderAfterSkip': softReminderAfterSkip,
-        'confirmationText': confirmationText,
-        'adjustments': <String, int>{
-          for (final PrayerType type in PrayerType.values)
-            type.name: adjustmentFor(type),
-        },
-      };
+    'calculationMethodId': calculationMethodId,
+    'madhhab': madhhab.name,
+    'highLatitudeRule': highLatitudeRule.name,
+    'gracePeriodMinutes': gracePeriodMinutes,
+    'snoozeMinutes': snoozeMinutes,
+    'maxSnoozes': maxSnoozes,
+    'focusEnabled': focusEnabled,
+    'softReminderAfterSkip': softReminderAfterSkip,
+    'confirmationText': confirmationText,
+    'adjustments': <String, int>{
+      for (final PrayerType type in PrayerType.values)
+        type.name: adjustmentFor(type),
+    },
+  };
 
   factory PrayerSettings.fromJson(Map<String, Object?> json) {
     final Object? rawAdjustments = json['adjustments'];
@@ -110,12 +125,9 @@ class PrayerSettings {
       highLatitudeRule: _parseHighLatitudeRule(json['highLatitudeRule']),
       gracePeriodMinutes: _clampInt(rawGrace, 0, 120),
       snoozeMinutes: _clampInt(rawSnooze, 5, 30),
-      maxSnoozes: rawMaxSnoozes == null
-          ? null
-          : _clampInt(rawMaxSnoozes, 1, 5),
+      maxSnoozes: rawMaxSnoozes == null ? null : _clampInt(rawMaxSnoozes, 1, 5),
       focusEnabled: (json['focusEnabled'] as bool?) ?? true,
-      softReminderAfterSkip:
-          (json['softReminderAfterSkip'] as bool?) ?? true,
+      softReminderAfterSkip: (json['softReminderAfterSkip'] as bool?) ?? true,
       confirmationText: rawConfirmation.isEmpty
           ? 'Wallah, ich habe gebetet'
           : rawConfirmation.substring(
@@ -149,8 +161,8 @@ class PrayerSettings {
   int get apiSchool => madhhab == AsrMadhhab.hanafi ? 1 : 0;
 
   int get apiLatitudeAdjustmentMethod => switch (highLatitudeRule) {
-        HighLatitudeRule.middleOfNight => 1,
-        HighLatitudeRule.oneSeventh => 2,
-        HighLatitudeRule.angleBased => 3,
-      };
+    HighLatitudeRule.middleOfNight => 1,
+    HighLatitudeRule.oneSeventh => 2,
+    HighLatitudeRule.angleBased => 3,
+  };
 }

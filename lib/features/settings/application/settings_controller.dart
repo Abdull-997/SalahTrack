@@ -9,17 +9,19 @@ final Provider<SettingsRepository> settingsRepositoryProvider =
 
 final Provider<AppPreferences> initialPreferencesProvider =
     Provider<AppPreferences>(
-  (Ref ref) => const AppPreferences(
-    prayerSettings: PrayerSettings(),
-    localeCode: 'de',
-    themeMode: 'system',
-    onboardingComplete: false,
-  ),
-);
+      (Ref ref) => const AppPreferences(
+        prayerSettings: PrayerSettings(),
+        localeCode: 'de',
+        themeMode: 'system',
+        onboardingComplete: false,
+      ),
+    );
 
 final NotifierProvider<SettingsController, AppPreferences>
-    settingsControllerProvider =
-    NotifierProvider<SettingsController, AppPreferences>(SettingsController.new);
+settingsControllerProvider =
+    NotifierProvider<SettingsController, AppPreferences>(
+      SettingsController.new,
+    );
 
 class SettingsController extends Notifier<AppPreferences> {
   SettingsRepository get _repository => ref.read(settingsRepositoryProvider);
@@ -38,8 +40,23 @@ class SettingsController extends Notifier<AppPreferences> {
   }
 
   Future<void> setLocale(String localeCode) async {
-    state = state.copyWith(localeCode: localeCode);
+    final PrayerSettings currentSettings = state.prayerSettings;
+    final PrayerSettings updatedSettings =
+        currentSettings.usesDefaultConfirmationText
+        ? currentSettings.copyWith(
+            confirmationText: PrayerSettings.defaultConfirmationText(
+              localeCode,
+            ),
+          )
+        : currentSettings;
+    state = state.copyWith(
+      localeCode: localeCode,
+      prayerSettings: updatedSettings,
+    );
     await _repository.saveLocale(localeCode);
+    if (updatedSettings != currentSettings) {
+      await _repository.savePrayerSettings(updatedSettings);
+    }
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
@@ -53,8 +70,8 @@ class SettingsController extends Notifier<AppPreferences> {
   }
 
   ThemeMode get themeMode => switch (state.themeMode) {
-        'light' => ThemeMode.light,
-        'dark' => ThemeMode.dark,
-        _ => ThemeMode.system,
-      };
+    'light' => ThemeMode.light,
+    'dark' => ThemeMode.dark,
+    _ => ThemeMode.system,
+  };
 }

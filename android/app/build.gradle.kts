@@ -6,7 +6,9 @@ plugins {
 
 android {
     namespace = "com.salahfocus.salah_focus"
-    compileSdk = flutter.compileSdkVersion
+    // Current AndroidX dependencies require API 34 or newer. Keep this
+    // explicit so builds do not depend on an older Flutter SDK default.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
