@@ -49,7 +49,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   leading: const Icon(Icons.calculate_outlined),
                   title: Text(s.t('calculationMethod')),
                   subtitle: Text(
-                    _calculationMethodName(settings.calculationMethodId),
+                    _localizedCalculationMethodName(
+                      settings.calculationMethodId,
+                      s.locale.languageCode,
+                    ),
                   ),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _chooseCalculationMethod(settings),
@@ -70,7 +73,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.public_rounded),
                   title: Text(s.t('highLatitude')),
-                  subtitle: Text(_highLatitudeName(settings.highLatitudeRule)),
+                  subtitle: Text(
+                    _localizedHighLatitudeName(
+                      settings.highLatitudeRule,
+                      s.locale.languageCode,
+                    ),
+                  ),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _chooseHighLatitude(settings),
                 ),
@@ -78,7 +86,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.tune_rounded),
                   title: Text(s.t('manualAdjustments')),
-                  subtitle: Text(_adjustmentsSummary(settings)),
+                  subtitle: Text(_localizedAdjustmentsSummary(settings, s)),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _editAdjustments(settings),
                 ),
@@ -109,7 +117,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(height: 1),
                 _SliderTile(
                   title: s.t('gracePeriod'),
-                  valueLabel: '${settings.gracePeriodMinutes} min',
+                  valueLabel: s.minutes(settings.gracePeriodMinutes),
                   value: settings.gracePeriodMinutes.toDouble(),
                   min: 0,
                   max: 120,
@@ -121,7 +129,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(height: 1),
                 _SliderTile(
                   title: s.t('snoozeDuration'),
-                  valueLabel: '${settings.snoozeMinutes} min',
+                  valueLabel: s.minutes(settings.snoozeMinutes),
                   value: settings.snoozeMinutes.toDouble(),
                   min: 5,
                   max: 30,
@@ -403,7 +411,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onPressed: () => Navigator.of(context).pop(entry.key),
                 child: _DialogChoice(
                   selected: entry.key == current.calculationMethodId,
-                  label: entry.value,
+                  label: _localizedCalculationMethodName(
+                    entry.key,
+                    AppStrings.of(context).locale.languageCode,
+                  ),
                 ),
               ),
             )
@@ -455,7 +466,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onPressed: () => Navigator.of(context).pop(rule),
                 child: _DialogChoice(
                   selected: rule == current.highLatitudeRule,
-                  label: _highLatitudeName(rule),
+                  label: _localizedHighLatitudeName(
+                    rule,
+                    AppStrings.of(context).locale.languageCode,
+                  ),
                 ),
               ),
             )
@@ -506,7 +520,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 SizedBox(
                                   width: 64,
                                   child: Text(
-                                    '${values[type] ?? 0} min',
+                                    AppStrings.of(context)
+                                        .minutes(values[type] ?? 0),
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -556,7 +571,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           for (int count = 1; count <= 5; count++)
             SimpleDialogOption(
               onPressed: () => Navigator.of(context).pop(count),
-              child: Text('$count'),
+              child: Text(AppStrings.of(context).number(count)),
             ),
         ],
       ),
@@ -658,7 +673,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  String _calculationMethodName(int id) => switch (id) {
+  String legacyCalculationMethodName(int id) => switch (id) {
     1 => 'University of Karachi',
     2 => 'ISNA',
     4 => 'Umm Al-Qura, Makkah',
@@ -667,13 +682,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _ => 'Muslim World League',
   };
 
-  String _highLatitudeName(HighLatitudeRule rule) => switch (rule) {
+  String legacyHighLatitudeName(HighLatitudeRule rule) => switch (rule) {
     HighLatitudeRule.middleOfNight => 'Middle of the Night',
     HighLatitudeRule.oneSeventh => 'One Seventh',
     HighLatitudeRule.angleBased => 'Angle Based',
   };
 
-  String _adjustmentsSummary(PrayerSettings settings) =>
+  String legacyAdjustmentsSummary(PrayerSettings settings) =>
       PrayerType.values
           .where((PrayerType type) => settings.adjustmentFor(type) != 0)
           .map(
@@ -691,6 +706,95 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   '${type.name} ${settings.adjustmentFor(type) >= 0 ? '+' : ''}${settings.adjustmentFor(type)}',
             )
             .join(' · ');
+
+  String _localizedCalculationMethodName(int id, String language) {
+    final Map<int, String> names = switch (language) {
+      'de' => const <int, String>{
+        1: 'Universität Karachi',
+        2: 'Islamische Gesellschaft Nordamerikas',
+        4: 'Umm-al-Qura-Universität, Mekka',
+        5: 'Ägyptische Allgemeine Vermessungsbehörde',
+        13: 'Türkisches Präsidium für Religionsangelegenheiten',
+        3: 'Muslimische Weltliga',
+      },
+      'ar' => const <int, String>{
+        1: 'جامعة كراتشي',
+        2: 'الجمعية الإسلامية لأمريكا الشمالية',
+        4: 'جامعة أم القرى، مكة',
+        5: 'الهيئة المصرية العامة للمساحة',
+        13: 'رئاسة الشؤون الدينية التركية',
+        3: 'رابطة العالم الإسلامي',
+      },
+      'ur' => const <int, String>{
+        1: 'جامعہ کراچی',
+        2: 'اسلامک سوسائٹی آف نارتھ امریکہ',
+        4: 'جامعہ ام القریٰ، مکہ',
+        5: 'مصری جنرل اتھارٹی برائے سروے',
+        13: 'ترکیہ امورِ مذہبیہ',
+        3: 'مسلم ورلڈ لیگ',
+      },
+      'ps' => const <int, String>{
+        1: 'د کراچۍ پوهنتون',
+        2: 'د شمالي امریکا اسلامي ټولنه',
+        4: 'د ام القرى پوهنتون، مکه',
+        5: 'د مصر عمومي سروې اداره',
+        13: 'د ترکیې د دیني چارو ریاست',
+        3: 'د اسلامي نړۍ ټولنه',
+      },
+      _ => const <int, String>{
+        1: 'University of Karachi',
+        2: 'ISNA',
+        4: 'Umm Al-Qura, Makkah',
+        5: 'Egyptian General Authority',
+        13: 'Diyanet İşleri Başkanlığı',
+        3: 'Muslim World League',
+      },
+    };
+    return names[id] ?? names[3]!;
+  }
+
+  String _localizedHighLatitudeName(HighLatitudeRule rule, String language) {
+    final Map<HighLatitudeRule, String> names = switch (language) {
+      'de' => const <HighLatitudeRule, String>{
+        HighLatitudeRule.middleOfNight: 'Mitte der Nacht',
+        HighLatitudeRule.oneSeventh: 'Ein Siebtel der Nacht',
+        HighLatitudeRule.angleBased: 'Winkelbasiert',
+      },
+      'ar' => const <HighLatitudeRule, String>{
+        HighLatitudeRule.middleOfNight: 'منتصف الليل',
+        HighLatitudeRule.oneSeventh: 'سُبع الليل',
+        HighLatitudeRule.angleBased: 'حسب الزاوية',
+      },
+      'ur' => const <HighLatitudeRule, String>{
+        HighLatitudeRule.middleOfNight: 'آدھی رات',
+        HighLatitudeRule.oneSeventh: 'رات کا ساتواں حصہ',
+        HighLatitudeRule.angleBased: 'زاویے کے مطابق',
+      },
+      'ps' => const <HighLatitudeRule, String>{
+        HighLatitudeRule.middleOfNight: 'د شپې منځ',
+        HighLatitudeRule.oneSeventh: 'د شپې اوومه برخه',
+        HighLatitudeRule.angleBased: 'د زاویې له مخې',
+      },
+      _ => const <HighLatitudeRule, String>{
+        HighLatitudeRule.middleOfNight: 'Middle of the Night',
+        HighLatitudeRule.oneSeventh: 'One Seventh of the Night',
+        HighLatitudeRule.angleBased: 'Angle Based',
+      },
+    };
+    return names[rule]!;
+  }
+
+  String _localizedAdjustmentsSummary(PrayerSettings settings, AppStrings s) {
+    final String summary = PrayerType.values
+        .where((PrayerType type) => settings.adjustmentFor(type) != 0)
+        .map((PrayerType type) {
+          final int adjustment = settings.adjustmentFor(type);
+          return '${type.localizedName(s.locale.languageCode)} '
+              '${adjustment >= 0 ? '+' : ''}${s.number(adjustment)}';
+        })
+        .join(' · ');
+    return summary.isEmpty ? s.minutes(0) : summary;
+  }
 }
 
 class _SectionTitle extends StatelessWidget {

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
@@ -84,9 +83,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       children: <Widget>[
                         Text(
                           s.t('appName'),
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w800,
-                              ),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w800),
                         ),
                         if (preferences.location != null)
                           Text(
@@ -130,7 +128,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: Text(
                           day.hijriDate!,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurfaceVariant,
@@ -139,9 +138,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     Text(
                       s.t('today'),
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
+                      style: Theme.of(context).textTheme.titleLarge
+                          ?.copyWith(fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 12),
                     for (final PrayerEntry prayer in day.entries) ...<Widget>[
@@ -175,7 +173,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         final PrayerEntry? target = await ref
             .read(prayerCoordinatorProvider)
             .focusCandidateForNow(day);
-        if (!mounted || target == null || _focusNavigationQueuedFor == target.id) {
+        if (!mounted ||
+            target == null ||
+            _focusNavigationQueuedFor == target.id) {
           return;
         }
         _focusNavigationQueuedFor = target.id;
@@ -212,13 +212,16 @@ class _NextPrayerCard extends StatelessWidget {
       next = day.entries.last;
     }
     if (next == null) return const SizedBox.shrink();
-    final DateTime local =
-        TimezoneService.toLocal(next.scheduledAtUtc, next.timezoneId);
-    final String time = DateFormat.Hm(Localizations.localeOf(context).toString())
-        .format(local);
+    final DateTime local = TimezoneService.toLocal(
+      next.scheduledAtUtc,
+      next.timezoneId,
+    );
+    final String time = s.time(local);
     final Duration remaining = next.scheduledAtUtc.difference(nowUtc);
     final bool waiting = remaining.isNegative;
-    final String countdown = waiting ? _statusLabel(context, next.status) : _duration(remaining);
+    final String countdown = waiting
+        ? _statusLabel(context, next.status)
+        : _duration(context, remaining);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(22),
@@ -228,9 +231,9 @@ class _NextPrayerCard extends StatelessWidget {
             Text(
               s.t('nextPrayer'),
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 14),
             Row(
@@ -238,17 +241,17 @@ class _NextPrayerCard extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    next.type.localizedName(Localizations.localeOf(context).languageCode),
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+                    next.type.localizedName(
+                      Localizations.localeOf(context).languageCode,
+                    ),
+                    style: Theme.of(context).textTheme.headlineMedium
+                        ?.copyWith(fontWeight: FontWeight.w800),
                   ),
                 ),
                 Text(
                   time,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                  style: Theme.of(context).textTheme.headlineMedium
+                      ?.copyWith(fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -256,14 +259,15 @@ class _NextPrayerCard extends StatelessWidget {
             Row(
               children: <Widget>[
                 Icon(
-                  waiting ? Icons.notifications_active_outlined : Icons.timer_outlined,
+                  waiting
+                      ? Icons.notifications_active_outlined
+                      : Icons.timer_outlined,
                   size: 18,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   countdown,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          ),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(),
                 ),
               ],
             ),
@@ -273,16 +277,18 @@ class _NextPrayerCard extends StatelessWidget {
     );
   }
 
-  static String _duration(Duration value) {
+  static String _duration(BuildContext context, Duration value) {
     final int seconds = value.inSeconds < 0
         ? 0
         : (value.inSeconds > 86400 ? 86400 : value.inSeconds);
     final int hours = seconds ~/ 3600;
     final int minutes = (seconds % 3600) ~/ 60;
     final int secs = seconds % 60;
-    return '${hours.toString().padLeft(2, '0')}:'
-        '${minutes.toString().padLeft(2, '0')}:'
-        '${secs.toString().padLeft(2, '0')}';
+    final AppStrings s = AppStrings.of(context);
+    final String zero = s.number(0);
+    return '${s.number(hours).padLeft(2, zero)}:'
+        '${s.number(minutes).padLeft(2, zero)}:'
+        '${s.number(secs).padLeft(2, zero)}';
   }
 }
 
@@ -294,17 +300,21 @@ class _PrayerTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final String language = Localizations.localeOf(context).languageCode;
-    final DateTime local =
-        TimezoneService.toLocal(prayer.scheduledAtUtc, prayer.timezoneId);
-    final String time = DateFormat.Hm(Localizations.localeOf(context).toString())
-        .format(local);
-    final bool actionable = prayer.status == PrayerStatus.active ||
+    final DateTime local = TimezoneService.toLocal(
+      prayer.scheduledAtUtc,
+      prayer.timezoneId,
+    );
+    final String time = AppStrings.of(context).time(local);
+    final bool actionable =
+        prayer.status == PrayerStatus.active ||
         prayer.status == PrayerStatus.pending ||
         prayer.status == PrayerStatus.snoozed;
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
-        onTap: actionable ? () => context.push('/focus/${Uri.encodeComponent(prayer.id)}') : null,
+        onTap: actionable
+            ? () => context.push('/focus/${Uri.encodeComponent(prayer.id)}')
+            : null,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           child: Row(
@@ -317,9 +327,8 @@ class _PrayerTile extends ConsumerWidget {
                   children: <Widget>[
                     Text(
                       prayer.type.localizedName(language),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 3),
                     Text(
@@ -331,9 +340,8 @@ class _PrayerTile extends ConsumerWidget {
               ),
               Text(
                 time,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                style: Theme.of(context).textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w700),
               ),
               if (actionable) ...<Widget>[
                 const SizedBox(width: 8),
@@ -344,7 +352,9 @@ class _PrayerTile extends ConsumerWidget {
                     ref.invalidate(todayPrayerDayProvider);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(AppStrings.of(context).t('accepted'))),
+                        SnackBar(
+                          content: Text(AppStrings.of(context).t('accepted')),
+                        ),
                       );
                     }
                   },
@@ -369,7 +379,10 @@ class _StatusIcon extends StatelessWidget {
     final ColorScheme scheme = Theme.of(context).colorScheme;
     final (IconData, Color) appearance = switch (status) {
       PrayerStatus.prayed => (Icons.check_rounded, scheme.primary),
-      PrayerStatus.active => (Icons.notifications_active_outlined, scheme.tertiary),
+      PrayerStatus.active => (
+        Icons.notifications_active_outlined,
+        scheme.tertiary,
+      ),
       PrayerStatus.pending => (Icons.shield_outlined, scheme.error),
       PrayerStatus.snoozed => (Icons.snooze_rounded, scheme.secondary),
       PrayerStatus.skipped => (Icons.remove_rounded, scheme.outline),
@@ -415,7 +428,9 @@ class _NoDataState extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Icon(
-            hasLocation ? Icons.cloud_off_outlined : Icons.location_off_outlined,
+            hasLocation
+                ? Icons.cloud_off_outlined
+                : Icons.location_off_outlined,
             size: 56,
           ),
           const SizedBox(height: 16),
@@ -450,10 +465,7 @@ class _ErrorState extends ConsumerWidget {
         children: <Widget>[
           const Icon(Icons.wifi_off_rounded, size: 56),
           const SizedBox(height: 16),
-          Text(
-            userErrorMessage(context, error),
-            textAlign: TextAlign.center,
-          ),
+          Text(userErrorMessage(context, error), textAlign: TextAlign.center),
           const SizedBox(height: 18),
           FilledButton.tonal(
             onPressed: () => ref.invalidate(todayPrayerDayProvider),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
@@ -10,10 +9,7 @@ import 'package:salah_focus/features/settings/application/settings_controller.da
 import 'package:salah_focus/shared/errors/user_error_message.dart';
 
 class TrackerData {
-  const TrackerData({
-    required this.entries,
-    required this.localNow,
-  });
+  const TrackerData({required this.entries, required this.localNow});
 
   final List<PrayerEntry> entries;
   final DateTime localNow;
@@ -31,10 +27,9 @@ final trackerDataProvider = FutureProvider<TrackerData>((Ref ref) async {
   final DateTime localNow = TimezoneService.toLocal(nowUtc, timezoneId);
   final DateTime first = DateTime(localNow.year, localNow.month, 1);
   final DateTime last = DateTime(localNow.year, localNow.month + 1, 0);
-  final List<PrayerEntry> entries = await ref.watch(prayerCoordinatorProvider).entriesBetween(
-        _iso(first),
-        _iso(last),
-      );
+  final List<PrayerEntry> entries = await ref
+      .watch(prayerCoordinatorProvider)
+      .entriesBetween(_iso(first), _iso(last));
 
   return TrackerData(entries: entries, localNow: localNow);
 });
@@ -79,7 +74,10 @@ class TrackerScreen extends ConsumerWidget {
               children: <Widget>[
                 const Icon(Icons.error_outline_rounded, size: 50),
                 const SizedBox(height: 12),
-                Text(userErrorMessage(context, error), textAlign: TextAlign.center),
+                Text(
+                  userErrorMessage(context, error),
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 12),
                 OutlinedButton(
                   onPressed: () => refresh(),
@@ -128,12 +126,18 @@ class _TrackerContent extends StatelessWidget {
       byDay.putIfAbsent(entry.localDate, () => <PrayerEntry>[]).add(entry);
     }
 
-    final int prayed = entries.where((PrayerEntry entry) => entry.status == PrayerStatus.prayed).length;
-    final int resolved = entries.where((PrayerEntry entry) => entry.status.isFinal).length;
+    final int prayed = entries
+        .where((PrayerEntry entry) => entry.status == PrayerStatus.prayed)
+        .length;
+    final int resolved = entries
+        .where((PrayerEntry entry) => entry.status.isFinal)
+        .length;
     final double ratio = resolved == 0 ? 0 : prayed / resolved;
-    final DateTime weekStart = DateTime(now.year, now.month, now.day).subtract(
-      Duration(days: now.weekday - 1),
-    );
+    final DateTime weekStart = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday - 1));
 
     return RefreshIndicator(
       onRefresh: onRefresh,
@@ -145,14 +149,16 @@ class _TrackerContent extends StatelessWidget {
           const SizedBox(height: 22),
           Text(
             s.t('today'),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            style: Theme.of(context).textTheme.titleLarge
+                ?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
           _DayCard(date: today, entries: byDay[today] ?? const <PrayerEntry>[]),
           const SizedBox(height: 24),
           Text(
             s.t('week'),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            style: Theme.of(context).textTheme.titleLarge
+                ?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
           for (int i = 0; i < 7; i++)
@@ -160,14 +166,17 @@ class _TrackerContent extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 8),
               child: _DayCard(
                 date: _iso(weekStart.add(Duration(days: i))),
-                entries: byDay[_iso(weekStart.add(Duration(days: i)))] ?? const <PrayerEntry>[],
+                entries:
+                    byDay[_iso(weekStart.add(Duration(days: i)))] ??
+                    const <PrayerEntry>[],
                 compact: true,
               ),
             ),
           const SizedBox(height: 18),
           Text(
             s.t('month'),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            style: Theme.of(context).textTheme.titleLarge
+                ?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
           _MonthGrid(month: DateTime(now.year, now.month), byDay: byDay),
@@ -202,7 +211,9 @@ class _StatsCard extends StatelessWidget {
               child: CircularProgressIndicator(
                 value: ratio,
                 strokeWidth: 7,
-                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                backgroundColor: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest,
               ),
             ),
             const SizedBox(width: 18),
@@ -212,13 +223,15 @@ class _StatsCard extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     s.t('confirmedPrayers'),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 5),
-                  Text('$prayed / $resolved'),
+                  Text('${s.number(prayed)} / ${s.number(resolved)}'),
                   Text(
-                    '${(ratio * 100).round()} %',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+                    '${s.number((ratio * 100).round())} %',
+                    style: Theme.of(context).textTheme.headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.w900),
                   ),
                 ],
               ),
@@ -245,19 +258,36 @@ class _DayCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final DateTime parsed = DateTime.parse(date);
     final String locale = Localizations.localeOf(context).languageCode;
-    final int prayed = entries.where((PrayerEntry entry) => entry.status == PrayerStatus.prayed).length;
-    final String title = DateFormat(compact ? 'EEE, dd.MM.' : 'EEEE, dd.MM.yyyy', locale).format(parsed);
+    final AppStrings s = AppStrings.of(context);
+    final int prayed = entries
+        .where((PrayerEntry entry) => entry.status == PrayerStatus.prayed)
+        .length;
+    final String title = s.date(
+      parsed,
+      pattern: compact ? 'EEE, d MMM.' : 'EEEE, d MMMM y',
+    );
 
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: compact ? 13 : 15),
+        padding: EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: compact ? 13 : 15,
+        ),
         child: Column(
           children: <Widget>[
             Row(
               children: <Widget>[
-                Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w700))),
-                Text('$prayed/5', style: const TextStyle(fontWeight: FontWeight.w800)),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
+                Text(
+                  '${s.number(prayed)}/${s.number(5)}',
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
               ],
             ),
             if (!compact) ...<Widget>[
@@ -317,10 +347,16 @@ class _MonthGrid extends StatelessWidget {
             if (index < prefix) return const SizedBox.shrink();
             final int day = index - prefix + 1;
             final String key = _iso(DateTime(month.year, month.month, day));
-            final List<PrayerEntry> values = byDay[key] ?? const <PrayerEntry>[];
-            final int prayed = values.where((PrayerEntry entry) => entry.status == PrayerStatus.prayed).length;
+            final List<PrayerEntry> values =
+                byDay[key] ?? const <PrayerEntry>[];
+            final int prayed = values
+                .where(
+                  (PrayerEntry entry) => entry.status == PrayerStatus.prayed,
+                )
+                .length;
             return Semantics(
-              label: '$day, $prayed/5 ${s.t('confirmedPrayers')}',
+              label:
+                  '${s.number(day)}, ${s.number(prayed)}/${s.number(5)} ${s.t('confirmedPrayers')}',
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
@@ -332,8 +368,14 @@ class _MonthGrid extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Text('$day', style: const TextStyle(fontWeight: FontWeight.w800)),
-                      Text('$prayed/5', style: Theme.of(context).textTheme.labelSmall),
+                      Text(
+                        s.number(day),
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      Text(
+                        '${s.number(prayed)}/${s.number(5)}',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
                     ],
                   ),
                 ),
@@ -354,10 +396,22 @@ class _StatusIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (IconData icon, Color color) = switch (status) {
-      PrayerStatus.prayed => (Icons.check_circle_rounded, Theme.of(context).colorScheme.primary),
-      PrayerStatus.skipped => (Icons.remove_circle_outline_rounded, Theme.of(context).colorScheme.outline),
-      PrayerStatus.missed => (Icons.help_outline_rounded, Theme.of(context).colorScheme.error),
-      PrayerStatus.snoozed => (Icons.snooze_rounded, Theme.of(context).colorScheme.tertiary),
+      PrayerStatus.prayed => (
+        Icons.check_circle_rounded,
+        Theme.of(context).colorScheme.primary,
+      ),
+      PrayerStatus.skipped => (
+        Icons.remove_circle_outline_rounded,
+        Theme.of(context).colorScheme.outline,
+      ),
+      PrayerStatus.missed => (
+        Icons.help_outline_rounded,
+        Theme.of(context).colorScheme.error,
+      ),
+      PrayerStatus.snoozed => (
+        Icons.snooze_rounded,
+        Theme.of(context).colorScheme.tertiary,
+      ),
       _ => (Icons.circle_outlined, Theme.of(context).colorScheme.outline),
     };
     return Icon(icon, color: color, size: 20);

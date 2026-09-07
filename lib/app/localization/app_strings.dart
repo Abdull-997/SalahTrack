@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class AppStrings {
   AppStrings(this.locale);
@@ -119,6 +120,7 @@ class AppStrings {
       'snoozeUnavailable': 'Dieses Gebet kann nicht weiter verschoben werden.',
       'prayerFirst': 'Gebet zuerst, Handy danach.',
       'heading': 'Ausrichtung',
+      'minutesValue': '{value} Min.',
     },
     'en': {
       'appName': 'Salaty',
@@ -220,6 +222,7 @@ class AppStrings {
       'snoozeUnavailable': 'This prayer cannot be snoozed any further.',
       'prayerFirst': 'Prayer first, phone second.',
       'heading': 'Heading',
+      'minutesValue': '{value} min',
     },
     'ar': {
       'appName': 'صلاتي',
@@ -318,6 +321,7 @@ class AppStrings {
       'snoozeUnavailable': 'لا يمكن تأجيل تذكير هذه الصلاة أكثر.',
       'prayerFirst': 'الصلاة أولًا، ثم الهاتف.',
       'heading': 'اتجاه الهاتف',
+      'minutesValue': '{value} دقيقة',
     },
     'ur': {
       'appName': 'صلاتی',
@@ -421,6 +425,7 @@ class AppStrings {
       'snoozeUnavailable': 'اس نماز کو مزید موخر نہیں کیا جا سکتا۔',
       'prayerFirst': 'پہلے نماز، پھر فون۔',
       'heading': 'سمت',
+      'minutesValue': '{value} منٹ',
     },
     'ps': {
       'appName': 'صلاتي',
@@ -523,6 +528,7 @@ class AppStrings {
       'snoozeUnavailable': 'دا لمونځ نور نه شي ځنډېدای.',
       'prayerFirst': 'لومړی لمونځ، بیا فون.',
       'heading': 'لوری',
+      'minutesValue': '{value} دقیقې',
     },
   };
 
@@ -536,6 +542,73 @@ class AppStrings {
       value = value.replaceAll('{${entry.key}}', entry.value);
     }
     return value;
+  }
+
+  /// Formats every user-visible number using the active app language.
+  ///
+  /// `intl` localizes punctuation, while Arabic, Urdu and Pashto also use
+  /// their familiar digit shapes so no Latin digits leak into the interface.
+  String number(num value) {
+    final String formatted = NumberFormat.decimalPattern(locale.languageCode)
+        .format(value);
+    const Map<String, String> western = <String, String>{
+      '0': '٠',
+      '1': '١',
+      '2': '٢',
+      '3': '٣',
+      '4': '٤',
+      '5': '٥',
+      '6': '٦',
+      '7': '٧',
+      '8': '٨',
+      '9': '٩',
+    };
+    const Map<String, String> eastern = <String, String>{
+      '0': '۰',
+      '1': '۱',
+      '2': '۲',
+      '3': '۳',
+      '4': '۴',
+      '5': '۵',
+      '6': '۶',
+      '7': '۷',
+      '8': '۸',
+      '9': '۹',
+    };
+    final Map<String, String>? digits = switch (locale.languageCode) {
+      'ar' => western,
+      'ur' || 'ps' => eastern,
+      _ => null,
+    };
+    if (digits == null) return formatted;
+    return formatted.splitMapJoin(
+      RegExp('[0-9]'),
+      onMatch: (Match match) => digits[match.group(0)]!,
+    );
+  }
+
+  String minutes(num value) =>
+      t('minutesValue', params: <String, String>{'value': number(value)});
+
+  String date(DateTime value, {required String pattern}) {
+    final String formatted = DateFormat(
+      pattern,
+      locale.languageCode,
+    ).format(value);
+    return _localizeDigits(formatted);
+  }
+
+  String time(DateTime value) =>
+      _localizeDigits(DateFormat.Hm(locale.languageCode).format(value));
+
+  String _localizeDigits(String value) {
+    if (locale.languageCode == 'de' || locale.languageCode == 'en') {
+      return value;
+    }
+    return value.replaceAllMapped(RegExp('[0-9]'), (Match match) {
+      final String digit = match.group(0)!;
+      return number(int.parse(digit));
+    });
   }
 }
 

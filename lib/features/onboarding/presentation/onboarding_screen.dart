@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/location/location_service.dart';
@@ -203,7 +202,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (cityValue.isEmpty || countryValue.isEmpty) return;
 
     await _run(() async {
-      final UserLocation location = await ref.read(locationServiceProvider).geocodeManual(
+      final UserLocation location = await ref
+          .read(locationServiceProvider)
+          .geocodeManual(
             city: cityValue,
             country: countryValue,
             deviceTimezoneId: ref.read(deviceTimezoneIdProvider),
@@ -214,7 +215,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Future<void> _setGracePeriod(int minutes) async {
-    final PrayerSettings current = ref.read(settingsControllerProvider).prayerSettings;
+    final PrayerSettings current = ref
+        .read(settingsControllerProvider)
+        .prayerSettings;
     await ref
         .read(settingsControllerProvider.notifier)
         .setPrayerSettings(current.copyWith(gracePeriodMinutes: minutes));
@@ -226,7 +229,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       final PrayerFocusService focus = ref.read(prayerFocusServiceProvider);
       _focusCapabilities ??= await focus.capabilities();
       if (_focusCapabilities!.appSelectionSupported) {
-        final bool authorized = !_focusCapabilities!.appShieldingSupported ||
+        final bool authorized =
+            !_focusCapabilities!.appShieldingSupported ||
             await focus.requestAuthorization();
         if (authorized) {
           await focus.selectBlockedApps();
@@ -244,10 +248,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (_focusCapabilities!.appShieldingSupported) {
         enabled = await focus.requestAuthorization();
       }
-      final PrayerSettings current = ref.read(settingsControllerProvider).prayerSettings;
-      await ref.read(settingsControllerProvider.notifier).setPrayerSettings(
-            current.copyWith(focusEnabled: enabled),
-          );
+      final PrayerSettings current = ref
+          .read(settingsControllerProvider)
+          .prayerSettings;
+      await ref
+          .read(settingsControllerProvider.notifier)
+          .setPrayerSettings(current.copyWith(focusEnabled: enabled));
       if (mounted) setState(() {});
     });
   }
@@ -367,9 +373,17 @@ class _PrayerPreviewPage extends StatelessWidget {
       child: Column(
         children: <Widget>[
           const SizedBox(height: 12),
-          Icon(Icons.schedule_rounded, size: 58, color: Theme.of(context).colorScheme.primary),
+          Icon(
+            Icons.schedule_rounded,
+            size: 58,
+            color: Theme.of(context).colorScheme.primary,
+          ),
           const SizedBox(height: 18),
-          Text(s.t('prayerTimes'), style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
+          Text(
+            s.t('prayerTimes'),
+            style: Theme.of(context).textTheme.headlineSmall
+                ?.copyWith(fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 8),
           Text(s.t('timesQuestion'), textAlign: TextAlign.center),
           const SizedBox(height: 22),
@@ -382,11 +396,18 @@ class _PrayerPreviewPage extends StatelessWidget {
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (BuildContext context, int index) {
                     final entry = day.entries[index];
-                    final DateTime local = TimezoneService.toLocal(entry.scheduledAtUtc, day.timezoneId);
+                    final DateTime local = TimezoneService.toLocal(
+                      entry.scheduledAtUtc,
+                      day.timezoneId,
+                    );
                     return ListTile(
                       leading: const Icon(Icons.nightlight_outlined),
-                      title: Text(entry.type.localizedName(Localizations.localeOf(context).languageCode)),
-                      trailing: Text(DateFormat.Hm(Localizations.localeOf(context).languageCode).format(local)),
+                      title: Text(
+                        entry.type.localizedName(
+                          Localizations.localeOf(context).languageCode,
+                        ),
+                      ),
+                      trailing: Text(AppStrings.of(context).time(local)),
                     );
                   },
                 );
@@ -396,9 +417,15 @@ class _PrayerPreviewPage extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Text(userErrorMessage(context, error), textAlign: TextAlign.center),
+                    Text(
+                      userErrorMessage(context, error),
+                      textAlign: TextAlign.center,
+                    ),
                     const SizedBox(height: 12),
-                    OutlinedButton(onPressed: onRefresh, child: Text(s.t('retry'))),
+                    OutlinedButton(
+                      onPressed: onRefresh,
+                      child: Text(s.t('retry')),
+                    ),
                   ],
                 ),
               ),
@@ -422,17 +449,19 @@ class _GracePage extends StatelessWidget {
     return _CenteredPage(
       icon: Icons.timer_outlined,
       title: s.t('graceQuestion'),
-      body: '$minutes ${s.t('minutesAfter')}',
+      body: '${s.number(minutes)} ${s.t('minutesAfter')}',
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
         alignment: WrapAlignment.center,
         children: options
-            .map((int value) => ChoiceChip(
-                  label: Text('$value min'),
-                  selected: minutes == value,
-                  onSelected: (_) => onChanged(value),
-                ))
+            .map(
+              (int value) => ChoiceChip(
+                label: Text(s.minutes(value)),
+                selected: minutes == value,
+                onSelected: (_) => onChanged(value),
+              ),
+            )
             .toList(),
       ),
     );
@@ -440,7 +469,11 @@ class _GracePage extends StatelessWidget {
 }
 
 class _DistractionPage extends StatelessWidget {
-  const _DistractionPage({required this.capabilities, required this.working, required this.onSelectApps});
+  const _DistractionPage({
+    required this.capabilities,
+    required this.working,
+    required this.onSelectApps,
+  });
   final PrayerFocusCapabilities? capabilities;
   final bool working;
   final VoidCallback onSelectApps;
@@ -464,7 +497,11 @@ class _DistractionPage extends StatelessWidget {
 }
 
 class _FocusExplainPage extends StatelessWidget {
-  const _FocusExplainPage({required this.capabilities, required this.working, required this.onEnable});
+  const _FocusExplainPage({
+    required this.capabilities,
+    required this.working,
+    required this.onEnable,
+  });
   final PrayerFocusCapabilities? capabilities;
   final bool working;
   final VoidCallback onEnable;
@@ -488,7 +525,12 @@ class _FocusExplainPage extends StatelessWidget {
 }
 
 class _PermissionsPage extends StatelessWidget {
-  const _PermissionsPage({required this.working, required this.onNotifications, required this.onExactAlarms, required this.onFinish});
+  const _PermissionsPage({
+    required this.working,
+    required this.onNotifications,
+    required this.onExactAlarms,
+    required this.onFinish,
+  });
   final bool working;
   final VoidCallback onNotifications;
   final VoidCallback onExactAlarms;
@@ -502,17 +544,37 @@ class _PermissionsPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Icon(Icons.notifications_active_outlined, size: 64, color: Theme.of(context).colorScheme.primary),
+          Icon(
+            Icons.notifications_active_outlined,
+            size: 64,
+            color: Theme.of(context).colorScheme.primary,
+          ),
           const SizedBox(height: 18),
-          Text(s.t('permissions'), style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
+          Text(
+            s.t('permissions'),
+            style: Theme.of(context).textTheme.headlineSmall
+                ?.copyWith(fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 12),
           Text(s.t('permissionExplain'), textAlign: TextAlign.center),
           const SizedBox(height: 24),
-          FilledButton.tonalIcon(onPressed: working ? null : onNotifications, icon: const Icon(Icons.notifications_rounded), label: Text(s.t('notificationPermission'))),
+          FilledButton.tonalIcon(
+            onPressed: working ? null : onNotifications,
+            icon: const Icon(Icons.notifications_rounded),
+            label: Text(s.t('notificationPermission')),
+          ),
           const SizedBox(height: 10),
-          OutlinedButton.icon(onPressed: working ? null : onExactAlarms, icon: const Icon(Icons.alarm_rounded), label: Text(s.t('exactAlarmPermission'))),
+          OutlinedButton.icon(
+            onPressed: working ? null : onExactAlarms,
+            icon: const Icon(Icons.alarm_rounded),
+            label: Text(s.t('exactAlarmPermission')),
+          ),
           const SizedBox(height: 26),
-          FilledButton.icon(onPressed: working ? null : onFinish, icon: const Icon(Icons.check_rounded), label: Text(s.t('finish'))),
+          FilledButton.icon(
+            onPressed: working ? null : onFinish,
+            icon: const Icon(Icons.check_rounded),
+            label: Text(s.t('finish')),
+          ),
         ],
       ),
     );
@@ -520,7 +582,12 @@ class _PermissionsPage extends StatelessWidget {
 }
 
 class _CenteredPage extends StatelessWidget {
-  const _CenteredPage({required this.icon, required this.title, required this.body, required this.child});
+  const _CenteredPage({
+    required this.icon,
+    required this.title,
+    required this.body,
+    required this.child,
+  });
   final IconData icon;
   final String title;
   final String body;
@@ -528,22 +595,32 @@ class _CenteredPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(28),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 620),
-            child: Column(
-              children: <Widget>[
-                Icon(icon, size: 74, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(height: 24),
-                Text(title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900)),
-                const SizedBox(height: 14),
-                Text(body, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5)),
-                const SizedBox(height: 30),
-                child,
-              ],
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.all(28),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 620),
+        child: Column(
+          children: <Widget>[
+            Icon(icon, size: 74, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 24),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineMedium
+                  ?.copyWith(fontWeight: FontWeight.w900),
             ),
-          ),
+            const SizedBox(height: 14),
+            Text(
+              body,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyLarge
+                  ?.copyWith(height: 1.5),
+            ),
+            const SizedBox(height: 30),
+            child,
+          ],
         ),
-      );
+      ),
+    ),
+  );
 }
