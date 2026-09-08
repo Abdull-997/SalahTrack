@@ -249,7 +249,8 @@ class AppStrings {
       'skipConfirmBody': 'هل تريد فعلًا إنهاء التذكيرات لهذه الصلاة؟',
       'noPrayLater': 'لا، سأصلي',
       'yesEnd': 'نعم، أنهِ التذكير',
-      'reminderBody': 'أردت أن تخصص وقتًا للصلاة. اترك الهاتف لبضع دقائق وصلِّ.',
+      'reminderBody':
+          'أردت أن تخصص وقتًا للصلاة. اترك الهاتف لبضع دقائق وصلِّ.',
       'accepted': 'الحمد لله 🤍',
       'week': 'هذا الأسبوع',
       'month': 'الشهر',
@@ -547,7 +548,7 @@ class AppStrings {
       pattern,
       locale.languageCode,
     ).format(value);
-    return _localizeDigits(formatted);
+    return _localizeDigits(_localizeGregorianDateWords(formatted));
   }
 
   String time(DateTime value) =>
@@ -632,6 +633,40 @@ class AppStrings {
       final String digit = match.group(0)!;
       return number(int.parse(digit));
     });
+  }
+
+  /// Keeps Gregorian day and month names in the selected app language even
+  /// when a platform's date-symbol fallback returns English names.
+  String _localizeGregorianDateWords(String value) {
+    if (locale.languageCode != 'ar') return value;
+
+    const Map<String, String> arabicWords = <String, String>{
+      'Monday': 'الاثنين',
+      'Tuesday': 'الثلاثاء',
+      'Wednesday': 'الأربعاء',
+      'Thursday': 'الخميس',
+      'Friday': 'الجمعة',
+      'Saturday': 'السبت',
+      'Sunday': 'الأحد',
+      'January': 'كانون الثاني',
+      'February': 'شباط',
+      'March': 'آذار',
+      'April': 'نيسان',
+      'May': 'أيار',
+      'June': 'حزيران',
+      'July': 'تموز',
+      'August': 'آب',
+      'September': 'أيلول',
+      'October': 'تشرين الأول',
+      'November': 'تشرين الثاني',
+      'December': 'كانون الأول',
+    };
+
+    String localized = value;
+    for (final MapEntry<String, String> entry in arabicWords.entries) {
+      localized = localized.replaceAll(entry.key, entry.value);
+    }
+    return localized;
   }
 }
 
