@@ -58,7 +58,7 @@ class AppStrings {
       'permissions': 'Berechtigungen',
       'permissionExplain': 'Wir fragen Berechtigungen erst dann an, wenn sie für eine Funktion gebraucht werden.',
       'finish': 'Fertig',
-      'confirmPrayer': 'Wallah, ich habe gebetet',
+      'confirmPrayer': 'Ich habe gebetet',
       'snooze': '20 Minuten später erinnern',
       'snoozeIn': 'In {minutes} Minuten erinnern',
       'skipToday': 'Heute überspringen',

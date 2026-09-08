@@ -13,7 +13,7 @@ class PrayerSettings {
     this.snoozeMinutes = 20,
     this.maxSnoozes = 2,
     this.softReminderAfterSkip = true,
-    this.confirmationText = 'Wallah, ich habe gebetet',
+    this.confirmationText = 'Ich habe gebetet',
     this.adjustments = const <PrayerType, int>{},
   });
 
@@ -28,7 +28,7 @@ class PrayerSettings {
   final Map<PrayerType, int> adjustments;
 
   static const Map<String, String> _defaultConfirmationTexts = <String, String>{
-    'de': 'Wallah, ich habe gebetet',
+    'de': 'Ich habe gebetet',
     'en': 'I have prayed',
     'ar': 'لقد صليت',
     'ur': 'میں نے نماز پڑھی ہے',
@@ -110,7 +110,7 @@ class PrayerSettings {
     final int rawSnooze = (json['snoozeMinutes'] as num?)?.toInt() ?? 20;
     final int? rawMaxSnoozes = (json['maxSnoozes'] as num?)?.toInt();
     final String rawConfirmation =
-        ((json['confirmationText'] as String?) ?? 'Wallah, ich habe gebetet')
+        ((json['confirmationText'] as String?) ?? 'Ich habe gebetet')
             .trim();
     return PrayerSettings(
       calculationMethodId: <int>{1, 2, 3, 4, 5, 13}.contains(rawMethod)
@@ -123,7 +123,7 @@ class PrayerSettings {
       maxSnoozes: rawMaxSnoozes == null ? null : _clampInt(rawMaxSnoozes, 1, 5),
       softReminderAfterSkip: (json['softReminderAfterSkip'] as bool?) ?? true,
       confirmationText: rawConfirmation.isEmpty
-          ? 'Wallah, ich habe gebetet'
+          ? 'Ich habe gebetet'
           : rawConfirmation.substring(
               0,
               rawConfirmation.length > 80 ? 80 : rawConfirmation.length,

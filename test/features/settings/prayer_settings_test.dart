@@ -6,7 +6,7 @@ void main() {
   test('default confirmation text is available for every app language', () {
     expect(
       PrayerSettings.defaultConfirmationText('de'),
-      'Wallah, ich habe gebetet',
+      'Ich habe gebetet',
     );
     expect(PrayerSettings.defaultConfirmationText('en'), 'I have prayed');
     expect(PrayerSettings.defaultConfirmationText('ar'), 'لقد صليت');
@@ -60,6 +60,6 @@ void main() {
     expect(decoded.snoozeMinutes, 30);
     expect(decoded.maxSnoozes, 5);
     expect(decoded.adjustmentFor(PrayerType.fajr), 60);
-    expect(decoded.confirmationText, 'Wallah, ich habe gebetet');
+    expect(decoded.confirmationText, 'Ich habe gebetet');
   });
 }
