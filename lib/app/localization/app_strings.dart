@@ -555,72 +555,40 @@ class AppStrings {
       _localizeDigits(DateFormat.Hm(locale.languageCode).format(value));
 
   String hijriDate(String value) {
-    const Map<String, List<String>> months = <String, List<String>>{
-      'ar': <String>[
-        'محرم',
-        'صفر',
-        'ربيع الأول',
-        'ربيع الآخر',
-        'جمادى الأولى',
-        'جمادى الآخرة',
-        'رجب',
-        'شعبان',
-        'رمضان',
-        'شوال',
-        'ذو القعدة',
-        'ذو الحجة',
-      ],
-      'ur': <String>[
-        'محرم',
-        'صفر',
-        'ربیع الاول',
-        'ربیع الثانی',
-        'جمادی الاول',
-        'جمادی الثانی',
-        'رجب',
-        'شعبان',
-        'رمضان',
-        'شوال',
-        'ذوالقعدہ',
-        'ذوالحجہ',
-      ],
-      'ps': <String>[
-        'محرم',
-        'صفر',
-        'ربيع الاول',
-        'ربيع الثاني',
-        'جمادى الاولى',
-        'جمادى الاخره',
-        'رجب',
-        'شعبان',
-        'رمضان',
-        'شوال',
-        'ذوالقعده',
-        'ذوالحجه',
-      ],
+    if (!const <String>{'ar', 'ur', 'ps'}.contains(locale.languageCode)) {
+      return _localizeDigits(value);
+    }
+
+    const Map<String, String> arabicMonths = <String, String>{
+      'Muharram': 'محرم',
+      'Safar': 'صفر',
+      'Rabi al-Awwal': 'ربيع الأول',
+      'Rabi al-awwal': 'ربيع الأول',
+      "Rabi' al-awwal": 'ربيع الأول',
+      'Rabīʿ al-awwal': 'ربيع الأول',
+      'Rabi al-Thani': 'ربيع الثاني',
+      'Rabi al-thani': 'ربيع الثاني',
+      "Rabi' al-thani": 'ربيع الثاني',
+      'Rabīʿ al-thānī': 'ربيع الثاني',
+      'Jumada al-Awwal': 'جمادى الأولى',
+      'Jumada al-awwal': 'جمادى الأولى',
+      'Jumada al-ula': 'جمادى الأولى',
+      'Jumada al-Thani': 'جمادى الآخرة',
+      'Jumada al-thani': 'جمادى الآخرة',
+      'Jumada al-akhirah': 'جمادى الآخرة',
+      'Rajab': 'رجب',
+      'Shaban': 'شعبان',
+      'Ramadan': 'رمضان',
+      'Shawwal': 'شوال',
+      'Dhul Qadah': 'ذو القعدة',
+      'Dhu al-Qidah': 'ذو القعدة',
+      'Dhul Hijjah': 'ذو الحجة',
+      'Dhu al-Hijjah': 'ذو الحجة',
     };
-    const List<String> englishMonths = <String>[
-      'Muharram',
-      'Safar',
-      'Rabi al-Awwal',
-      'Rabi al-Thani',
-      'Jumada al-Awwal',
-      'Jumada al-Thani',
-      'Rajab',
-      'Shaban',
-      'Ramadan',
-      'Shawwal',
-      'Dhul Qadah',
-      'Dhul Hijjah',
-    ];
-    final List<String>? translatedMonths = months[locale.languageCode];
-    if (translatedMonths == null) return _localizeDigits(value);
+
     String localized = value;
-    for (int index = 0; index < englishMonths.length; index++) {
-      localized = localized.replaceAll(
-        englishMonths[index],
-        translatedMonths[index],
-      );
+    for (final MapEntry<String, String> entry in arabicMonths.entries) {
+      localized = localized.replaceAll(entry.key, entry.value);
     }
     return _localizeDigits(localized);
   }
@@ -660,6 +628,20 @@ class AppStrings {
       'October': 'تشرين الأول',
       'November': 'تشرين الثاني',
       'December': 'كانون الأول',
+      // Arabic CLDR data normally uses these international Arabic names.
+      // Replace them with the requested Levantine Gregorian month names.
+      'يناير': 'كانون الثاني',
+      'فبراير': 'شباط',
+      'مارس': 'آذار',
+      'أبريل': 'نيسان',
+      'مايو': 'أيار',
+      'يونيو': 'حزيران',
+      'يوليو': 'تموز',
+      'أغسطس': 'آب',
+      'سبتمبر': 'أيلول',
+      'أكتوبر': 'تشرين الأول',
+      'نوفمبر': 'تشرين الثاني',
+      'ديسمبر': 'كانون الأول',
     };
 
     String localized = value;

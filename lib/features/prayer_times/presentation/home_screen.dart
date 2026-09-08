@@ -119,33 +119,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
                 sliver: SliverList.list(
                   children: <Widget>[
+                    if (day.hijriDate != null) ...<Widget>[
+                      Text(
+                        s.hijriDate(day.hijriDate!),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                    ],
                     Text(
                       s.date(
                         TimezoneService.toLocal(_nowUtc, day.timezoneId),
                         pattern: 'EEEE, d MMMM y',
                       ),
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 14),
                     _NextPrayerCard(day: day, nowUtc: _nowUtc),
                     const SizedBox(height: 14),
-                    if (day.hijriDate != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Text(
-                          s.hijriDate(day.hijriDate!),
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                        ),
-                      ),
                     Text(
                       s.t('today'),
                       style: Theme.of(context).textTheme.titleLarge
@@ -173,7 +168,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
-
 }
 
 class _NextPrayerCard extends StatelessWidget {
@@ -367,7 +361,10 @@ class _StatusIcon extends StatelessWidget {
         Icons.notifications_active_outlined,
         scheme.tertiary,
       ),
-      PrayerStatus.pending => (Icons.notifications_active_outlined, scheme.error),
+      PrayerStatus.pending => (
+        Icons.notifications_active_outlined,
+        scheme.error,
+      ),
       PrayerStatus.snoozed => (Icons.snooze_rounded, scheme.secondary),
       PrayerStatus.skipped => (Icons.remove_rounded, scheme.outline),
       PrayerStatus.missed => (Icons.circle_outlined, scheme.outline),

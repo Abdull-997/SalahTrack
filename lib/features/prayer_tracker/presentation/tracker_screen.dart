@@ -186,10 +186,7 @@ class _TrackerContent extends StatelessWidget {
 }
 
 class _StatsCard extends StatelessWidget {
-  const _StatsCard({
-    required this.prayed,
-    required this.ratio,
-  });
+  const _StatsCard({required this.prayed, required this.ratio});
 
   final int prayed;
   final double ratio;
@@ -226,9 +223,8 @@ class _StatsCard extends StatelessWidget {
                   const SizedBox(height: 5),
                   Text(
                     '${s.number(prayed)}/${s.number(5)}',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
+                    style: Theme.of(context).textTheme.headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.w900),
                   ),
                   Text(
                     '${s.number((ratio * 100).round())} %',
@@ -376,7 +372,8 @@ class _MonthGrid extends StatelessWidget {
                       ),
                       Text(
                         '${s.number(prayed)}/${s.number(5)}',
-                        style: Theme.of(context).textTheme.labelSmall,
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(fontWeight: FontWeight.w800),
                       ),
                     ],
                   ),
