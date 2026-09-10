@@ -328,6 +328,16 @@ class LocalNotificationService implements NotificationService {
   static String _text(String languageCode, String key, String prayerName) {
     const Map<String, Map<String, String>>
     values = <String, Map<String, String>>{
+      'tr': <String, String>{
+        'prayerTitle': '🕌 {prayer} vakti geldi',
+        'prayerBody': 'Namaz vakti geldi.',
+        'graceTitle': '{prayer} vakti',
+        'graceBody': 'Şimdi namazın için birkaç dakika ayırmak istemiştin.',
+        'snoozeTitle': '{prayer} – hatırlatma',
+        'snoozeBody': 'Erteleme süresi bitti. Müsaitsen birkaç dakika ayır.',
+        'softTitle': 'Nazik bir hatırlatma 🤍',
+        'softBody': 'Müsaitsen {prayer} için birkaç dakika ayır.',
+      },
       'de': <String, String>{
         'prayerTitle': '🕌 {prayer} ist da',
         'prayerBody': 'Es ist Zeit für dein Gebet.',

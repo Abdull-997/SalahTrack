@@ -1,8 +1,10 @@
 package com.salahfocus.salah_focus
 
 import android.content.Intent
+import android.app.LocaleManager
 import android.net.Uri
 import android.os.Build
+import android.os.LocaleList
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -28,6 +30,18 @@ class MainActivity : FlutterActivity() {
                             })
                         }
                         result.success(null)
+                    }
+                    "setApplicationLocale" -> {
+                        val languageCode = call.arguments as? String
+                        if (languageCode == null) {
+                            result.error("invalid_locale", "A language code is required.", null)
+                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            getSystemService(LocaleManager::class.java).applicationLocales =
+                                LocaleList.forLanguageTags(languageCode)
+                            result.success(null)
+                        } else {
+                            result.success(null)
+                        }
                     }
                     else -> result.notImplemented()
                 }

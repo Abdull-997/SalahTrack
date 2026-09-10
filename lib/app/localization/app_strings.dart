@@ -489,6 +489,16 @@ class AppStrings {
     String key, {
     Map<String, String> params = const <String, String>{},
   }) {
+    if (key == 'appName') {
+      return const <String, String>{
+        'de': 'Mein Gebet', 'en': 'My Prayer', 'ar': 'صلاتي',
+        'bn': 'আমার নামাজ', 'fa': 'نماز من', 'fr': 'Ma prière',
+        'ha': "Addu'ata", 'id': 'Salatku', 'jv': 'Shalatku',
+        'ms': 'Solatku', 'nl': 'Mijn gebed', 'ps': 'زما لمونځ',
+        'ru': 'Моя молитва', 'so': 'Salaaddayda', 'sw': 'Swala yangu',
+        'ce': 'Сан ламаз', 'tr': 'Namazım', 'ur': 'میری نماز',
+      }[locale.languageCode] ?? 'My Prayer';
+    }
     String value =
         _values[locale.languageCode]?[key] ?? _values['en']?[key] ?? key;
     for (final MapEntry<String, String> entry in params.entries) {

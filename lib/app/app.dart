@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/app/router/app_router.dart';
+import 'package:salah_focus/core/platform/application_locale.dart';
 import 'package:salah_focus/core/theme/app_theme.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
@@ -25,6 +26,7 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      ApplicationLocale.apply(ref.read(settingsControllerProvider).localeCode);
       _handleLaunchPayload();
       _syncAutomaticLocationUpdates();
     });

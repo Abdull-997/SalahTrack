@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:salah_focus/core/platform/application_locale.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 import 'package:salah_focus/features/settings/data/settings_repository.dart';
@@ -54,6 +55,7 @@ class SettingsController extends Notifier<AppPreferences> {
       prayerSettings: updatedSettings,
     );
     await _repository.saveLocale(localeCode);
+    await ApplicationLocale.apply(localeCode);
     if (updatedSettings != currentSettings) {
       await _repository.savePrayerSettings(updatedSettings);
     }

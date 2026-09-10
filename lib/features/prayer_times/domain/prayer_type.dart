@@ -29,6 +29,13 @@ enum PrayerType {
         PrayerType.maghrib: 'Maghrib',
         PrayerType.isha: 'Isha',
       },
+      'tr': {
+        PrayerType.fajr: 'Sabah',
+        PrayerType.dhuhr: 'Öğle',
+        PrayerType.asr: 'İkindi',
+        PrayerType.maghrib: 'Akşam',
+        PrayerType.isha: 'Yatsı',
+      },
       'ar': {
         PrayerType.fajr: 'الفجر',
         PrayerType.dhuhr: 'الظهر',
