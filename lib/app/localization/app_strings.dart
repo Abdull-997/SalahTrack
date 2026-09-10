@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:salah_focus/app/localization/app_language.dart';
 
 class AppStrings {
   AppStrings(this.locale);
@@ -13,13 +14,7 @@ class AppStrings {
   static AppStrings of(BuildContext context) =>
       Localizations.of<AppStrings>(context, AppStrings)!;
 
-  static const List<Locale> supportedLocales = <Locale>[
-    Locale('de'),
-    Locale('en'),
-    Locale('ar'),
-    Locale('ur'),
-    Locale('ps'),
-  ];
+  static const List<Locale> supportedLocales = supportedAppLocales;
 
   static const Map<String, Map<String, String>> _values = {
     'de': {
@@ -86,6 +81,7 @@ class AppStrings {
       'light': 'Hell',
       'dark': 'Dunkel',
       'language': 'Sprache',
+      'languageSelect': 'Sprache wählen',
       'languageChoose': 'Wähle die Sprache für Salaty.',
       'german': 'Deutsch',
       'english': 'Englisch',
@@ -176,6 +172,7 @@ class AppStrings {
       'light': 'Light',
       'dark': 'Dark',
       'language': 'Language',
+      'languageSelect': 'Choose language',
       'languageChoose': 'Choose the language for Salaty.',
       'german': 'German',
       'english': 'English',
@@ -269,6 +266,7 @@ class AppStrings {
       'light': 'فاتح',
       'dark': 'داكن',
       'language': 'اللغة',
+      'languageSelect': 'اختر اللغة',
       'languageChoose': 'اختر لغة تطبيق صلاتي.',
       'german': 'الألمانية',
       'english': 'الإنجليزية',
@@ -360,6 +358,7 @@ class AppStrings {
       'light': 'روشن',
       'dark': 'تاریک',
       'language': 'زبان',
+      'languageSelect': 'زبان منتخب کریں',
       'languageChoose': 'صلاتی کے لیے زبان منتخب کریں۔',
       'german': 'جرمن',
       'english': 'انگریزی',
@@ -453,6 +452,7 @@ class AppStrings {
       'light': 'روښانه',
       'dark': 'تیاره',
       'language': 'ژبه',
+      'languageSelect': 'ژبه وټاکئ',
       'languageChoose': 'د صلاتي لپاره ژبه وټاکئ.',
       'german': 'جرمني',
       'english': 'انګلیسي',

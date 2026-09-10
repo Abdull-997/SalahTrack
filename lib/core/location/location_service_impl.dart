@@ -167,9 +167,22 @@ class LocationServiceImpl implements LocationService {
 
   String _localeIdentifier(String languageCode) => switch (languageCode) {
     'ar' => 'ar_SA',
+    'bn' => 'bn_BD',
     'ur' => 'ur_PK',
     'ps' => 'ps_AF',
     'de' => 'de_DE',
+    'fa' => 'fa_IR',
+    'fr' => 'fr_FR',
+    'ha' => 'ha_NG',
+    'id' => 'id_ID',
+    'jv' => 'jv_ID',
+    'ms' => 'ms_MY',
+    'nl' => 'nl_NL',
+    'ru' => 'ru_RU',
+    'so' => 'so_SO',
+    'sw' => 'sw_TZ',
+    'ce' => 'ce_RU',
+    'tr' => 'tr_TR',
     _ => 'en_US',
   };
 }

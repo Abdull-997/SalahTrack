@@ -28,6 +28,19 @@ class PrayerSettings {
   final Map<PrayerType, int> adjustments;
 
   static const Map<String, String> _defaultConfirmationTexts = <String, String>{
+    'bn': 'আমি নামাজ পড়েছি',
+    'fa': 'من نماز خوانده‌ام',
+    'fr': "J\'ai prié",
+    'ha': 'Na yi sallah',
+    'id': 'Saya telah salat',
+    'jv': 'Aku wis shalat',
+    'ms': 'Saya sudah solat',
+    'nl': 'Ik heb gebeden',
+    'ru': 'Я помолился',
+    'so': 'Waan tukaday',
+    'sw': 'Nimeswali',
+    'ce': 'Ас салат диллина',
+    'tr': 'Namaz kıldım',
     'de': 'Ich habe gebetet',
     'en': 'I have prayed',
     'ar': 'لقد صليت',

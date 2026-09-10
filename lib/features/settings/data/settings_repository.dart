@@ -3,6 +3,7 @@ import 'dart:ui' show PlatformDispatcher;
 
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
+import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppPreferences {
@@ -83,7 +84,10 @@ class SettingsRepository {
     return AppPreferences(
       prayerSettings: prayerSettings,
       location: location,
-      localeCode: <String>{'de', 'en', 'ar', 'ur', 'ps'}.contains(storedLocale)
+      localeCode: <String>{
+        ...appLanguages.map((AppLanguage language) => language.code),
+        'ms',
+      }.contains(storedLocale)
           ? storedLocale
           : 'de',
       themeMode: <String>{'system', 'light', 'dark'}.contains(storedTheme)
@@ -120,7 +124,10 @@ class SettingsRepository {
 
   String _systemLocaleCode() {
     final String languageCode = PlatformDispatcher.instance.locale.languageCode;
-    return <String>{'de', 'en', 'ar', 'ur', 'ps'}.contains(languageCode)
+    return <String>{
+      ...appLanguages.map((AppLanguage language) => language.code),
+      'ms',
+    }.contains(languageCode)
         ? languageCode
         : 'en';
   }

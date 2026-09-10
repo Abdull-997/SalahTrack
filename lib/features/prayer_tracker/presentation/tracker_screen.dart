@@ -176,6 +176,7 @@ class _TrackerContent extends StatelessWidget {
                   weekStart.add(Duration(days: i)),
                   now,
                 ),
+                isToday: _iso(weekStart.add(Duration(days: i))) == today,
               ),
             ),
           const SizedBox(height: 18),
@@ -258,12 +259,14 @@ class _DayCard extends ConsumerWidget {
     required this.entries,
     this.compact = false,
     this.editable = false,
+    this.isToday = false,
   });
 
   final String date;
   final List<PrayerEntry> entries;
   final bool compact;
   final bool editable;
+  final bool isToday;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -280,6 +283,7 @@ class _DayCard extends ConsumerWidget {
 
     return Card(
       margin: EdgeInsets.zero,
+      color: isToday ? Colors.green.shade100 : null,
       child: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: 16,

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salah_focus/app/app_providers.dart';
+import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/location/location_suggestions.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
+import 'package:salah_focus/features/settings/presentation/language_selection_screen.dart';
 import 'package:salah_focus/shared/errors/user_error_message.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -207,34 +209,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 18),
           _SectionTitle(title: s.t('language'), icon: Icons.language_rounded),
           Card(
-            child: Column(
-              children: <Widget>[
-                _RadioLikeTile(
-                  title: s.t('german'),
-                  selected: prefs.localeCode == 'de',
-                  onTap: () => _setLocale('de'),
-                ),
-                _RadioLikeTile(
-                  title: s.t('english'),
-                  selected: prefs.localeCode == 'en',
-                  onTap: () => _setLocale('en'),
-                ),
-                _RadioLikeTile(
-                  title: s.t('arabic'),
-                  selected: prefs.localeCode == 'ar',
-                  onTap: () => _setLocale('ar'),
-                ),
-                _RadioLikeTile(
-                  title: s.t('urdu'),
-                  selected: prefs.localeCode == 'ur',
-                  onTap: () => _setLocale('ur'),
-                ),
-                _RadioLikeTile(
-                  title: s.t('pashto'),
-                  selected: prefs.localeCode == 'ps',
-                  onTap: () => _setLocale('ps'),
-                ),
-              ],
+            child: ListTile(
+              leading: const Icon(Icons.language_rounded),
+              title: Text(s.t('languageSelect')),
+              subtitle: Text(languageName(prefs.localeCode)),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: _working
+                  ? null
+                  : () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const LanguageSelectionScreen(),
+                      ),
+                    ),
             ),
           ),
         ],
@@ -283,30 +269,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       return;
     }
     await _manualLocationDialog();
-  }
-
-  Future<void> _setLocale(String languageCode) async {
-    if (_working ||
-        ref.read(settingsControllerProvider).localeCode == languageCode) {
-      return;
-    }
-    await _run(() async {
-      await ref
-          .read(settingsControllerProvider.notifier)
-          .setLocale(languageCode);
-      final UserLocation? location = ref
-          .read(settingsControllerProvider)
-          .location;
-      if (location != null) {
-        final UserLocation localized = await ref
-            .read(locationServiceProvider)
-            .localizeLocation(location, languageCode: languageCode);
-        await ref
-            .read(settingsControllerProvider.notifier)
-            .setLocation(localized);
-      }
-      ref.invalidate(todayPrayerDayProvider);
-    });
   }
 
   Future<void> _manualLocationDialog() async {
