@@ -62,6 +62,9 @@ class _LanguageSelectionScreenState
         await ref.read(settingsControllerProvider.notifier).setLocation(localized);
       }
       ref.invalidate(todayPrayerDayProvider);
+      // Reloading immediately also replaces already scheduled notifications
+      // with texts and prayer names from the newly selected language.
+      await ref.read(todayPrayerDayProvider.future);
       if (mounted) Navigator.of(context).pop();
     } finally {
       if (mounted) setState(() => _saving = false);

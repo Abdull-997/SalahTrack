@@ -30,7 +30,7 @@ class PrayerSettings {
   static const Map<String, String> _defaultConfirmationTexts = <String, String>{
     'bn': 'আমি নামাজ পড়েছি',
     'fa': 'من نماز خوانده‌ام',
-    'fr': "J\'ai prié",
+    'fr': "J'ai prié",
     'ha': 'Na yi sallah',
     'id': 'Saya telah salat',
     'jv': 'Aku wis shalat',
