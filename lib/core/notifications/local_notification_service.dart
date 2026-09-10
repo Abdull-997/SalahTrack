@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:salah_focus/core/notifications/notification_ids.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
@@ -13,6 +14,9 @@ class LocalNotificationService implements NotificationService {
     : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
 
   final FlutterLocalNotificationsPlugin _plugin;
+  static const MethodChannel _settingsChannel = MethodChannel(
+    'salah_focus/system_settings',
+  );
   final StreamController<String> _payloadController =
       StreamController<String>.broadcast();
   bool _initialized = false;
@@ -168,6 +172,24 @@ class LocalNotificationService implements NotificationService {
           AndroidFlutterLocalNotificationsPlugin
         >();
     return await android?.requestExactAlarmsPermission() ?? false;
+  }
+
+  @override
+  Future<void> openNotificationSettings() async {
+    if (Platform.isAndroid) {
+      await _settingsChannel.invokeMethod<void>('openNotificationSettings');
+      return;
+    }
+    await requestPermission();
+  }
+
+  @override
+  Future<void> openExactAlarmSettings() async {
+    if (Platform.isAndroid) {
+      await _settingsChannel.invokeMethod<void>('openExactAlarmSettings');
+      return;
+    }
+    await requestExactAlarmPermission();
   }
 
   @override

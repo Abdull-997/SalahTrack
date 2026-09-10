@@ -316,55 +316,58 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final bool accepted =
         await showDialog<bool>(
           context: context,
-      builder: (BuildContext context) => StatefulBuilder(
-        builder: (BuildContext context, StateSetter setDialogState) => AlertDialog(
-          title: Text(s.t('chooseCity')),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                TextField(
-                  controller: city,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: InputDecoration(labelText: s.t('city')),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: country,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: InputDecoration(labelText: s.t('country')),
-                ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: locationSuggestions
-                      .map(
-                        (LocationSuggestion suggestion) => ActionChip(
-                          label: Text(suggestion.label),
-                          onPressed: () => setDialogState(() {
-                            city.text = suggestion.city;
-                            country.text = suggestion.country;
-                          }),
+          builder: (BuildContext context) => StatefulBuilder(
+            builder: (BuildContext context, StateSetter setDialogState) =>
+                AlertDialog(
+                  title: Text(s.t('chooseCity')),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        TextField(
+                          controller: city,
+                          textCapitalization: TextCapitalization.words,
+                          decoration: InputDecoration(labelText: s.t('city')),
                         ),
-                      )
-                      .toList(),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: country,
+                          textCapitalization: TextCapitalization.words,
+                          decoration: InputDecoration(
+                            labelText: s.t('country'),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: locationSuggestions
+                              .map(
+                                (LocationSuggestion suggestion) => ActionChip(
+                                  label: Text(suggestion.label),
+                                  onPressed: () => setDialogState(() {
+                                    city.text = suggestion.city;
+                                    country.text = suggestion.country;
+                                  }),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: Text(s.t('cancel')),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: Text(s.t('save')),
+                    ),
+                  ],
                 ),
-              ],
-            ),
           ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(s.t('cancel')),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text(s.t('save')),
-            ),
-          ],
-        ),
-      ),
         ) ??
         false;
     final String cityValue = city.text.trim();
@@ -621,13 +624,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _requestNotifications() async => _run(() async {
     final service = ref.read(notificationServiceProvider);
     await service.initialize();
-    await service.requestPermission();
+    if (await service.notificationsAllowed()) {
+      await service.openNotificationSettings();
+      return;
+    }
+    if (!await service.requestPermission()) {
+      await service.openNotificationSettings();
+    }
   });
 
   Future<void> _requestExactAlarms() async => _run(() async {
     final service = ref.read(notificationServiceProvider);
     await service.initialize();
-    await service.requestExactAlarmPermission();
+    await service.openExactAlarmSettings();
   });
 
   Future<void> _savePrayerSettings(PrayerSettings settings) async {

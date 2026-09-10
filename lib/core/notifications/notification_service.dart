@@ -13,6 +13,12 @@ abstract interface class NotificationService {
 
   Future<bool> requestExactAlarmPermission();
 
+  /// Opens the operating system page where the user can change this later.
+  Future<void> openNotificationSettings();
+
+  /// Opens the operating system page for precise alarm permission.
+  Future<void> openExactAlarmSettings();
+
   Future<bool> canScheduleExactly();
 
   Future<void> schedulePrayer(

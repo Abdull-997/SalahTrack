@@ -98,7 +98,9 @@ class AppDatabase {
         if (previous.isNotEmpty) {
           final Map<String, Object?> old = previous.first;
           final String oldStatus = old['status']! as String;
-          if (oldStatus == 'prayed' || oldStatus == 'skipped') {
+          if (oldStatus == 'prayed' ||
+              oldStatus == 'skipped' ||
+              oldStatus == 'missed') {
             row = <String, Object?>{
               ...row,
               'status': oldStatus,

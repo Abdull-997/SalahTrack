@@ -7,6 +7,7 @@ import 'package:salah_focus/features/prayer_times/data/prayer_cache_key.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_state_machine.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_times_repository.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
@@ -154,6 +155,22 @@ class PrayerCoordinator {
         _stateMachine.confirm(prayer, _clock.nowUtc());
     await _repository.saveEntry(updated);
     await _notifications.cancelPrayer(updated);
+    return updated;
+  }
+
+  /// Corrects a recorded prayer without reviving any old reminders.
+  Future<PrayerEntry> correctHistoricalPrayer(
+    PrayerEntry prayer, {
+    required bool prayed,
+  }) async {
+    final PrayerEntry updated = prayer.copyWith(
+      status: prayed ? PrayerStatus.prayed : PrayerStatus.missed,
+      confirmedAtUtc: prayed ? _clock.nowUtc() : null,
+      clearConfirmedAt: !prayed,
+      clearSnoozedUntil: true,
+    );
+    await _repository.saveEntry(updated);
+    await _notifications.cancelPrayer(prayer);
     return updated;
   }
 

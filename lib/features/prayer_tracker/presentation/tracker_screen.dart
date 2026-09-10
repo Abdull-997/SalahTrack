@@ -168,7 +168,14 @@ class _TrackerContent extends StatelessWidget {
                 entries:
                     byDay[_iso(weekStart.add(Duration(days: i)))] ??
                     const <PrayerEntry>[],
-                compact: true,
+                compact: !_isCorrectableDate(
+                  weekStart.add(Duration(days: i)),
+                  now,
+                ),
+                editable: _isCorrectableDate(
+                  weekStart.add(Duration(days: i)),
+                  now,
+                ),
               ),
             ),
           const SizedBox(height: 18),
@@ -178,7 +185,11 @@ class _TrackerContent extends StatelessWidget {
                 ?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
-          _MonthGrid(month: DateTime(now.year, now.month), byDay: byDay),
+          _MonthGrid(
+            month: DateTime(now.year, now.month),
+            byDay: byDay,
+            localNow: now,
+          ),
         ],
       ),
     );
@@ -241,19 +252,21 @@ class _StatsCard extends StatelessWidget {
   }
 }
 
-class _DayCard extends StatelessWidget {
+class _DayCard extends ConsumerWidget {
   const _DayCard({
     required this.date,
     required this.entries,
     this.compact = false,
+    this.editable = false,
   });
 
   final String date;
   final List<PrayerEntry> entries;
   final bool compact;
+  final bool editable;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final DateTime parsed = DateTime.parse(date);
     final String locale = Localizations.localeOf(context).languageCode;
     final AppStrings s = AppStrings.of(context);
@@ -299,6 +312,29 @@ class _DayCard extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(child: Text(entry.type.localizedName(locale))),
                       Text(_statusLabel(context, entry.status)),
+                      if (editable) ...<Widget>[
+                        const SizedBox(width: 4),
+                        IconButton(
+                          tooltip: entry.status == PrayerStatus.prayed
+                              ? s.t('missed')
+                              : s.t('prayed'),
+                          icon: Icon(
+                            entry.status == PrayerStatus.prayed
+                                ? Icons.undo_rounded
+                                : Icons.check_circle_outline_rounded,
+                          ),
+                          onPressed: () async {
+                            await ref
+                                .read(prayerCoordinatorProvider)
+                                .correctHistoricalPrayer(
+                                  entry,
+                                  prayed:
+                                      entry.status != PrayerStatus.prayed,
+                                );
+                            ref.invalidate(trackerDataProvider);
+                          },
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -316,10 +352,15 @@ class _DayCard extends StatelessWidget {
 }
 
 class _MonthGrid extends StatelessWidget {
-  const _MonthGrid({required this.month, required this.byDay});
+  const _MonthGrid({
+    required this.month,
+    required this.byDay,
+    required this.localNow,
+  });
 
   final DateTime month;
   final Map<String, List<PrayerEntry>> byDay;
+  final DateTime localNow;
 
   @override
   Widget build(BuildContext context) {
@@ -352,15 +393,17 @@ class _MonthGrid extends StatelessWidget {
                   (PrayerEntry entry) => entry.status == PrayerStatus.prayed,
                 )
                 .length;
+            final DateTime date = DateTime(month.year, month.month, day);
+            final bool past = date.isBefore(
+              DateTime(localNow.year, localNow.month, localNow.day),
+            );
             return Semantics(
               label:
                   '${s.number(day)}, ${s.number(prayed)}/${s.number(5)} ${s.t('confirmedPrayers')}',
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: prayed == 5
-                      ? Theme.of(context).colorScheme.primaryContainer
-                      : Theme.of(context).colorScheme.surfaceContainerHighest,
+                  color: _calendarColor(context, prayed: prayed, isPast: past),
                 ),
                 child: Center(
                   child: Column(
@@ -428,6 +471,24 @@ String _statusLabel(BuildContext context, PrayerStatus status) {
     PrayerStatus.active => s.t('active'),
     PrayerStatus.upcoming => s.t('upcoming'),
   };
+}
+
+bool _isCorrectableDate(DateTime date, DateTime localNow) {
+  final DateTime day = DateTime(date.year, date.month, date.day);
+  final DateTime today = DateTime(localNow.year, localNow.month, localNow.day);
+  return day.isBefore(today) && !day.isBefore(today.subtract(const Duration(days: 3)));
+}
+
+Color _calendarColor(
+  BuildContext context, {
+  required int prayed,
+  required bool isPast,
+}) {
+  final ColorScheme scheme = Theme.of(context).colorScheme;
+  if (!isPast) return scheme.surfaceContainerHighest;
+  if (prayed == 0) return scheme.errorContainer;
+  if (prayed < 5) return Colors.amber.shade200;
+  return Colors.green.shade200;
 }
 
 String _iso(DateTime date) =>
