@@ -26,10 +26,19 @@ final trackerDataProvider = FutureProvider<TrackerData>((Ref ref) async {
   final String timezoneId = day?.timezoneId ?? prefs.location!.timezoneId;
   final DateTime localNow = TimezoneService.toLocal(nowUtc, timezoneId);
   final DateTime first = DateTime(localNow.year, localNow.month, 1);
+  // Include the previous two calendar days even across a month/year boundary.
+  final DateTime oldestEditable = DateTime(
+    localNow.year,
+    localNow.month,
+    localNow.day - 2,
+  );
+  final DateTime start = oldestEditable.isBefore(first)
+      ? oldestEditable
+      : first;
   final DateTime last = DateTime(localNow.year, localNow.month + 1, 0);
   final List<PrayerEntry> entries = await ref
       .watch(prayerCoordinatorProvider)
-      .entriesBetween(_iso(first), _iso(last));
+      .entriesBetween(_iso(start), _iso(last));
 
   return TrackerData(entries: entries, localNow: localNow);
 });
@@ -132,11 +141,6 @@ class _TrackerContent extends StatelessWidget {
         .where((PrayerEntry entry) => entry.status == PrayerStatus.prayed)
         .length;
     final double ratio = prayed / 5;
-    final DateTime weekStart = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    ).subtract(Duration(days: now.weekday - 1));
 
     return RefreshIndicator(
       onRefresh: onRefresh,
@@ -144,15 +148,13 @@ class _TrackerContent extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(18, 10, 18, 28),
         children: <Widget>[
-          _StatsCard(prayed: prayed, ratio: ratio),
-          const SizedBox(height: 22),
           Text(
             s.t('today'),
             style: Theme.of(context).textTheme.titleLarge
                 ?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
-          _DayCard(date: today, entries: todayEntries, isToday: true),
+          _StatsCard(prayed: prayed, ratio: ratio),
           const SizedBox(height: 24),
           Text(
             s.t('week'),
@@ -160,23 +162,19 @@ class _TrackerContent extends StatelessWidget {
                 ?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
-          for (int i = 0; i < 7; i++)
+          for (int i = 0; i < 3; i++)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: _DayCard(
-                date: _iso(weekStart.add(Duration(days: i))),
+                key: ValueKey<String>(
+                  'tracker-day-${_iso(DateTime(now.year, now.month, now.day - i))}',
+                ),
+                date: _iso(DateTime(now.year, now.month, now.day - i)),
                 entries:
-                    byDay[_iso(weekStart.add(Duration(days: i)))] ??
+                    byDay[_iso(DateTime(now.year, now.month, now.day - i))] ??
                     const <PrayerEntry>[],
-                compact: !_isCorrectableDate(
-                  weekStart.add(Duration(days: i)),
-                  now,
-                ),
-                editable: _isCorrectableDate(
-                  weekStart.add(Duration(days: i)),
-                  now,
-                ),
-                isToday: _iso(weekStart.add(Duration(days: i))) == today,
+                labelKey: const ['today', 'yesterday', 'dayBeforeYesterday'][i],
+                isToday: i == 0,
               ),
             ),
           const SizedBox(height: 18),
@@ -253,54 +251,116 @@ class _StatsCard extends StatelessWidget {
   }
 }
 
-class _DayCard extends ConsumerWidget {
+class _DayCard extends ConsumerStatefulWidget {
   const _DayCard({
+    super.key,
     required this.date,
     required this.entries,
-    this.compact = false,
-    this.editable = false,
+    required this.labelKey,
     this.isToday = false,
   });
 
   final String date;
   final List<PrayerEntry> entries;
-  final bool compact;
-  final bool editable;
+  final String labelKey;
   final bool isToday;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final DateTime parsed = DateTime.parse(date);
+  ConsumerState<_DayCard> createState() => _DayCardState();
+}
+
+class _DayCardState extends ConsumerState<_DayCard> {
+  bool _working = false;
+
+  Future<void> _changePrayer(PrayerEntry entry) async {
+    if (_working) return;
+    setState(() => _working = true);
+    try {
+      final bool prayed = entry.status != PrayerStatus.prayed;
+      final bool accepted =
+          await showDialog<bool>(
+            context: context,
+            builder: (BuildContext dialogContext) {
+              final AppStrings s = AppStrings.of(dialogContext);
+              return AlertDialog(
+                title: Text(
+                  s.t(
+                    prayed
+                        ? 'confirmPrayerRecordTitle'
+                        : 'undoPrayerRecordTitle',
+                  ),
+                ),
+                content: Text(
+                  s.t(
+                    prayed ? 'confirmPrayerRecordBody' : 'undoPrayerRecordBody',
+                    params: {
+                      'prayer': entry.type.localizedName(s.locale.languageCode),
+                      'date': s.date(
+                        DateTime.parse(entry.localDate),
+                        pattern: 'd MMMM y',
+                      ),
+                    },
+                  ),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(false),
+                    child: Text(s.t('cancel')),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(true),
+                    child: Text(s.t(prayed ? 'confirmPrayer' : 'yes')),
+                  ),
+                ],
+              );
+            },
+          ) ??
+          false;
+      if (!mounted || !accepted) return;
+      await ref
+          .read(prayerCoordinatorProvider)
+          .correctHistoricalPrayer(entry, prayed: prayed);
+      if (!mounted) return;
+      ref.invalidate(todayPrayerDayProvider);
+      ref.invalidate(trackerDataProvider);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(userErrorMessage(context, error))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _working = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final DateTime parsed = DateTime.parse(widget.date);
     final String locale = Localizations.localeOf(context).languageCode;
     final AppStrings s = AppStrings.of(context);
-    final int prayed = entries
+    final int prayed = widget.entries
         .where((PrayerEntry entry) => entry.status == PrayerStatus.prayed)
         .length;
-    final String title = s.date(
-      parsed,
-      pattern: compact ? 'EEE, d MMM.' : 'EEEE, d MMMM y',
-    );
+    final String title = s.date(parsed, pattern: 'EEEE, d MMMM y');
     final ColorScheme scheme = Theme.of(context).colorScheme;
 
     return Card(
       margin: EdgeInsets.zero,
-      color: isToday
+      color: widget.isToday
           ? Color.alphaBlend(
               scheme.primary.withValues(alpha: 0.08),
               scheme.surface,
             )
           : null,
-      shape: isToday
+      shape: widget.isToday
           ? RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24),
               side: BorderSide(color: scheme.primary, width: 1.5),
             )
           : null,
       child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: compact ? 13 : 15,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         child: Column(
           children: <Widget>[
             Row(
@@ -309,17 +369,16 @@ class _DayCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      if (isToday)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Text(
-                            s.t('today'),
-                            style: TextStyle(
-                              color: scheme.primary,
-                              fontWeight: FontWeight.w800,
-                            ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          s.t(widget.labelKey),
+                          style: TextStyle(
+                            color: scheme.primary,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
+                      ),
                       Text(
                         title,
                         style: TextStyle(
@@ -339,9 +398,9 @@ class _DayCard extends ConsumerWidget {
                 ),
               ],
             ),
-            if (!compact) ...<Widget>[
+            ...<Widget>[
               const SizedBox(height: 10),
-              for (final PrayerEntry entry in entries)
+              for (final PrayerEntry entry in widget.entries)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 5),
                   child: Row(
@@ -350,9 +409,10 @@ class _DayCard extends ConsumerWidget {
                       const SizedBox(width: 10),
                       Expanded(child: Text(entry.type.localizedName(locale))),
                       Text(_statusLabel(context, entry.status)),
-                      if (editable) ...<Widget>[
+                      ...<Widget>[
                         const SizedBox(width: 4),
                         IconButton(
+                          key: ValueKey<String>('correct-${entry.id}'),
                           tooltip: entry.status == PrayerStatus.prayed
                               ? s.t('missed')
                               : s.t('prayed'),
@@ -361,21 +421,15 @@ class _DayCard extends ConsumerWidget {
                                 ? Icons.undo_rounded
                                 : Icons.check_circle_outline_rounded,
                           ),
-                          onPressed: () async {
-                            await ref
-                                .read(prayerCoordinatorProvider)
-                                .correctHistoricalPrayer(
-                                  entry,
-                                  prayed: entry.status != PrayerStatus.prayed,
-                                );
-                            ref.invalidate(trackerDataProvider);
-                          },
+                          onPressed: _working
+                              ? null
+                              : () => _changePrayer(entry),
                         ),
                       ],
                     ],
                   ),
                 ),
-              if (entries.isEmpty)
+              if (widget.entries.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Text(AppStrings.of(context).t('noData')),
@@ -531,13 +585,6 @@ String _statusLabel(BuildContext context, PrayerStatus status) {
     PrayerStatus.active => s.t('active'),
     PrayerStatus.upcoming => s.t('upcoming'),
   };
-}
-
-bool _isCorrectableDate(DateTime date, DateTime localNow) {
-  final DateTime day = DateTime(date.year, date.month, date.day);
-  final DateTime today = DateTime(localNow.year, localNow.month, localNow.day);
-  return day.isBefore(today) &&
-      !day.isBefore(today.subtract(const Duration(days: 3)));
 }
 
 (Color, Color) _calendarColors(
