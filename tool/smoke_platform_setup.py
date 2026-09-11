@@ -34,6 +34,9 @@ with tempfile.TemporaryDirectory() as d:
     native_main_activity = r/'native/android/MainActivity.kt'
     generated_main_activity = r/'android/app/src/main/kotlin/com/salahfocus/salah_focus/MainActivity.kt'
     assert generated_main_activity.is_file() == native_main_activity.is_file()
+    assert native_main_activity.is_file(), 'System settings bridge must survive bootstrap'
+    assert generated_main_activity.read_bytes() == native_main_activity.read_bytes()
+    assert (src/'android/app/src/main/kotlin/com/salahfocus/salah_focus/MainActivity.kt').read_bytes() == native_main_activity.read_bytes()
 
     with (r/'ios/Runner/Info.plist').open('rb') as h:
         info=plistlib.load(h)

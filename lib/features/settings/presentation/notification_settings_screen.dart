@@ -55,9 +55,11 @@ class _NotificationSettingsScreenState
     });
     try {
       final NotificationService service = ref.read(notificationServiceProvider);
+      // Opening system settings must also work if notification setup fails.
+      await action?.call(service);
+      if (!mounted) return;
       await service.initialize();
       if (!mounted) return;
-      await action?.call(service);
       final bool allowed = widget.isExactAlarm
           ? await service.canScheduleExactly()
           : await service.notificationsAllowed();

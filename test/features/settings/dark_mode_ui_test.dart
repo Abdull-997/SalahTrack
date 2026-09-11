@@ -22,9 +22,13 @@ class _Permissions implements NotificationService {
   bool exactAllowed = false;
   int exactSettingsOpened = 0;
   bool fail = false;
+  bool failInitialization = false;
 
   @override
-  Future<void> initialize() async {}
+  Future<void> initialize() async {
+    if (failInitialization) throw StateError('Initialization unavailable');
+  }
+
   @override
   Future<bool> notificationsAllowed() async {
     if (fail) throw StateError('Unavailable');
@@ -76,6 +80,34 @@ double _contrast(Color foreground, Color background) {
 
 void main() {
   setUpAll(initializeDateFormatting);
+
+  for (final bool exact in [false, true]) {
+    testWidgets(
+      'system settings open after initialization fails (exact: $exact)',
+      (tester) async {
+        final service = _Permissions()..failInitialization = true;
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [notificationServiceProvider.overrideWithValue(service)],
+            child: _app(
+              exact
+                  ? const NotificationSettingsScreen.exactAlarms()
+                  : const NotificationSettingsScreen(),
+              AppTheme.dark(),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.widgetWithIcon(OutlinedButton, Icons.open_in_new_rounded),
+        );
+        await tester.pumpAndSettle();
+        expect(service.settingsOpened, exact ? 0 : 1);
+        expect(service.exactSettingsOpened, exact ? 1 : 0);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   for (final bool initiallyAllowed in [false, true]) {
     testWidgets('exact alarm settings stay dark (allowed: $initiallyAllowed)', (
