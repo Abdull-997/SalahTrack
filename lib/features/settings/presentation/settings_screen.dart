@@ -597,11 +597,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (mounted) ref.invalidate(todayPrayerDayProvider);
   }
 
-  Future<void> _requestExactAlarms() async => _run(() async {
-    final service = ref.read(notificationServiceProvider);
-    await service.initialize();
-    await service.openExactAlarmSettings();
-  });
+  Future<void> _requestExactAlarms() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => const NotificationSettingsScreen.exactAlarms(),
+      ),
+    );
+    if (mounted) ref.invalidate(todayPrayerDayProvider);
+  }
 
   Future<void> _savePrayerSettings(PrayerSettings settings) async {
     await ref

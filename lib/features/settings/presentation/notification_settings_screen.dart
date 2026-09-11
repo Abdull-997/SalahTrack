@@ -8,7 +8,12 @@ import 'package:salah_focus/shared/errors/user_error_message.dart';
 /// Keeps permission status in the app theme. Operating-system settings are
 /// opened only through the explicitly labelled external-settings button.
 class NotificationSettingsScreen extends ConsumerStatefulWidget {
-  const NotificationSettingsScreen({super.key});
+  const NotificationSettingsScreen({super.key}) : isExactAlarm = false;
+
+  const NotificationSettingsScreen.exactAlarms({super.key})
+    : isExactAlarm = true;
+
+  final bool isExactAlarm;
 
   @override
   ConsumerState<NotificationSettingsScreen> createState() =>
@@ -53,7 +58,9 @@ class _NotificationSettingsScreenState
       await service.initialize();
       if (!mounted) return;
       await action?.call(service);
-      final bool allowed = await service.notificationsAllowed();
+      final bool allowed = widget.isExactAlarm
+          ? await service.canScheduleExactly()
+          : await service.notificationsAllowed();
       if (mounted) setState(() => _allowed = allowed);
     } catch (error) {
       if (mounted) setState(() => _error = error);
@@ -66,8 +73,11 @@ class _NotificationSettingsScreenState
   Widget build(BuildContext context) {
     final AppStrings s = AppStrings.of(context);
     final ColorScheme scheme = Theme.of(context).colorScheme;
+    final String permissionKey = widget.isExactAlarm
+        ? 'exactAlarmPermission'
+        : 'notificationPermission';
     return Scaffold(
-      appBar: AppBar(title: Text(s.t('notificationPermission'))),
+      appBar: AppBar(title: Text(s.t(permissionKey))),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(20),
@@ -79,7 +89,9 @@ class _NotificationSettingsScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Icon(
-                      _allowed == true
+                      widget.isExactAlarm
+                          ? Icons.alarm_rounded
+                          : _allowed == true
                           ? Icons.notifications_active_outlined
                           : Icons.notifications_none_rounded,
                       size: 40,
@@ -91,9 +103,13 @@ class _NotificationSettingsScreenState
                         liveRegion: true,
                         child: Text(
                           s.t(
-                            _allowed!
-                                ? 'notificationsEnabled'
-                                : 'notificationsDisabled',
+                            widget.isExactAlarm
+                                ? (_allowed!
+                                      ? 'exactAlarmsEnabled'
+                                      : 'exactAlarmsDisabled')
+                                : (_allowed!
+                                      ? 'notificationsEnabled'
+                                      : 'notificationsDisabled'),
                           ),
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(
@@ -104,7 +120,11 @@ class _NotificationSettingsScreenState
                       ),
                     const SizedBox(height: 12),
                     Text(
-                      s.t('notificationPermissionHelp'),
+                      s.t(
+                        widget.isExactAlarm
+                            ? 'exactAlarmPermissionHelp'
+                            : 'notificationPermissionHelp',
+                      ),
                       style: TextStyle(color: scheme.onSurfaceVariant),
                     ),
                     if (_working)
@@ -124,7 +144,7 @@ class _NotificationSettingsScreenState
                         label: Text(s.t('retry')),
                       ),
                     ],
-                    if (_allowed == false) ...<Widget>[
+                    if (_allowed == false && !widget.isExactAlarm) ...<Widget>[
                       const SizedBox(height: 24),
                       FilledButton.icon(
                         onPressed: _working
@@ -147,7 +167,9 @@ class _NotificationSettingsScreenState
               onPressed: _working
                   ? null
                   : () => _update(
-                      action: (service) => service.openNotificationSettings(),
+                      action: (service) => widget.isExactAlarm
+                          ? service.openExactAlarmSettings()
+                          : service.openNotificationSettings(),
                     ),
               icon: const Icon(Icons.open_in_new_rounded),
               label: Text(s.t('openSystemSettings')),

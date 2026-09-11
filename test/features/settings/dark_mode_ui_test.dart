@@ -19,6 +19,8 @@ class _Permissions implements NotificationService {
   bool grantOnRequest = false;
   int requests = 0;
   int settingsOpened = 0;
+  bool exactAllowed = false;
+  int exactSettingsOpened = 0;
   bool fail = false;
 
   @override
@@ -39,6 +41,14 @@ class _Permissions implements NotificationService {
   @override
   Future<void> openNotificationSettings() async {
     settingsOpened++;
+  }
+
+  @override
+  Future<bool> canScheduleExactly() async => exactAllowed;
+
+  @override
+  Future<void> openExactAlarmSettings() async {
+    exactSettingsOpened++;
   }
 
   @override
@@ -66,6 +76,71 @@ double _contrast(Color foreground, Color background) {
 
 void main() {
   setUpAll(initializeDateFormatting);
+
+  for (final bool initiallyAllowed in [false, true]) {
+    testWidgets('exact alarm settings stay dark (allowed: $initiallyAllowed)', (
+      tester,
+    ) async {
+      final _Permissions service = _Permissions()
+        ..exactAllowed = initiallyAllowed
+        ..allowed = !initiallyAllowed;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [notificationServiceProvider.overrideWithValue(service)],
+          child: _app(const SettingsScreen(), AppTheme.dark()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Präzise Erinnerungen erlauben').hitTestable(),
+        200,
+      );
+      await tester.tap(find.text('Präzise Erinnerungen erlauben'));
+      await tester.pumpAndSettle();
+      final Finder page = find.byType(NotificationSettingsScreen);
+      expect(
+        tester.widget<NotificationSettingsScreen>(page).isExactAlarm,
+        isTrue,
+      );
+      expect(Theme.of(tester.element(page)).brightness, Brightness.dark);
+      expect(
+        Theme.of(tester.element(page)).scaffoldBackgroundColor
+            .computeLuminance(),
+        lessThan(0.1),
+      );
+      expect(
+        find.text(
+          initiallyAllowed
+              ? 'Präzise Erinnerungen sind aktiviert'
+              : 'Präzise Erinnerungen sind deaktiviert',
+        ),
+        findsOneWidget,
+      );
+      expect(service.exactSettingsOpened, 0);
+      expect(service.settingsOpened, 0);
+      expect(service.requests, 0);
+
+      await tester.tap(find.text('Systemeinstellungen öffnen'));
+      await tester.pumpAndSettle();
+      expect(service.exactSettingsOpened, 1);
+      expect(service.settingsOpened, 0);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      service.exactAllowed = !initiallyAllowed;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(
+        find.text(
+          initiallyAllowed
+              ? 'Präzise Erinnerungen sind deaktiviert'
+              : 'Präzise Erinnerungen sind aktiviert',
+        ),
+        findsOneWidget,
+      );
+      expect(Theme.of(tester.element(page)).brightness, Brightness.dark);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets(
     'notification settings stay dark and open Android only explicitly',

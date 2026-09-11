@@ -80,6 +80,9 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'openSystemSettings': 'Sistem ayarlarını aç',
     'systemSettingsAppearance': 'Sistem ayarları uygulamanın dışında açılır ve cihazının görünümünü kullanır.',
     'exactAlarmPermission': 'Tam zamanında hatırlatmalara izin ver',
+    'exactAlarmsEnabled': 'Tam zamanında hatırlatmalar açık',
+    'exactAlarmsDisabled': 'Tam zamanında hatırlatmalar kapalı',
+    'exactAlarmPermissionHelp': 'Bu izin, namaz vaktinde tam zamanında hatırlatma yapılmasını sağlar. Sistem ayarlarındaki “Alarmlar ve hatırlatıcılar” bölümünden değiştirebilirsin.',
     'qiblaDirection': 'Kıble yönü',
     'calibrate':
         'Pusula doğru göstermiyorsa telefonunu sekiz çizer gibi hareket ettir.',
@@ -184,6 +187,9 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'openSystemSettings': 'Ouvrir les paramètres système',
     'systemSettingsAppearance': 'Les paramètres système s’ouvrent en dehors de l’application et utilisent l’apparence de votre appareil.',
     'exactAlarmPermission': 'Autoriser les rappels à l’heure exacte',
+    'exactAlarmsEnabled': 'Les rappels à l’heure exacte sont activés',
+    'exactAlarmsDisabled': 'Les rappels à l’heure exacte sont désactivés',
+    'exactAlarmPermissionHelp': 'Cette autorisation permet de recevoir les rappels à l’heure exacte de la prière. Vous pouvez la modifier dans « Alarmes et rappels » dans les paramètres système.',
     'qiblaDirection': 'Direction de la qibla',
     'calibrate': 'Décrivez un huit avec votre téléphone si la boussole semble imprécise.',
     'noCompass': 'Aucun capteur de boussole disponible. La direction de la qibla est indiquée en degrés.',
@@ -286,6 +292,10 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'openSystemSettings': 'Abrir ajustes del sistema',
     'systemSettingsAppearance': 'Los ajustes del sistema se abren fuera de la aplicación y usan la apariencia de tu dispositivo.',
     'exactAlarmPermission': 'Permitir recordatorios a la hora exacta',
+    'exactAlarmsEnabled': 'Los recordatorios a la hora exacta están activados',
+    'exactAlarmsDisabled':
+        'Los recordatorios a la hora exacta están desactivados',
+    'exactAlarmPermissionHelp': 'Este permiso permite recibir recordatorios a la hora exacta de la oración. Puedes cambiarlo en «Alarmas y recordatorios» en los ajustes del sistema.',
     'qiblaDirection': 'Dirección de la alquibla',
     'calibrate':
         'Mueve el teléfono dibujando un ocho si la brújula parece imprecisa.',
