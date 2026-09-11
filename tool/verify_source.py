@@ -73,30 +73,25 @@ def check_local_imports() -> None:
 
 
 def check_localizations() -> None:
-    text = (ROOT / "lib/app/localization/app_strings.dart").read_text(encoding="utf-8")
-    # Parse the three top-level locale map bodies using their explicit markers.
+    # Catalogs can live in separate files. Match each map at its own indentation
+    # so the following language and date-formatting maps are not included.
     blocks: dict[str, str] = {}
-    for code, next_code in (("de", "en"), ("en", "ar")):
-        start = text.find(f"    '{code}': {{")
-        end = text.find(f"    '{next_code}': {{", start + 1)
-        if start < 0 or end < 0:
-            fail(f"cannot locate localization block {code}")
-        blocks[code] = text[start:end]
-    start = text.find("    'ar': {")
-    end = text.find("};\n\nclass", start)
-    if start < 0 or end < 0:
-        # Fallback to the end of the map when class formatting differs.
-        end = text.rfind("};")
-    blocks["ar"] = text[start:end]
-
-    key_re = re.compile(r"^      '([^']+)'\s*:\s*", re.MULTILINE)
+    block_re = re.compile(r"^([ ]{2,4})'([a-z]{2})': \{\n(.*?)^\1\},", re.MULTILINE | re.DOTALL)
+    for name in ("app_strings.dart", "additional_translations.dart"):
+        text = (ROOT / "lib/app/localization" / name).read_text(encoding="utf-8")
+        for match in block_re.finditer(text):
+            blocks[match.group(2)] = match.group(3)
+    languages = (ROOT / "lib/app/localization/app_language.dart").read_text(encoding="utf-8")
+    supported = set(re.findall(r"Locale\('([a-z]{2})'\)", languages))
+    if not supported or not supported.issubset(blocks):
+        fail(f"missing localization catalogs: {sorted(supported - blocks.keys())}")
+    key_re = re.compile(r"^\s+'([^']+)'\s*:\s*", re.MULTILINE)
     keys = {code: set(key_re.findall(body)) for code, body in blocks.items()}
-    reference = keys["de"]
-    for code in ("en", "ar"):
-        if keys[code] != reference:
-            missing = sorted(reference - keys[code])
-            extra = sorted(keys[code] - reference)
-            fail(f"localization key mismatch for {code}; missing={missing}, extra={extra}")
+    reference = keys["en"]
+    for code in supported:
+        missing = sorted(reference - keys[code])
+        if missing:
+            fail(f"localization keys missing for {code}: {missing}")
 
 
 def check_no_placeholders() -> None:

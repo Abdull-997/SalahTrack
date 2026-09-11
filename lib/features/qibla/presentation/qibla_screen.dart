@@ -40,7 +40,11 @@ class QiblaScreen extends ConsumerWidget {
 }
 
 class _QiblaCompass extends StatelessWidget {
-  const _QiblaCompass({required this.latitude, required this.longitude, required this.locationLabel});
+  const _QiblaCompass({
+    required this.latitude,
+    required this.longitude,
+    required this.locationLabel,
+  });
 
   final double latitude;
   final double longitude;
@@ -49,26 +53,46 @@ class _QiblaCompass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppStrings s = AppStrings.of(context);
-    final double bearing = QiblaCalculator.bearing(latitude: latitude, longitude: longitude);
+    final double bearing = QiblaCalculator.bearing(
+      latitude: latitude,
+      longitude: longitude,
+    );
     final Stream<CompassEvent>? events = FlutterCompass.events;
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
       children: <Widget>[
-        Text(s.t('qiblaDirection'), textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
+        Text(
+          s.t('qiblaDirection'),
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineSmall
+              ?.copyWith(fontWeight: FontWeight.w900),
+        ),
         const SizedBox(height: 6),
-        Text(locationLabel, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+        Text(
+          locationLabel,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
         const SizedBox(height: 28),
         if (events == null)
           _BearingOnly(bearing: bearing)
         else
           StreamBuilder<CompassEvent>(
             stream: events,
-            builder: (BuildContext context, AsyncSnapshot<CompassEvent> snapshot) {
-              final double? heading = snapshot.data?.heading;
-              if (heading == null) return _BearingOnly(bearing: bearing);
-              final double relative = QiblaCalculator.relativeAngle(qiblaBearing: bearing, heading: heading);
-              return _CompassFace(bearing: bearing, heading: heading, relative: relative);
-            },
+            builder:
+                (BuildContext context, AsyncSnapshot<CompassEvent> snapshot) {
+                  final double? heading = snapshot.data?.heading;
+                  if (heading == null) return _BearingOnly(bearing: bearing);
+                  final double relative = QiblaCalculator.relativeAngle(
+                    qiblaBearing: bearing,
+                    heading: heading,
+                  );
+                  return _CompassFace(
+                    bearing: bearing,
+                    heading: heading,
+                    relative: relative,
+                  );
+                },
           ),
         const SizedBox(height: 28),
         Card(
@@ -90,51 +114,100 @@ class _QiblaCompass extends StatelessWidget {
 }
 
 class _CompassFace extends StatelessWidget {
-  const _CompassFace({required this.bearing, required this.heading, required this.relative});
+  const _CompassFace({
+    required this.bearing,
+    required this.heading,
+    required this.relative,
+  });
   final double bearing;
   final double heading;
   final double relative;
 
   @override
   Widget build(BuildContext context) => Column(
-        children: <Widget>[
-          Semantics(
-            label: 'Qibla ${bearing.round()} degrees',
-            child: Container(
-              width: 290,
-              height: 290,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant, width: 2),
-                color: Theme.of(context).colorScheme.surfaceContainerLow,
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: <Widget>[
-                  const Positioned(top: 16, child: Text('N', style: TextStyle(fontWeight: FontWeight.w900))),
-                  const Positioned(bottom: 16, child: Text('S', style: TextStyle(fontWeight: FontWeight.w900))),
-                  const Positioned(left: 16, child: Text('W', style: TextStyle(fontWeight: FontWeight.w900))),
-                  const Positioned(right: 16, child: Text('E', style: TextStyle(fontWeight: FontWeight.w900))),
-                  Transform.rotate(
-                    angle: relative * math.pi / 180,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Icon(Icons.navigation_rounded, size: 105, color: Theme.of(context).colorScheme.primary),
-                        const Text('🕋', style: TextStyle(fontSize: 32)),
-                      ],
-                    ),
-                  ),
-                  Container(width: 12, height: 12, decoration: BoxDecoration(shape: BoxShape.circle, color: Theme.of(context).colorScheme.onSurface)),
-                ],
-              ),
+    children: <Widget>[
+      Semantics(
+        label: 'Qibla ${bearing.round()} degrees',
+        child: Container(
+          width: 290,
+          height: 290,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant,
+              width: 2,
             ),
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
           ),
-          const SizedBox(height: 18),
-          Text('${bearing.toStringAsFixed(1)}°', style: Theme.of(context).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w900)),
-          Text('${AppStrings.of(context).t('heading')} ${heading.toStringAsFixed(0)}°', style: Theme.of(context).textTheme.bodyMedium),
-        ],
-      );
+          child: Stack(
+            alignment: Alignment.center,
+            children: <Widget>[
+              Positioned(
+                top: 16,
+                child: Text(
+                  AppStrings.of(context).compassDirection('N'),
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+              ),
+              Positioned(
+                bottom: 16,
+                child: Text(
+                  AppStrings.of(context).compassDirection('S'),
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+              ),
+              Positioned(
+                left: 16,
+                child: Text(
+                  AppStrings.of(context).compassDirection('W'),
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+              ),
+              Positioned(
+                right: 16,
+                child: Text(
+                  AppStrings.of(context).compassDirection('E'),
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+              ),
+              Transform.rotate(
+                angle: relative * math.pi / 180,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Icon(
+                      Icons.navigation_rounded,
+                      size: 105,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const Text('🕋', style: TextStyle(fontSize: 32)),
+                  ],
+                ),
+              ),
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      const SizedBox(height: 18),
+      Text(
+        '${AppStrings.of(context).number(bearing)}°',
+        style: Theme.of(context).textTheme.displaySmall
+            ?.copyWith(fontWeight: FontWeight.w900),
+      ),
+      Text(
+        '${AppStrings.of(context).t('heading')} ${AppStrings.of(context).number(heading)}°',
+        style: Theme.of(context).textTheme.bodyMedium,
+      ),
+    ],
+  );
 }
 
 class _BearingOnly extends StatelessWidget {
@@ -155,11 +228,19 @@ class _BearingOnly extends StatelessWidget {
           ),
           child: Transform.rotate(
             angle: bearing * math.pi / 180,
-            child: Icon(Icons.navigation_rounded, size: 112, color: Theme.of(context).colorScheme.onPrimaryContainer),
+            child: Icon(
+              Icons.navigation_rounded,
+              size: 112,
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
           ),
         ),
         const SizedBox(height: 18),
-        Text('${bearing.toStringAsFixed(1)}°', style: Theme.of(context).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w900)),
+        Text(
+          '${s.number(bearing)}°',
+          style: Theme.of(context).textTheme.displaySmall
+              ?.copyWith(fontWeight: FontWeight.w900),
+        ),
         const SizedBox(height: 8),
         Text(s.t('noCompass'), textAlign: TextAlign.center),
       ],

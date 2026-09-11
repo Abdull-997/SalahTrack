@@ -1,0 +1,2 @@
+CFBundleDisplayName = "Namazım";
+NSLocationWhenInUseUsageDescription = "Namazım, yerel namaz vakitlerini ve kıble yönünü hesaplamak için konumunuzu kullanır.";

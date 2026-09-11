@@ -31,6 +31,7 @@ class PrayerSettings {
     'bn': 'আমি নামাজ পড়েছি',
     'fa': 'من نماز خوانده‌ام',
     'fr': "J'ai prié",
+    'es': 'He rezado',
     'ha': 'Na yi sallah',
     'id': 'Saya telah salat',
     'jv': 'Aku wis shalat',
@@ -123,8 +124,7 @@ class PrayerSettings {
     final int rawSnooze = (json['snoozeMinutes'] as num?)?.toInt() ?? 20;
     final int? rawMaxSnoozes = (json['maxSnoozes'] as num?)?.toInt();
     final String rawConfirmation =
-        ((json['confirmationText'] as String?) ?? 'Ich habe gebetet')
-            .trim();
+        ((json['confirmationText'] as String?) ?? 'Ich habe gebetet').trim();
     return PrayerSettings(
       calculationMethodId: <int>{1, 2, 3, 4, 5, 13}.contains(rawMethod)
           ? rawMethod

@@ -9,38 +9,42 @@ class LocationServiceImpl implements LocationService {
   Stream<UserLocation> automaticLocationUpdates({
     required String deviceTimezoneId,
     required String languageCode,
-  }) => Geolocator.getPositionStream(
-    locationSettings: const LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 1000,
-    ),
-  ).asyncMap((Position position) async {
-    String city = '';
-    String country = '';
-    try {
-      await setLocaleIdentifier(_localeIdentifier(languageCode));
-      final List<Placemark> places = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-      if (places.isNotEmpty) {
-        final Placemark place = places.first;
-        city = place.locality ?? place.subAdministrativeArea ??
-            place.administrativeArea ?? '';
-        country = place.country ?? '';
-      }
-    } on Object {
-      // Keep coordinates even when reverse geocoding is unavailable.
-    }
-    return UserLocation(
-      latitude: position.latitude,
-      longitude: position.longitude,
-      city: city,
-      country: country,
-      timezoneId: deviceTimezoneId,
-      isAutomatic: true,
-    );
-  });
+  }) =>
+      Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 1000,
+        ),
+      ).asyncMap((Position position) async {
+        String city = '';
+        String country = '';
+        try {
+          await setLocaleIdentifier(_localeIdentifier(languageCode));
+          final List<Placemark> places = await placemarkFromCoordinates(
+            position.latitude,
+            position.longitude,
+          );
+          if (places.isNotEmpty) {
+            final Placemark place = places.first;
+            city =
+                place.locality ??
+                place.subAdministrativeArea ??
+                place.administrativeArea ??
+                '';
+            country = place.country ?? '';
+          }
+        } on Object {
+          // Keep coordinates even when reverse geocoding is unavailable.
+        }
+        return UserLocation(
+          latitude: position.latitude,
+          longitude: position.longitude,
+          city: city,
+          country: country,
+          timezoneId: deviceTimezoneId,
+          isAutomatic: true,
+        );
+      });
   @override
   Future<UserLocation> currentLocation({
     required String deviceTimezoneId,
@@ -173,6 +177,7 @@ class LocationServiceImpl implements LocationService {
     'de' => 'de_DE',
     'fa' => 'fa_IR',
     'fr' => 'fr_FR',
+    'es' => 'es_ES',
     'ha' => 'ha_NG',
     'id' => 'id_ID',
     'jv' => 'jv_ID',

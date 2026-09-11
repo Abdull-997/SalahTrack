@@ -6,6 +6,17 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>ar</string>
+		<string>de</string>
+		<string>en</string>
+		<string>es</string>
+		<string>fr</string>
+		<string>ps</string>
+		<string>tr</string>
+		<string>ur</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>SalahFocus</string>
 	<key>CFBundleExecutable</key>

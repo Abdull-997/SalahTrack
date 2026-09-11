@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
+import 'package:salah_focus/app/localization/additional_translations.dart';
 
 class AppStrings {
   AppStrings(this.locale);
@@ -17,6 +18,7 @@ class AppStrings {
   static const List<Locale> supportedLocales = supportedAppLocales;
 
   static const Map<String, Map<String, String>> _values = {
+    ...additionalTranslations,
     'de': {
       'appName': 'Salaty',
       'tagline': 'Weniger Ablenkung. Mehr Salah.',
@@ -44,6 +46,7 @@ class AppStrings {
       'continue': 'Weiter',
       'back': 'Zurück',
       'prayerTimes': 'Gebetszeiten',
+      'prayerReminders': 'Gebetserinnerungen',
       'timesQuestion':
           'Stimmen diese Zeiten ungefähr mit deiner Moschee überein?',
       'yes': 'Ja',
@@ -136,6 +139,7 @@ class AppStrings {
       'continue': 'Continue',
       'back': 'Back',
       'prayerTimes': 'Prayer times',
+      'prayerReminders': 'Prayer reminders',
       'timesQuestion': 'Do these times roughly match your local mosque?',
       'yes': 'Yes',
       'adjust': 'Adjust',
@@ -230,6 +234,7 @@ class AppStrings {
       'continue': 'متابعة',
       'back': 'رجوع',
       'prayerTimes': 'مواقيت الصلاة',
+      'prayerReminders': 'تذكيرات الصلاة',
       'timesQuestion': 'هل تتوافق هذه الأوقات تقريبًا مع مسجدك؟',
       'yes': 'نعم',
       'adjust': 'تعديل',
@@ -321,6 +326,7 @@ class AppStrings {
       'continue': 'جاری رکھیں',
       'back': 'واپس',
       'prayerTimes': 'نماز کے اوقات',
+      'prayerReminders': 'نماز کی یاد دہانیاں',
       'timesQuestion': 'کیا یہ اوقات تقریباً آپ کی مقامی مسجد سے ملتے ہیں؟',
       'yes': 'ہاں',
       'adjust': 'تبدیل کریں',
@@ -416,6 +422,7 @@ class AppStrings {
       'continue': 'دوام ورکړئ',
       'back': 'بېرته',
       'prayerTimes': 'د لمانځه وختونه',
+      'prayerReminders': 'د لمانځه یادونې',
       'timesQuestion': 'ایا دا وختونه نږدې ستاسو له جومات سره سمون لري؟',
       'yes': 'هو',
       'adjust': 'سمول',
@@ -485,19 +492,37 @@ class AppStrings {
     },
   };
 
+  /// Exposes the actual catalogs so tests can detect unintended fallbacks.
+  @visibleForTesting
+  static Map<String, Map<String, String>> get translations => _values;
+
   String t(
     String key, {
     Map<String, String> params = const <String, String>{},
   }) {
     if (key == 'appName') {
       return const <String, String>{
-        'de': 'Mein Gebet', 'en': 'My Prayer', 'ar': 'صلاتي',
-        'bn': 'আমার নামাজ', 'fa': 'نماز من', 'fr': 'Ma prière',
-        'ha': "Addu'ata", 'id': 'Salatku', 'jv': 'Shalatku',
-        'ms': 'Solatku', 'nl': 'Mijn gebed', 'ps': 'زما لمونځ',
-        'ru': 'Моя молитва', 'so': 'Salaaddayda', 'sw': 'Swala yangu',
-        'ce': 'Сан ламаз', 'tr': 'Namazım', 'ur': 'میری نماز',
-      }[locale.languageCode] ?? 'My Prayer';
+            'de': 'Mein Gebet',
+            'en': 'My Prayer',
+            'ar': 'صلاتي',
+            'bn': 'আমার নামাজ',
+            'fa': 'نماز من',
+            'fr': 'Ma prière',
+            'ha': "Addu'ata",
+            'id': 'Salatku',
+            'jv': 'Shalatku',
+            'ms': 'Solatku',
+            'nl': 'Mijn gebed',
+            'ps': 'زما لمونځ',
+            'ru': 'Моя молитва',
+            'so': 'Salaaddayda',
+            'sw': 'Swala yangu',
+            'ce': 'Сан ламаз',
+            'tr': 'Namazım',
+            'ur': 'میری نماز',
+            'es': 'Mi oración',
+          }[locale.languageCode] ??
+          'My Prayer';
     }
     String value =
         _values[locale.languageCode]?[key] ?? _values['en']?[key] ?? key;
@@ -565,7 +590,14 @@ class AppStrings {
       _localizeDigits(DateFormat.Hm(locale.languageCode).format(value));
 
   String hijriDate(String value) {
-    if (!const <String>{'ar', 'ur', 'ps'}.contains(locale.languageCode)) {
+    if (!const <String>{
+      'ar',
+      'ur',
+      'ps',
+      'tr',
+      'fr',
+      'es',
+    }.contains(locale.languageCode)) {
       return _localizeDigits(value);
     }
 
@@ -583,24 +615,98 @@ class AppStrings {
       'Jumada al-Awwal': 'جمادى الأولى',
       'Jumada al-awwal': 'جمادى الأولى',
       'Jumada al-ula': 'جمادى الأولى',
+      'Jumādá al-ūlá': 'جمادى الأولى',
       'Jumada al-Thani': 'جمادى الآخرة',
       'Jumada al-thani': 'جمادى الآخرة',
       'Jumada al-akhirah': 'جمادى الآخرة',
+      'Jumādá al-ākhirah': 'جمادى الآخرة',
       'Rajab': 'رجب',
       'Shaban': 'شعبان',
+      'Shaʿbān': 'شعبان',
       'Ramadan': 'رمضان',
+      'Ramaḍān': 'رمضان',
       'Shawwal': 'شوال',
+      'Shawwāl': 'شوال',
       'Dhul Qadah': 'ذو القعدة',
       'Dhu al-Qidah': 'ذو القعدة',
+      'Dhū al-Qaʿdah': 'ذو القعدة',
       'Dhul Hijjah': 'ذو الحجة',
       'Dhu al-Hijjah': 'ذو الحجة',
+      'Dhū al-Ḥijjah': 'ذو الحجة',
     };
 
+    const Map<String, List<String>> monthNames = {
+      'tr': [
+        'Muharrem',
+        'Safer',
+        'Rebiülevvel',
+        'Rebiülahir',
+        'Cemaziyelevvel',
+        'Cemaziyelahir',
+        'Recep',
+        'Şaban',
+        'Ramazan',
+        'Şevval',
+        'Zilkade',
+        'Zilhicce',
+      ],
+      'fr': [
+        'Mouharram',
+        'Safar',
+        'Rabia al awal',
+        'Rabia ath-thani',
+        'Joumada al oula',
+        'Joumada ath-thania',
+        'Rajab',
+        'Chaabane',
+        'Ramadan',
+        'Chawwal',
+        'Dhou al qi`da',
+        'Dhou al hijja',
+      ],
+      'es': [
+        'Muharram',
+        'Safar',
+        'Rabi al-awwal',
+        'Rabi al-thani',
+        'Yumada al-ula',
+        'Yumada al-ajira',
+        'Rayab',
+        'Shaabán',
+        'Ramadán',
+        'Shawwal',
+        'Dhu al-qada',
+        'Dhu al-hiyya',
+      ],
+    };
+    final List<String> sourceMonths = arabicMonths.values.toSet().toList();
+    final List<String>? targetMonths = monthNames[locale.languageCode];
     String localized = value;
     for (final MapEntry<String, String> entry in arabicMonths.entries) {
-      localized = localized.replaceAll(entry.key, entry.value);
+      final String name = targetMonths == null
+          ? entry.value
+          : targetMonths[sourceMonths.indexOf(entry.value)];
+      localized = localized.replaceAll(entry.key, name);
     }
     return _localizeDigits(localized);
+  }
+
+  /// Physical compass positions are independent of the interface direction.
+  String compassDirection(String direction) {
+    const Map<String, List<String>> labels = {
+      'de': ['N', 'S', 'W', 'O'],
+      'en': ['N', 'S', 'W', 'E'],
+      'tr': ['K', 'G', 'B', 'D'],
+      'fr': ['N', 'S', 'O', 'E'],
+      'es': ['N', 'S', 'O', 'E'],
+      'ar': ['ش', 'ج', 'غ', 'ق'],
+      'ur': ['ش', 'ج', 'مغ', 'مش'],
+      'ps': ['ش', 'ج', 'ل', 'خ'],
+    };
+    final int index = const ['N', 'S', 'W', 'E'].indexOf(direction);
+    return index < 0
+        ? direction
+        : (labels[locale.languageCode] ?? labels['en']!)[index];
   }
 
   String _localizeDigits(String value) {

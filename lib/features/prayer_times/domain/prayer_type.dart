@@ -36,6 +36,20 @@ enum PrayerType {
         PrayerType.maghrib: 'Akşam',
         PrayerType.isha: 'Yatsı',
       },
+      'fr': {
+        PrayerType.fajr: 'Fajr',
+        PrayerType.dhuhr: 'Dhohr',
+        PrayerType.asr: 'Asr',
+        PrayerType.maghrib: 'Maghreb',
+        PrayerType.isha: 'Icha',
+      },
+      'es': {
+        PrayerType.fajr: 'Fayr',
+        PrayerType.dhuhr: 'Dhuhr',
+        PrayerType.asr: 'Asr',
+        PrayerType.maghrib: 'Magreb',
+        PrayerType.isha: 'Isha',
+      },
       'ar': {
         PrayerType.fajr: 'الفجر',
         PrayerType.dhuhr: 'الظهر',

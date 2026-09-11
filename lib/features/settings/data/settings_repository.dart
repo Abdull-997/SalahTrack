@@ -80,16 +80,22 @@ class SettingsRepository {
 
     final String? savedLocale = prefs.getString(_localeKey);
     final String storedLocale = savedLocale ?? _systemLocaleCode();
+    final String localeCode =
+        appLanguages.any(
+          (AppLanguage language) => language.code == storedLocale,
+        )
+        ? storedLocale
+        : 'de';
+    if (prayerSettings.usesDefaultConfirmationText) {
+      prayerSettings = prayerSettings.copyWith(
+        confirmationText: PrayerSettings.defaultConfirmationText(localeCode),
+      );
+    }
     final String storedTheme = prefs.getString(_themeKey) ?? 'system';
     return AppPreferences(
       prayerSettings: prayerSettings,
       location: location,
-      localeCode: <String>{
-        ...appLanguages.map((AppLanguage language) => language.code),
-        'ms',
-      }.contains(storedLocale)
-          ? storedLocale
-          : 'de',
+      localeCode: localeCode,
       themeMode: <String>{'system', 'light', 'dark'}.contains(storedTheme)
           ? storedTheme
           : 'system',
@@ -124,10 +130,9 @@ class SettingsRepository {
 
   String _systemLocaleCode() {
     final String languageCode = PlatformDispatcher.instance.locale.languageCode;
-    return <String>{
-      ...appLanguages.map((AppLanguage language) => language.code),
-      'ms',
-    }.contains(languageCode)
+    return appLanguages
+            .map((AppLanguage language) => language.code)
+            .contains(languageCode)
         ? languageCode
         : 'en';
   }

@@ -149,7 +149,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   title: Text(s.t('maxSnoozes')),
                   subtitle: Text(
-                    settings.maxSnoozes?.toString() ?? s.t('unlimited'),
+                    settings.maxSnoozes == null
+                        ? s.t('unlimited')
+                        : s.number(settings.maxSnoozes!),
                   ),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _chooseMaxSnoozes(settings),
@@ -303,17 +305,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: locationSuggestions
-                              .map(
-                                (LocationSuggestion suggestion) => ActionChip(
-                                  label: Text(suggestion.label),
-                                  onPressed: () => setDialogState(() {
-                                    city.text = suggestion.city;
-                                    country.text = suggestion.country;
-                                  }),
-                                ),
-                              )
-                              .toList(),
+                          children:
+                              locationSuggestionsFor(s.locale.languageCode)
+                                  .map(
+                                    (LocationSuggestion suggestion) =>
+                                        ActionChip(
+                                          label: Text(suggestion.label),
+                                          onPressed: () => setDialogState(() {
+                                            city.text = suggestion.city;
+                                            country.text = suggestion.country;
+                                          }),
+                                        ),
+                                  )
+                                  .toList(),
                         ),
                       ],
                     ),
@@ -628,6 +632,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   String _localizedCalculationMethodName(int id, String language) {
     final Map<int, String> names = switch (language) {
+      'tr' => const <int, String>{
+        1: 'Karaçi Üniversitesi',
+        2: 'Kuzey Amerika İslam Topluluğu',
+        3: 'Dünya İslam Birliği',
+        4: 'Ümmü’l-Kurâ Üniversitesi, Mekke',
+        5: 'Mısır Genel Harita Kurumu',
+        13: 'Diyanet İşleri Başkanlığı',
+      },
+      'fr' => const <int, String>{
+        1: 'Université de Karachi',
+        2: 'Société islamique d’Amérique du Nord',
+        3: 'Ligue islamique mondiale',
+        4: 'Université Oumm al-Qoura, La Mecque',
+        5: 'Autorité générale égyptienne de topographie',
+        13: 'Présidence turque des affaires religieuses',
+      },
+      'es' => const <int, String>{
+        1: 'Universidad de Karachi',
+        2: 'Sociedad Islámica de América del Norte',
+        3: 'Liga del Mundo Islámico',
+        4: 'Universidad Umm al-Qura, La Meca',
+        5: 'Autoridad General Egipcia de Topografía',
+        13: 'Presidencia turca de Asuntos Religiosos',
+      },
       'de' => const <int, String>{
         1: 'Universität Karachi',
         2: 'Islamische Gesellschaft Nordamerikas',
@@ -674,6 +702,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   String _localizedHighLatitudeName(HighLatitudeRule rule, String language) {
     final Map<HighLatitudeRule, String> names = switch (language) {
+      'tr' => const <HighLatitudeRule, String>{
+        HighLatitudeRule.middleOfNight: 'Gecenin yarısı',
+        HighLatitudeRule.oneSeventh: 'Gecenin yedide biri',
+        HighLatitudeRule.angleBased: 'Açıya dayalı',
+      },
+      'fr' => const <HighLatitudeRule, String>{
+        HighLatitudeRule.middleOfNight: 'Milieu de la nuit',
+        HighLatitudeRule.oneSeventh: 'Un septième de la nuit',
+        HighLatitudeRule.angleBased: 'Selon l’angle',
+      },
+      'es' => const <HighLatitudeRule, String>{
+        HighLatitudeRule.middleOfNight: 'Mitad de la noche',
+        HighLatitudeRule.oneSeventh: 'Un séptimo de la noche',
+        HighLatitudeRule.angleBased: 'Según el ángulo',
+      },
       'de' => const <HighLatitudeRule, String>{
         HighLatitudeRule.middleOfNight: 'Mitte der Nacht',
         HighLatitudeRule.oneSeventh: 'Ein Siebtel der Nacht',

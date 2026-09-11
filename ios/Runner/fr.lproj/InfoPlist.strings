@@ -1,0 +1,2 @@
+CFBundleDisplayName = "Ma prière";
+NSLocationWhenInUseUsageDescription = "Ma prière utilise votre position pour calculer les horaires de prière locaux et la direction de la qibla.";

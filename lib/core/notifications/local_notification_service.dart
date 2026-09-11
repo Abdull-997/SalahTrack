@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart' show Locale;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/notifications/notification_ids.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
@@ -10,10 +12,15 @@ import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class LocalNotificationService implements NotificationService {
-  LocalNotificationService({FlutterLocalNotificationsPlugin? plugin})
-    : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+  LocalNotificationService({
+    FlutterLocalNotificationsPlugin? plugin,
+    String Function()? languageCode,
+  }) : _plugin = plugin ?? FlutterLocalNotificationsPlugin(),
+       _languageCode = languageCode ?? (() => 'en');
 
   final FlutterLocalNotificationsPlugin _plugin;
+  final String Function() _languageCode;
+  String? _channelLanguage;
   static const MethodChannel _settingsChannel = MethodChannel(
     'salah_focus/system_settings',
   );
@@ -25,25 +32,20 @@ class LocalNotificationService implements NotificationService {
   @override
   Stream<String> get payloads => _payloadController.stream;
 
-  static const AndroidNotificationDetails _androidPrayerDetails =
-      AndroidNotificationDetails(
-        'prayer_times',
-        'Prayer times',
-        channelDescription: 'Prayer-time reminders',
-        importance: Importance.high,
-        priority: Priority.high,
-        category: AndroidNotificationCategory.reminder,
-      );
-
-  static const AndroidNotificationDetails _androidReminderDetails =
-      AndroidNotificationDetails(
-        'prayer_reminders',
-        'Prayer reminders',
-        channelDescription: 'Grace-period and snooze reminders',
-        importance: Importance.high,
-        priority: Priority.high,
-        category: AndroidNotificationCategory.reminder,
-      );
+  static AndroidNotificationDetails _androidDetails(
+    String languageCode, {
+    bool reminder = false,
+  }) {
+    final AppStrings s = AppStrings(Locale(languageCode));
+    return AndroidNotificationDetails(
+      reminder ? 'prayer_reminders' : 'prayer_times',
+      s.t(reminder ? 'prayerReminders' : 'prayerTimes'),
+      channelDescription: s.t('reminderBody'),
+      importance: Importance.high,
+      priority: Priority.high,
+      category: AndroidNotificationCategory.reminder,
+    );
+  }
 
   static const DarwinNotificationDetails _darwinDetails =
       DarwinNotificationDetails(
@@ -56,6 +58,7 @@ class LocalNotificationService implements NotificationService {
   @override
   Future<void> initialize() async {
     if (_initialized) {
+      await _syncChannels();
       return;
     }
     const InitializationSettings settings = InitializationSettings(
@@ -80,29 +83,33 @@ class LocalNotificationService implements NotificationService {
     if (launchDetails?.didNotificationLaunchApp == true) {
       _initialPayload = launchDetails?.notificationResponse?.payload;
     }
-    if (Platform.isAndroid) {
+    _initialized = true;
+    await _syncChannels();
+  }
+
+  Future<void> _syncChannels() async {
+    final String languageCode = _languageCode();
+    if (Platform.isAndroid && _channelLanguage != languageCode) {
       final AndroidFlutterLocalNotificationsPlugin? android = _plugin
           .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin
           >();
-      await android?.createNotificationChannel(
-        const AndroidNotificationChannel(
-          'prayer_times',
-          'Prayer times',
-          description: 'Prayer-time reminders',
-          importance: Importance.high,
-        ),
-      );
-      await android?.createNotificationChannel(
-        const AndroidNotificationChannel(
-          'prayer_reminders',
-          'Prayer reminders',
-          description: 'Grace-period and snooze reminders',
-          importance: Importance.high,
-        ),
-      );
+      for (final bool reminder in <bool>[false, true]) {
+        final AndroidNotificationDetails details = _androidDetails(
+          languageCode,
+          reminder: reminder,
+        );
+        await android?.createNotificationChannel(
+          AndroidNotificationChannel(
+            details.channelId,
+            details.channelName,
+            description: details.channelDescription,
+            importance: Importance.high,
+          ),
+        );
+      }
+      _channelLanguage = languageCode;
     }
-    _initialized = true;
   }
 
   @override
@@ -129,11 +136,7 @@ class LocalNotificationService implements NotificationService {
           .resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin
           >();
-      await ios?.requestPermissions(
-            alert: true,
-            badge: true,
-            sound: true,
-          );
+      await ios?.requestPermissions(alert: true, badge: true, sound: true);
       return notificationsAllowed();
     }
     return true;
@@ -216,8 +219,8 @@ class LocalNotificationService implements NotificationService {
       timezoneId: prayer.timezoneId,
       title: _text(languageCode, 'prayerTitle', prayerName),
       body: _text(languageCode, 'prayerBody', prayerName),
-      details: const NotificationDetails(
-        android: _androidPrayerDetails,
+      details: NotificationDetails(
+        android: _androidDetails(languageCode),
         iOS: _darwinDetails,
       ),
       payload: 'prayer:${prayer.id}',
@@ -236,8 +239,8 @@ class LocalNotificationService implements NotificationService {
       timezoneId: prayer.timezoneId,
       title: _text(languageCode, 'graceTitle', prayerName),
       body: _text(languageCode, 'graceBody', prayerName),
-      details: const NotificationDetails(
-        android: _androidReminderDetails,
+      details: NotificationDetails(
+        android: _androidDetails(languageCode, reminder: true),
         iOS: _darwinDetails,
       ),
       payload: 'reminder:${prayer.id}',
@@ -260,8 +263,8 @@ class LocalNotificationService implements NotificationService {
       timezoneId: prayer.timezoneId,
       title: _text(languageCode, 'snoozeTitle', prayerName),
       body: _text(languageCode, 'snoozeBody', prayerName),
-      details: const NotificationDetails(
-        android: _androidReminderDetails,
+      details: NotificationDetails(
+        android: _androidDetails(languageCode, reminder: true),
         iOS: _darwinDetails,
       ),
       payload: 'reminder:${prayer.id}',
@@ -286,8 +289,8 @@ class LocalNotificationService implements NotificationService {
       timezoneId: prayer.timezoneId,
       title: _text(languageCode, 'softTitle', prayerName),
       body: _text(languageCode, 'softBody', prayerName),
-      details: const NotificationDetails(
-        android: _androidReminderDetails,
+      details: NotificationDetails(
+        android: _androidDetails(languageCode, reminder: true),
         iOS: _darwinDetails,
       ),
       payload: 'soft:${prayer.id}',
@@ -328,6 +331,27 @@ class LocalNotificationService implements NotificationService {
   static String _text(String languageCode, String key, String prayerName) {
     const Map<String, Map<String, String>>
     values = <String, Map<String, String>>{
+      'fr': <String, String>{
+        'prayerTitle': '🕌 C’est l’heure de {prayer}',
+        'prayerBody': 'C’est l’heure de votre prière.',
+        'graceTitle': 'L’heure de {prayer}',
+        'graceBody': 'Vous souhaitiez consacrer quelques minutes à votre prière maintenant.',
+        'snoozeTitle': '{prayer} – rappel',
+        'snoozeBody': 'Le délai de report est terminé. Prenez quelques minutes si vous le pouvez.',
+        'softTitle': 'Un petit rappel 🤍',
+        'softBody': 'Prenez quelques minutes pour {prayer}, si vous le pouvez.',
+      },
+      'es': <String, String>{
+        'prayerTitle': '🕌 Es la hora de {prayer}',
+        'prayerBody': 'Es la hora de tu oración.',
+        'graceTitle': 'Hora de {prayer}',
+        'graceBody': 'Querías dedicar unos minutos a tu oración ahora.',
+        'snoozeTitle': '{prayer} – recordatorio',
+        'snoozeBody':
+            'El aplazamiento ha terminado. Dedica unos minutos si puedes.',
+        'softTitle': 'Un pequeño recordatorio 🤍',
+        'softBody': 'Dedica unos minutos a {prayer}, si puedes.',
+      },
       'tr': <String, String>{
         'prayerTitle': '🕌 {prayer} vakti geldi',
         'prayerBody': 'Namaz vakti geldi.',

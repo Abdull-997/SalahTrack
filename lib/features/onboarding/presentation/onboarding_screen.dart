@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
+import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/core/location/location_suggestions.dart';
 import 'package:salah_focus/core/location/location_service.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
@@ -126,8 +127,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       duration: const Duration(milliseconds: 280),
       curve: Curves.easeOutCubic,
     );
-    if (nextPage == 2 && ref.read(settingsControllerProvider).location == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _useAutomaticLocation());
+    if (nextPage == 2 &&
+        ref.read(settingsControllerProvider).location == null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _useAutomaticLocation(),
+      );
     }
   }
 
@@ -163,53 +167,54 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final bool? submit = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) => StatefulBuilder(
-        builder: (BuildContext context, StateSetter setDialogState) => AlertDialog(
-          title: Text(s.t('chooseCity')),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                TextField(
-                  controller: city,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: InputDecoration(labelText: s.t('city')),
+        builder: (BuildContext context, StateSetter setDialogState) =>
+            AlertDialog(
+              title: Text(s.t('chooseCity')),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    TextField(
+                      controller: city,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: InputDecoration(labelText: s.t('city')),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: country,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: InputDecoration(labelText: s.t('country')),
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: locationSuggestionsFor(s.locale.languageCode)
+                          .map(
+                            (LocationSuggestion suggestion) => ActionChip(
+                              label: Text(suggestion.label),
+                              onPressed: () => setDialogState(() {
+                                city.text = suggestion.city;
+                                country.text = suggestion.country;
+                              }),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: country,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: InputDecoration(labelText: s.t('country')),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(s.t('cancel')),
                 ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: locationSuggestions
-                      .map(
-                        (LocationSuggestion suggestion) => ActionChip(
-                          label: Text(suggestion.label),
-                          onPressed: () => setDialogState(() {
-                            city.text = suggestion.city;
-                            country.text = suggestion.country;
-                          }),
-                        ),
-                      )
-                      .toList(),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text(s.t('save')),
                 ),
               ],
             ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(s.t('cancel')),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text(s.t('save')),
-            ),
-          ],
-        ),
       ),
     );
     if (submit != true || !mounted) {
@@ -303,28 +308,21 @@ class _LanguagePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppStrings s = AppStrings.of(context);
-    const List<(String, String)> languages = <(String, String)>[
-      ('de', 'Deutsch'),
-      ('en', 'English'),
-      ('ar', 'العربية'),
-      ('ur', 'اردو'),
-      ('ps', 'پښتو'),
-    ];
     return _CenteredPage(
       icon: Icons.language_rounded,
       title: s.t('language'),
       body: s.t('languageChoose'),
       child: Column(
         children: <Widget>[
-          for (final (String code, String name) in languages)
+          for (final AppLanguage language in appLanguages)
             ListTile(
-              title: Text(name),
+              title: Text(language.name),
               leading: Icon(
-                code == selectedLanguage
+                language.code == selectedLanguage
                     ? Icons.radio_button_checked_rounded
                     : Icons.radio_button_unchecked_rounded,
               ),
-              onTap: () => onSelected(code),
+              onTap: () => onSelected(language.code),
             ),
           const SizedBox(height: 12),
           FilledButton(onPressed: onContinue, child: Text(s.t('continue'))),

@@ -5,6 +5,7 @@ import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
+import 'package:salah_focus/shared/errors/user_error_message.dart';
 
 class LanguageSelectionScreen extends ConsumerStatefulWidget {
   const LanguageSelectionScreen({super.key});
@@ -21,7 +22,9 @@ class _LanguageSelectionScreenState
   @override
   Widget build(BuildContext context) {
     final AppStrings s = AppStrings.of(context);
-    final String selectedCode = ref.watch(settingsControllerProvider).localeCode;
+    final String selectedCode = ref
+        .watch(settingsControllerProvider)
+        .localeCode;
     return Scaffold(
       appBar: AppBar(title: Text(s.t('languageSelect'))),
       body: ListView.separated(
@@ -29,12 +32,10 @@ class _LanguageSelectionScreenState
         separatorBuilder: (_, _) => const Divider(height: 1),
         itemBuilder: (BuildContext context, int index) {
           final AppLanguage language = appLanguages[index];
-          final bool selected =
-              language.code == selectedCode ||
-              (language.code == 'id' && selectedCode == 'ms');
+          final bool selected = language.code == selectedCode;
           return ListTile(
             title: Text(language.name),
-            subtitle: Text(language.code == 'id' ? 'id / ms' : language.code),
+            subtitle: Text(language.code),
             trailing: Icon(
               selected
                   ? Icons.radio_button_checked_rounded
@@ -53,19 +54,32 @@ class _LanguageSelectionScreenState
     if (_saving) return;
     setState(() => _saving = true);
     try {
-      await ref.read(settingsControllerProvider.notifier).setLocale(languageCode);
-      final UserLocation? location = ref.read(settingsControllerProvider).location;
+      await ref
+          .read(settingsControllerProvider.notifier)
+          .setLocale(languageCode);
+      await ref.read(notificationServiceProvider).initialize();
+      final UserLocation? location = ref
+          .read(settingsControllerProvider)
+          .location;
       if (location != null) {
         final UserLocation localized = await ref
             .read(locationServiceProvider)
             .localizeLocation(location, languageCode: languageCode);
-        await ref.read(settingsControllerProvider.notifier).setLocation(localized);
+        await ref
+            .read(settingsControllerProvider.notifier)
+            .setLocation(localized);
       }
       ref.invalidate(todayPrayerDayProvider);
       // Reloading immediately also replaces already scheduled notifications
       // with texts and prayer names from the newly selected language.
       await ref.read(todayPrayerDayProvider.future);
       if (mounted) Navigator.of(context).pop();
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(userErrorMessage(context, error))),
+        );
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
