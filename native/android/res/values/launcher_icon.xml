@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_emerald">#123E32</color>
+    <!-- Legacy launcher fallback; keep the bitmap available for notifications. -->
+    <item type="mipmap" name="ic_launcher_app">@mipmap/ic_launcher</item>
+</resources>

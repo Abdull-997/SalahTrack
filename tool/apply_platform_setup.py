@@ -61,7 +61,13 @@ def patch_android() -> None:
         )
         if count != 1:
             raise RuntimeError("Could not locate </application> element")
+    if (ROOT / "native/android/res/mipmap-anydpi-v26/ic_launcher_app.xml").exists():
+        text = text.replace('android:icon="@mipmap/ic_launcher"', 'android:icon="@mipmap/ic_launcher_app"')
     manifest.write_text(text, encoding="utf-8")
+
+    native_resources = ROOT / "native/android/res"
+    if native_resources.exists():
+        shutil.copytree(native_resources, ROOT / "android/app/src/main/res", dirs_exist_ok=True)
 
     native_main_activity = ROOT / "native/android/MainActivity.kt"
     if native_main_activity.exists():
@@ -91,6 +97,10 @@ def patch_android() -> None:
 
 
 def patch_ios() -> None:
+    native_icons = ROOT / "native/ios/AppIcon.appiconset"
+    if native_icons.exists():
+        shutil.copytree(native_icons, ROOT / "ios/Runner/Assets.xcassets/AppIcon.appiconset", dirs_exist_ok=True)
+
     native_app_delegate = ROOT / "native/ios/AppDelegate.swift"
     if native_app_delegate.exists():
         shutil.copy2(native_app_delegate, ROOT / "ios/Runner/AppDelegate.swift")
