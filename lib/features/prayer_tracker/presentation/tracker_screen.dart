@@ -152,7 +152,7 @@ class _TrackerContent extends StatelessWidget {
                 ?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
-          _DayCard(date: today, entries: todayEntries),
+          _DayCard(date: today, entries: todayEntries, isToday: true),
           const SizedBox(height: 24),
           Text(
             s.t('week'),
@@ -280,10 +280,22 @@ class _DayCard extends ConsumerWidget {
       parsed,
       pattern: compact ? 'EEE, d MMM.' : 'EEEE, d MMMM y',
     );
+    final ColorScheme scheme = Theme.of(context).colorScheme;
 
     return Card(
       margin: EdgeInsets.zero,
-      color: isToday ? Colors.green.shade100 : null,
+      color: isToday
+          ? Color.alphaBlend(
+              scheme.primary.withValues(alpha: 0.08),
+              scheme.surface,
+            )
+          : null,
+      shape: isToday
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+              side: BorderSide(color: scheme.primary, width: 1.5),
+            )
+          : null,
       child: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: 16,
@@ -294,14 +306,36 @@ class _DayCard extends ConsumerWidget {
             Row(
               children: <Widget>[
                 Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      if (isToday)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            s.t('today'),
+                            style: TextStyle(
+                              color: scheme.primary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: scheme.onSurface,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Text(
                   '${s.number(prayed)}/${s.number(5)}',
-                  style: const TextStyle(fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                    color: scheme.onSurface,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ],
             ),
@@ -332,8 +366,7 @@ class _DayCard extends ConsumerWidget {
                                 .read(prayerCoordinatorProvider)
                                 .correctHistoricalPrayer(
                                   entry,
-                                  prayed:
-                                      entry.status != PrayerStatus.prayed,
+                                  prayed: entry.status != PrayerStatus.prayed,
                                 );
                             ref.invalidate(trackerDataProvider);
                           },
@@ -372,6 +405,10 @@ class _MonthGrid extends StatelessWidget {
     final int days = DateTime(month.year, month.month + 1, 0).day;
     final int prefix = DateTime(month.year, month.month, 1).weekday - 1;
     final int total = prefix + days;
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    final TextScaler textScaler = MediaQuery.textScalerOf(context);
+    final double cellHeight = (textScaler.scale(14) + textScaler.scale(12) + 20)
+        .clamp(58.0, double.infinity);
 
     return Card(
       margin: EdgeInsets.zero,
@@ -380,10 +417,11 @@ class _MonthGrid extends StatelessWidget {
         child: GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 7,
             mainAxisSpacing: 6,
             crossAxisSpacing: 6,
+            mainAxisExtent: cellHeight,
           ),
           itemCount: total,
           itemBuilder: (BuildContext context, int index) {
@@ -401,13 +439,25 @@ class _MonthGrid extends StatelessWidget {
             final bool past = date.isBefore(
               DateTime(localNow.year, localNow.month, localNow.day),
             );
+            final bool isToday =
+                date == DateTime(localNow.year, localNow.month, localNow.day);
+            final (Color background, Color foreground) = _calendarColors(
+              context,
+              prayed: prayed,
+              isPast: past,
+            );
             return Semantics(
+              excludeSemantics: true,
               label:
-                  '${s.number(day)}, ${s.number(prayed)}/${s.number(5)} ${s.t('confirmedPrayers')}',
+                  '${isToday ? '${s.t('today')}, ' : ''}${s.number(day)}, ${s.number(prayed)}/${s.number(5)} ${s.t('confirmedPrayers')}',
               child: DecoratedBox(
+                key: ValueKey<String>('calendar-$key'),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: _calendarColor(context, prayed: prayed, isPast: past),
+                  color: background,
+                  border: isToday
+                      ? Border.all(color: scheme.primary, width: 2)
+                      : null,
                 ),
                 child: Center(
                   child: Column(
@@ -415,12 +465,18 @@ class _MonthGrid extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         s.number(day),
-                        style: const TextStyle(fontWeight: FontWeight.w800),
+                        style: TextStyle(
+                          color: foreground,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       Text(
                         '${s.number(prayed)}/${s.number(5)}',
                         style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(fontWeight: FontWeight.w800),
+                            ?.copyWith(
+                              color: foreground,
+                              fontWeight: FontWeight.w700,
+                            ),
                       ),
                     ],
                   ),
@@ -480,19 +536,30 @@ String _statusLabel(BuildContext context, PrayerStatus status) {
 bool _isCorrectableDate(DateTime date, DateTime localNow) {
   final DateTime day = DateTime(date.year, date.month, date.day);
   final DateTime today = DateTime(localNow.year, localNow.month, localNow.day);
-  return day.isBefore(today) && !day.isBefore(today.subtract(const Duration(days: 3)));
+  return day.isBefore(today) &&
+      !day.isBefore(today.subtract(const Duration(days: 3)));
 }
 
-Color _calendarColor(
+(Color, Color) _calendarColors(
   BuildContext context, {
   required int prayed,
   required bool isPast,
 }) {
   final ColorScheme scheme = Theme.of(context).colorScheme;
-  if (!isPast) return scheme.surfaceContainerHighest;
-  if (prayed == 0) return scheme.errorContainer;
-  if (prayed < 5) return Colors.amber.shade200;
-  return Colors.green.shade200;
+  final bool dark = scheme.brightness == Brightness.dark;
+  // Pair every status background with its own readable foreground.
+  if (prayed >= 5) {
+    return dark
+        ? (const Color(0xFF183F32), const Color(0xFFB7F3D3))
+        : (const Color(0xFFD7F3DF), const Color(0xFF153D28));
+  }
+  if (prayed > 0) {
+    return dark
+        ? (const Color(0xFF3C2E16), const Color(0xFFFFE0A3))
+        : (const Color(0xFFFFF0C2), const Color(0xFF573D00));
+  }
+  if (isPast) return (scheme.errorContainer, scheme.onErrorContainer);
+  return (scheme.surfaceContainerHighest, scheme.onSurface);
 }
 
 String _iso(DateTime date) =>

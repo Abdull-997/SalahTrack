@@ -9,6 +9,7 @@ import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
 import 'package:salah_focus/features/settings/presentation/language_selection_screen.dart';
+import 'package:salah_focus/features/settings/presentation/notification_settings_screen.dart';
 import 'package:salah_focus/shared/errors/user_error_message.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -587,17 +588,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  Future<void> _requestNotifications() async => _run(() async {
-    final service = ref.read(notificationServiceProvider);
-    await service.initialize();
-    if (await service.notificationsAllowed()) {
-      await service.openNotificationSettings();
-      return;
-    }
-    if (!await service.requestPermission()) {
-      await service.openNotificationSettings();
-    }
-  });
+  Future<void> _requestNotifications() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => const NotificationSettingsScreen(),
+      ),
+    );
+    if (mounted) ref.invalidate(todayPrayerDayProvider);
+  }
 
   Future<void> _requestExactAlarms() async => _run(() async {
     final service = ref.read(notificationServiceProvider);
