@@ -12,6 +12,7 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'today': 'Bugün',
     'yesterday': 'Dün',
     'dayBeforeYesterday': 'Evvelsi gün',
+    'edited': 'Elle düzenlendi',
     'confirmPrayerRecordTitle': 'Namaz onaylansın mı?',
     'confirmPrayerRecordBody':
         '{date} tarihindeki {prayer} namazı kılındı olarak işaretlensin mi?',
@@ -127,6 +128,7 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'today': 'Aujourd’hui',
     'yesterday': 'Hier',
     'dayBeforeYesterday': 'Avant-hier',
+    'edited': 'Modifié manuellement',
     'confirmPrayerRecordTitle': 'Confirmer la prière ?',
     'confirmPrayerRecordBody':
         'Marquer la prière de {prayer} du {date} comme accomplie ?',
@@ -238,6 +240,7 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'today': 'Hoy',
     'yesterday': 'Ayer',
     'dayBeforeYesterday': 'Anteayer',
+    'edited': 'Editado manualmente',
     'confirmPrayerRecordTitle': '¿Confirmar la oración?',
     'confirmPrayerRecordBody':
         '¿Marcar la oración de {prayer} del {date} como realizada?',

@@ -31,6 +31,7 @@ class AppStrings {
       'today': 'Heute',
       'yesterday': 'Gestern',
       'dayBeforeYesterday': 'Vorgestern',
+      'edited': 'Nachträglich bearbeitet',
       'confirmPrayerRecordTitle': 'Gebet bestätigen?',
       'confirmPrayerRecordBody': '{prayer} am {date} als gebetet markieren?',
       'undoPrayerRecordTitle': 'Bestätigung zurücknehmen?',
@@ -139,6 +140,7 @@ class AppStrings {
       'today': 'Today',
       'yesterday': 'Yesterday',
       'dayBeforeYesterday': 'The day before yesterday',
+      'edited': 'Manually edited',
       'confirmPrayerRecordTitle': 'Confirm prayer?',
       'confirmPrayerRecordBody': 'Mark {prayer} on {date} as prayed?',
       'undoPrayerRecordTitle': 'Undo confirmation?',
@@ -248,6 +250,7 @@ class AppStrings {
       'today': 'اليوم',
       'yesterday': 'أمس',
       'dayBeforeYesterday': 'أول أمس',
+      'edited': 'تم التعديل يدويًا',
       'confirmPrayerRecordTitle': 'تأكيد الصلاة؟',
       'confirmPrayerRecordBody':
           'هل تريد تسجيل صلاة {prayer} بتاريخ {date} على أنها أُدّيت؟',
@@ -356,6 +359,7 @@ class AppStrings {
       'today': 'آج',
       'yesterday': 'گزشتہ روز',
       'dayBeforeYesterday': 'دو دن پہلے',
+      'edited': 'دستی طور پر ترمیم شدہ',
       'confirmPrayerRecordTitle': 'نماز کی تصدیق کریں؟',
       'confirmPrayerRecordBody':
           'کیا {date} کی {prayer} کو ادا شدہ درج کرنا چاہتے ہیں؟',
@@ -468,6 +472,7 @@ class AppStrings {
       'today': 'نن',
       'yesterday': 'پرون',
       'dayBeforeYesterday': 'وړمه ورځ',
+      'edited': 'په لاسي ډول سم شوی',
       'confirmPrayerRecordTitle': 'لمونځ تایید کړئ؟',
       'confirmPrayerRecordBody':
           'د {date} نېټې {prayer} لمونځ د ادا شوي په توګه ثبت کړئ؟',

@@ -27,7 +27,7 @@ class _Clock implements ClockService {
 }
 
 class _Coordinator implements PrayerCoordinator {
-  _Coordinator(DateTime now) {
+  _Coordinator(this.now) {
     for (int offset = -3; offset <= 1; offset++) {
       final DateTime date = DateTime.utc(now.year, now.month, now.day + offset);
       for (final PrayerType type in PrayerType.values) {
@@ -47,6 +47,7 @@ class _Coordinator implements PrayerCoordinator {
       }
     }
   }
+  final DateTime now;
   final List<PrayerEntry> entries = [];
   final List<(String, String)> ranges = [];
   int changes = 0;
@@ -73,6 +74,7 @@ class _Coordinator implements PrayerCoordinator {
     changes++;
     final PrayerEntry updated = prayer.copyWith(
       status: prayed ? PrayerStatus.prayed : PrayerStatus.missed,
+      editedAtUtc: prayer.localDate.compareTo(_iso(now)) < 0 ? now : null,
     );
     entries[entries.indexWhere((entry) => entry.id == prayer.id)] = updated;
     return updated;
@@ -156,7 +158,33 @@ void main() {
         expect(find.text('Gestern'), findsOneWidget);
         expect(find.text('Vorgestern'), findsOneWidget);
 
+        final todayHeader = find.byKey(
+          ValueKey('tracker-header-${expected.first}'),
+        );
+        expect(tester.widget<InkWell>(todayHeader).onTap, isNull);
+        expect(
+          find.byKey(ValueKey('correct-${expected.first}-fajr')),
+          findsOneWidget,
+        );
+        for (final date in expected.skip(1)) {
+          expect(find.byKey(ValueKey('correct-$date-fajr')), findsNothing);
+          final header = find.byKey(ValueKey('tracker-header-$date'));
+          await tester.ensureVisible(header);
+          await tester.tap(header);
+          await tester.pumpAndSettle();
+          expect(find.byKey(ValueKey('correct-$date-fajr')), findsOneWidget);
+          await tester.tap(header);
+          await tester.pumpAndSettle();
+          expect(find.byKey(ValueKey('correct-$date-fajr')), findsNothing);
+        }
+
         for (final String date in expected) {
+          if (date != expected.first) {
+            final header = find.byKey(ValueKey('tracker-header-$date'));
+            await tester.ensureVisible(header);
+            await tester.tap(header);
+            await tester.pumpAndSettle();
+          }
           final Finder edit = find.byKey(ValueKey('correct-$date-fajr'));
           await tester.ensureVisible(edit);
           await tester.tap(edit);
@@ -176,6 +204,7 @@ void main() {
           await tester.tap(find.text('Abbrechen'));
           await tester.pumpAndSettle();
           expect(coordinator.changes, before);
+          expect(find.byKey(ValueKey('edited-$date-fajr')), findsNothing);
           await tester.tap(edit);
           await tester.pumpAndSettle();
           // Dismissing the popup must not save either.
@@ -187,6 +216,11 @@ void main() {
           await tester.tap(find.text('Ich habe gebetet'));
           await tester.pumpAndSettle();
           expect(coordinator.changes, before + 1);
+          expect(
+            find.byKey(ValueKey('edited-$date-fajr')),
+            date == expected.first ? findsNothing : findsOneWidget,
+          );
+          expect(find.byKey(ValueKey('edited-$date-dhuhr')), findsNothing);
           expect(
             coordinator.entries
                 .firstWhere((entry) => entry.id == '$date-fajr')
@@ -210,6 +244,38 @@ void main() {
         await tester.tap(find.text('Ja'));
         await tester.pumpAndSettle();
         expect(coordinator.changes, 4);
+        // Reverting a past-day correction keeps its edit history visible.
+        final pastId = '${expected[1]}-fajr';
+        final pastEdit = find.byKey(ValueKey('correct-$pastId'));
+        await tester.ensureVisible(pastEdit);
+        await tester.tap(pastEdit);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Ja'));
+        await tester.pumpAndSettle();
+        expect(
+          coordinator.entries.firstWhere((entry) => entry.id == pastId).status,
+          PrayerStatus.missed,
+        );
+        expect(find.byKey(ValueKey('edited-$pastId')), findsOneWidget);
+        expect(
+          tester
+              .widget<Tooltip>(find.byKey(ValueKey('edited-$pastId')))
+              .message,
+          'Nachträglich bearbeitet',
+        );
+
+        // Recreate the screen to verify markers come from records, not UI state.
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpWidget(_app(coordinator, now));
+        await tester.pumpAndSettle();
+        expect(find.byKey(ValueKey('correct-$pastId')), findsNothing);
+        final pastHeader = find.byKey(
+          ValueKey('tracker-header-${expected[1]}'),
+        );
+        await tester.ensureVisible(pastHeader);
+        await tester.tap(pastHeader);
+        await tester.pumpAndSettle();
+        expect(find.byKey(ValueKey('edited-$pastId')), findsOneWidget);
         expect(
           coordinator.entries
               .firstWhere((entry) => entry.id == '${expected.first}-fajr')
@@ -228,13 +294,18 @@ void main() {
     final _Coordinator coordinator = _Coordinator(now)..fail = true;
     await tester.pumpWidget(_app(coordinator, now));
     await tester.pumpAndSettle();
-    final Finder edit = find.byKey(const ValueKey('correct-2026-09-11-fajr'));
+    final header = find.byKey(const ValueKey('tracker-header-2026-09-10'));
+    await tester.scrollUntilVisible(header, 250);
+    await tester.tap(header);
+    await tester.pumpAndSettle();
+    final Finder edit = find.byKey(const ValueKey('correct-2026-09-10-fajr'));
     await tester.ensureVisible(edit);
     await tester.tap(edit);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ich habe gebetet'));
     await tester.pumpAndSettle();
     expect(coordinator.changes, 0);
+    expect(find.byKey(const ValueKey('edited-2026-09-10-fajr')), findsNothing);
     expect(find.byType(SnackBar), findsOneWidget);
     expect(tester.widget<IconButton>(edit).onPressed, isNotNull);
     coordinator.fail = false;
@@ -243,6 +314,10 @@ void main() {
     await tester.tap(find.text('Ich habe gebetet'));
     await tester.pumpAndSettle();
     expect(coordinator.changes, 1);
+    expect(
+      find.byKey(const ValueKey('edited-2026-09-10-fajr')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 }

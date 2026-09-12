@@ -12,6 +12,7 @@ class PrayerEntry {
     required this.trackingEndsAtUtc,
     required this.status,
     this.confirmedAtUtc,
+    this.editedAtUtc,
     this.snoozedUntilUtc,
     this.snoozeCount = 0,
     this.manualOffsetMinutes = 0,
@@ -26,6 +27,9 @@ class PrayerEntry {
   final DateTime trackingEndsAtUtc;
   final PrayerStatus status;
   final DateTime? confirmedAtUtc;
+
+  /// Last manual status correction made after this prayer's local calendar day.
+  final DateTime? editedAtUtc;
   final DateTime? snoozedUntilUtc;
   final int snoozeCount;
   final int manualOffsetMinutes;
@@ -37,6 +41,7 @@ class PrayerEntry {
     DateTime? trackingEndsAtUtc,
     PrayerStatus? status,
     DateTime? confirmedAtUtc,
+    DateTime? editedAtUtc,
     bool clearConfirmedAt = false,
     DateTime? snoozedUntilUtc,
     bool clearSnoozedUntil = false,
@@ -52,45 +57,53 @@ class PrayerEntry {
       graceEndsAtUtc: graceEndsAtUtc ?? this.graceEndsAtUtc,
       trackingEndsAtUtc: trackingEndsAtUtc ?? this.trackingEndsAtUtc,
       status: status ?? this.status,
-      confirmedAtUtc:
-          clearConfirmedAt ? null : confirmedAtUtc ?? this.confirmedAtUtc,
-      snoozedUntilUtc:
-          clearSnoozedUntil ? null : snoozedUntilUtc ?? this.snoozedUntilUtc,
+      confirmedAtUtc: clearConfirmedAt
+          ? null
+          : confirmedAtUtc ?? this.confirmedAtUtc,
+      editedAtUtc: editedAtUtc ?? this.editedAtUtc,
+      snoozedUntilUtc: clearSnoozedUntil
+          ? null
+          : snoozedUntilUtc ?? this.snoozedUntilUtc,
       snoozeCount: snoozeCount ?? this.snoozeCount,
       manualOffsetMinutes: manualOffsetMinutes ?? this.manualOffsetMinutes,
     );
   }
 
   Map<String, Object?> toMap() => <String, Object?>{
-        'id': id,
-        'local_date': localDate,
-        'type': type.name,
-        'scheduled_at_utc': scheduledAtUtc.toIso8601String(),
-        'timezone_id': timezoneId,
-        'grace_ends_at_utc': graceEndsAtUtc.toIso8601String(),
-        'tracking_ends_at_utc': trackingEndsAtUtc.toIso8601String(),
-        'status': status.name,
-        'confirmed_at_utc': confirmedAtUtc?.toIso8601String(),
-        'snoozed_until_utc': snoozedUntilUtc?.toIso8601String(),
-        'snooze_count': snoozeCount,
-        'manual_offset_minutes': manualOffsetMinutes,
-      };
+    'id': id,
+    'local_date': localDate,
+    'type': type.name,
+    'scheduled_at_utc': scheduledAtUtc.toIso8601String(),
+    'timezone_id': timezoneId,
+    'grace_ends_at_utc': graceEndsAtUtc.toIso8601String(),
+    'tracking_ends_at_utc': trackingEndsAtUtc.toIso8601String(),
+    'status': status.name,
+    'confirmed_at_utc': confirmedAtUtc?.toIso8601String(),
+    'edited_at_utc': editedAtUtc?.toIso8601String(),
+    'snoozed_until_utc': snoozedUntilUtc?.toIso8601String(),
+    'snooze_count': snoozeCount,
+    'manual_offset_minutes': manualOffsetMinutes,
+  };
 
   factory PrayerEntry.fromMap(Map<String, Object?> map) {
     return PrayerEntry(
       id: map['id']! as String,
       localDate: map['local_date']! as String,
       type: PrayerType.values.byName(map['type']! as String),
-      scheduledAtUtc: DateTime.parse(map['scheduled_at_utc']! as String).toUtc(),
+      scheduledAtUtc: DateTime.parse(map['scheduled_at_utc']! as String)
+          .toUtc(),
       timezoneId: map['timezone_id']! as String,
-      graceEndsAtUtc:
-          DateTime.parse(map['grace_ends_at_utc']! as String).toUtc(),
-      trackingEndsAtUtc:
-          DateTime.parse(map['tracking_ends_at_utc']! as String).toUtc(),
+      graceEndsAtUtc: DateTime.parse(map['grace_ends_at_utc']! as String)
+          .toUtc(),
+      trackingEndsAtUtc: DateTime.parse(map['tracking_ends_at_utc']! as String)
+          .toUtc(),
       status: PrayerStatus.values.byName(map['status']! as String),
       confirmedAtUtc: map['confirmed_at_utc'] == null
           ? null
           : DateTime.parse(map['confirmed_at_utc']! as String).toUtc(),
+      editedAtUtc: map['edited_at_utc'] == null
+          ? null
+          : DateTime.parse(map['edited_at_utc']! as String).toUtc(),
       snoozedUntilUtc: map['snoozed_until_utc'] == null
           ? null
           : DateTime.parse(map['snoozed_until_utc']! as String).toUtc(),

@@ -202,7 +202,14 @@ void main() {
       expect(find.text('Next prayer'), findsNothing);
       router.go('/tracker');
       await tester.pumpAndSettle();
-      await tester.scrollUntilVisible(find.text(s.t('month')), 300);
+      await tester.scrollUntilVisible(
+        find.text(s.t('month')),
+        300,
+        scrollable: find.descendant(
+          of: find.byType(TrackerScreen),
+          matching: find.byType(Scrollable),
+        ).first,
+      );
       expect(find.text(s.t('month')), findsOneWidget);
       expect(find.text('Month'), findsNothing);
       expect(tester.takeException(), isNull);

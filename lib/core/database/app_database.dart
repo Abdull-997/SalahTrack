@@ -31,7 +31,7 @@ class AppDatabase {
     final String root = await getDatabasesPath();
     final Database db = await openDatabase(
       p.join(root, 'salah_focus.db'),
-      version: 3,
+      version: 4,
       onConfigure: (Database db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -39,6 +39,11 @@ class AppDatabase {
         if (oldVersion < 3) {
           await db.execute(
             "ALTER TABLE prayer_day_meta ADD COLUMN source_key TEXT NOT NULL DEFAULT ''",
+          );
+        }
+        if (oldVersion < 4) {
+          await db.execute(
+            'ALTER TABLE prayer_entries ADD COLUMN edited_at_utc TEXT',
           );
         }
       },
@@ -54,6 +59,7 @@ class AppDatabase {
             tracking_ends_at_utc TEXT NOT NULL,
             status TEXT NOT NULL,
             confirmed_at_utc TEXT,
+            edited_at_utc TEXT,
             snoozed_until_utc TEXT,
             snooze_count INTEGER NOT NULL DEFAULT 0,
             manual_offset_minutes INTEGER NOT NULL DEFAULT 0
@@ -87,6 +93,7 @@ class AppDatabase {
           columns: <String>[
             'status',
             'confirmed_at_utc',
+            'edited_at_utc',
             'snoozed_until_utc',
             'snooze_count',
           ],
@@ -97,6 +104,8 @@ class AppDatabase {
         Map<String, Object?> row = entry.toMap();
         if (previous.isNotEmpty) {
           final Map<String, Object?> old = previous.first;
+          // Schedule refreshes must preserve the user's edit history.
+          row['edited_at_utc'] = old['edited_at_utc'];
           final String oldStatus = old['status']! as String;
           if (oldStatus == 'prayed' ||
               oldStatus == 'skipped' ||
@@ -119,7 +128,9 @@ class AppDatabase {
               // refreshed schedule. Location/grace changes must never revive
               // a reminder beyond the new prayer tracking window.
               if (oldSnooze != null &&
-                  oldSnooze.isBefore(entry.trackingEndsAtUtc)) ...<String, Object?>{
+                  oldSnooze.isBefore(
+                    entry.trackingEndsAtUtc,
+                  )) ...<String, Object?>{
                 'status': oldStatus,
                 'snoozed_until_utc': oldSnoozeText,
               },
@@ -135,7 +146,6 @@ class AppDatabase {
       }
     });
   }
-
 
   Future<PrayerEntry?> prayerEntryById(String id) async {
     final Database db = await database;
@@ -190,18 +200,14 @@ class AppDatabase {
     required String sourceKey,
   }) async {
     final Database db = await database;
-    await db.insert(
-      'prayer_day_meta',
-      <String, Object?>{
-        'local_date': localDate,
-        'timezone_id': timezoneId,
-        'hijri_date': hijriDate,
-        'sunrise_utc': sunriseUtc?.toIso8601String(),
-        'fetched_at_utc': DateTime.now().toUtc().toIso8601String(),
-        'source_key': sourceKey,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('prayer_day_meta', <String, Object?>{
+      'local_date': localDate,
+      'timezone_id': timezoneId,
+      'hijri_date': hijriDate,
+      'sunrise_utc': sunriseUtc?.toIso8601String(),
+      'fetched_at_utc': DateTime.now().toUtc().toIso8601String(),
+      'source_key': sourceKey,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<PrayerDayMeta?> dayMeta(String localDate) async {
@@ -237,6 +243,7 @@ class AppDatabase {
     );
     return ((rows.first['count'] as int?) ?? 0) >= 27;
   }
+
   Future<void> close() async {
     final Database? db = _database;
     if (db != null) {

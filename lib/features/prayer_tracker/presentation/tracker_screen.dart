@@ -274,6 +274,7 @@ class _DayCard extends ConsumerStatefulWidget {
 
 class _DayCardState extends ConsumerState<_DayCard> {
   bool _working = false;
+  bool _expanded = false;
 
   Future<void> _changePrayer(PrayerEntry entry) async {
     if (_working) return;
@@ -366,42 +367,62 @@ class _DayCardState extends ConsumerState<_DayCard> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         child: Column(
           children: <Widget>[
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Text(
-                          s.t(widget.labelKey),
-                          style: TextStyle(
-                            color: scheme.primary,
-                            fontWeight: FontWeight.w800,
+            Semantics(
+              button: !widget.isToday,
+              expanded: widget.isToday ? null : _expanded,
+              child: InkWell(
+                key: ValueKey<String>('tracker-header-${widget.date}'),
+                borderRadius: BorderRadius.circular(12),
+                onTap: widget.isToday
+                    ? null
+                    : () => setState(() => _expanded = !_expanded),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Text(
+                              s.t(widget.labelKey),
+                              style: TextStyle(
+                                color: scheme.primary,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                           ),
-                        ),
+                          Text(
+                            title,
+                            style: TextStyle(
+                              color: scheme.onSurface,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: scheme.onSurface,
-                          fontWeight: FontWeight.w700,
-                        ),
+                    ),
+                    Text(
+                      '${s.number(prayed)}/${s.number(5)}',
+                      style: TextStyle(
+                        color: scheme.onSurface,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    if (!widget.isToday) ...<Widget>[
+                      const SizedBox(width: 8),
+                      Icon(
+                        _expanded
+                            ? Icons.expand_less_rounded
+                            : Icons.expand_more_rounded,
+                        color: scheme.onSurfaceVariant,
                       ),
                     ],
-                  ),
+                  ],
                 ),
-                Text(
-                  '${s.number(prayed)}/${s.number(5)}',
-                  style: TextStyle(
-                    color: scheme.onSurface,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
+              ),
             ),
-            ...<Widget>[
+            if (widget.isToday || _expanded) ...<Widget>[
               const SizedBox(height: 10),
               for (final PrayerEntry entry in widget.entries)
                 Padding(
@@ -411,7 +432,27 @@ class _DayCardState extends ConsumerState<_DayCard> {
                       _StatusIcon(status: entry.status),
                       const SizedBox(width: 10),
                       Expanded(child: Text(entry.type.localizedName(locale))),
-                      Text(_statusLabel(context, entry.status)),
+                      Flexible(
+                        flex: 2,
+                        child: Wrap(
+                          alignment: WrapAlignment.end,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 6,
+                          children: <Widget>[
+                            Text(_statusLabel(context, entry.status)),
+                            if (entry.editedAtUtc != null)
+                              Tooltip(
+                                key: ValueKey<String>('edited-${entry.id}'),
+                                message: s.t('edited'),
+                                child: Icon(
+                                  Icons.edit_outlined,
+                                  size: 16,
+                                  color: scheme.primary,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                       ...<Widget>[
                         const SizedBox(width: 4),
                         IconButton(

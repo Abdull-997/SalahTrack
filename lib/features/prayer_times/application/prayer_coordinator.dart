@@ -37,7 +37,11 @@ class PrayerCoordinator {
 
     // Fetch the UTC day and its immediate neighbours. This avoids assuming
     // that a manually selected city shares the device timezone.
-    final DateTime utcDate = DateTime.utc(nowUtc.year, nowUtc.month, nowUtc.day);
+    final DateTime utcDate = DateTime.utc(
+      nowUtc.year,
+      nowUtc.month,
+      nowUtc.day,
+    );
     final Set<String> months = <String>{};
     for (final int offset in <int>[-1, 0, 1]) {
       final DateTime candidate = utcDate.add(Duration(days: offset));
@@ -54,8 +58,10 @@ class PrayerCoordinator {
 
     PrayerDay? day = await _resolveCurrentDay(nowUtc);
     if (day == null) {
-      final DateTime deviceLocal =
-          TimezoneService.toLocal(nowUtc, location.timezoneId);
+      final DateTime deviceLocal = TimezoneService.toLocal(
+        nowUtc,
+        location.timezoneId,
+      );
       day = await _repository.day(_isoDate(deviceLocal));
     }
     if (day == null) return null;
@@ -82,12 +88,13 @@ class PrayerCoordinator {
 
     final String today = day.localDate;
     final String end = _isoDate(horizonLocal);
-    final List<PrayerEntry> upcoming =
-        await _repository.entriesBetween(today, end);
+    final List<PrayerEntry> upcoming = await _repository.entriesBetween(
+      today,
+      end,
+    );
     await _planner.reschedule(
       upcoming,
-      prayerName: (PrayerEntry entry) =>
-          entry.type.localizedName(languageCode),
+      prayerName: (PrayerEntry entry) => entry.type.localizedName(languageCode),
       languageCode: languageCode,
       nowUtc: nowUtc,
     );
@@ -96,7 +103,11 @@ class PrayerCoordinator {
   }
 
   Future<PrayerDay?> _resolveCurrentDay(DateTime nowUtc) async {
-    final DateTime utcDate = DateTime.utc(nowUtc.year, nowUtc.month, nowUtc.day);
+    final DateTime utcDate = DateTime.utc(
+      nowUtc.year,
+      nowUtc.month,
+      nowUtc.day,
+    );
     for (final int offset in <int>[-1, 0, 1]) {
       final String candidate = _isoDate(utcDate.add(Duration(days: offset)));
       final PrayerDay? day = await _repository.day(candidate);
@@ -151,8 +162,7 @@ class PrayerCoordinator {
   }
 
   Future<PrayerEntry> confirm(PrayerEntry prayer) async {
-    final PrayerEntry updated =
-        _stateMachine.confirm(prayer, _clock.nowUtc());
+    final PrayerEntry updated = _stateMachine.confirm(prayer, _clock.nowUtc());
     await _repository.saveEntry(updated);
     await _notifications.cancelPrayer(updated);
     return updated;
@@ -163,9 +173,16 @@ class PrayerCoordinator {
     PrayerEntry prayer, {
     required bool prayed,
   }) async {
+    final DateTime now = _clock.nowUtc();
+    final bool isPastDay =
+        prayer.localDate.compareTo(
+          TimezoneService.isoLocalDate(now, prayer.timezoneId),
+        ) <
+        0;
     final PrayerEntry updated = prayer.copyWith(
       status: prayed ? PrayerStatus.prayed : PrayerStatus.missed,
-      confirmedAtUtc: prayed ? _clock.nowUtc() : null,
+      confirmedAtUtc: prayed ? now : null,
+      editedAtUtc: isPastDay ? now : null,
       clearConfirmedAt: !prayed,
       clearSnoozedUntil: true,
     );
@@ -188,7 +205,11 @@ class PrayerCoordinator {
     );
     await _repository.saveEntry(updated);
     await _notifications.cancelPrayer(prayer);
-    await _notifications.scheduleSnoozeReminder(updated, prayerName, languageCode: languageCode);
+    await _notifications.scheduleSnoozeReminder(
+      updated,
+      prayerName,
+      languageCode: languageCode,
+    );
     return updated;
   }
 
@@ -202,14 +223,21 @@ class PrayerCoordinator {
     await _repository.saveEntry(updated);
     await _notifications.cancelPrayer(prayer);
     if (settings.softReminderAfterSkip) {
-      await _notifications.scheduleSoftReminder(updated, prayerName, languageCode: languageCode);
+      await _notifications.scheduleSoftReminder(
+        updated,
+        prayerName,
+        languageCode: languageCode,
+      );
     }
     return updated;
   }
 
   Future<List<PrayerEntry>> entriesBetween(String start, String end) async {
     final DateTime now = _clock.nowUtc();
-    final List<PrayerEntry> entries = await _repository.entriesBetween(start, end);
+    final List<PrayerEntry> entries = await _repository.entriesBetween(
+      start,
+      end,
+    );
     final List<PrayerEntry> advanced = <PrayerEntry>[];
     for (final PrayerEntry entry in entries) {
       final PrayerEntry next = _stateMachine.advance(entry, now);
