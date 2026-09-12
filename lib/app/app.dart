@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -26,7 +26,7 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ApplicationLocale.apply(ref.read(settingsControllerProvider).localeCode);
+      ApplicationLocale.followSystem();
       _handleLaunchPayload();
       _syncAutomaticLocationUpdates();
     });
@@ -42,10 +42,16 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
   Widget build(BuildContext context) {
     final preferences = ref.watch(settingsControllerProvider);
     final GoRouter router = ref.watch(goRouterProvider);
-    ref.listen<AsyncValue<String>>(notificationPayloadProvider, (_, AsyncValue<String> next) {
+    ref.listen<AsyncValue<String>>(notificationPayloadProvider, (
+      _,
+      AsyncValue<String> next,
+    ) {
       next.whenData((String payload) => _routePayload(router, payload));
     });
-    ref.listen(settingsControllerProvider, (_, _) => _syncAutomaticLocationUpdates());
+    ref.listen(
+      settingsControllerProvider,
+      (_, _) => _syncAutomaticLocationUpdates(),
+    );
 
     final ThemeMode themeMode = switch (preferences.themeMode) {
       'light' => ThemeMode.light,
@@ -83,11 +89,16 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
           languageCode: preferences.localeCode,
         )
         .listen((UserLocation updated) async {
-          final UserLocation? current = ref.read(settingsControllerProvider).location;
-          if (current == null || !current.isAutomatic ||
+          final UserLocation? current = ref
+              .read(settingsControllerProvider)
+              .location;
+          if (current == null ||
+              !current.isAutomatic ||
               (current.latitude - updated.latitude).abs() > 0.005 ||
               (current.longitude - updated.longitude).abs() > 0.005) {
-            await ref.read(settingsControllerProvider.notifier).setLocation(updated);
+            await ref
+                .read(settingsControllerProvider.notifier)
+                .setLocation(updated);
             ref.invalidate(todayPrayerDayProvider);
           }
         });

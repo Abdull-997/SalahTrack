@@ -63,6 +63,12 @@ def patch_android() -> None:
             raise RuntimeError("Could not locate </application> element")
     if (ROOT / "native/android/res/mipmap-anydpi-v26/ic_launcher_app.xml").exists():
         text = text.replace('android:icon="@mipmap/ic_launcher"', 'android:icon="@mipmap/ic_launcher_app"')
+    text = re.sub(
+        r'(<application\b[^>]*\bandroid:label=")[^"]*"',
+        r'\1@string/app_name"',
+        text,
+        count=1,
+    )
     manifest.write_text(text, encoding="utf-8")
 
     native_resources = ROOT / "native/android/res"
@@ -96,6 +102,70 @@ def patch_android() -> None:
     )
 
 
+def localize_ios_project(project: str) -> str:
+    """Register launcher names in both existing and fresh Flutter projects."""
+    language_ids = {
+        'tr': 'B71900100000000000000003',
+        'fr': 'B71900100000000000000004',
+        'es': 'B71900100000000000000005',
+        'en': 'B71900100000000000000006',
+        'de': 'B71900100000000000000007',
+        'ar': 'B71900100000000000000008',
+        'ps': 'B71900100000000000000009',
+        'ur': 'B7190010000000000000000A',
+    }
+
+    def upsert(section: str, identifier: str, entry: str) -> None:
+        nonlocal project
+        pattern = rf'\t\t{identifier} /\*[^\n]*\*/ = \{{.*?\}};'
+        if re.search(pattern, project, re.S):
+            project = re.sub(pattern, lambda _: entry, project, count=1, flags=re.S)
+        else:
+            marker = f'/* End {section} section */'
+            if marker not in project:
+                raise RuntimeError(f'Missing Xcode {section} section')
+            project = project.replace(marker, entry + '\n' + marker, 1)
+
+    for language, identifier in language_ids.items():
+        upsert('PBXFileReference', identifier,
+               f'\t\t{identifier} /* {language} */ = {{isa = PBXFileReference; '
+               f'lastKnownFileType = text.plist.strings; name = {language}; '
+               f'path = {language}.lproj/InfoPlist.strings; sourceTree = "<group>"; }};')
+    children = ''.join(f'\t\t\t\t{identifier} /* {language} */,\n'
+                       for language, identifier in language_ids.items())
+    upsert('PBXVariantGroup', 'B71900100000000000000002',
+           '\t\tB71900100000000000000002 /* InfoPlist.strings */ = {\n'
+           '\t\t\tisa = PBXVariantGroup;\n\t\t\tchildren = (\n' + children +
+           '\t\t\t);\n\t\t\tname = InfoPlist.strings;\n'
+           '\t\t\tsourceTree = "<group>";\n\t\t};')
+    upsert('PBXBuildFile', 'B71900100000000000000001',
+           '\t\tB71900100000000000000001 /* InfoPlist.strings in Resources */ = '
+           '{isa = PBXBuildFile; fileRef = B71900100000000000000002 /* InfoPlist.strings */; };')
+
+    for owner, field, reference in [
+        ('97C146F01CF9000F007C117D', 'children',
+         'B71900100000000000000002 /* InfoPlist.strings */'),
+        ('97C146EC1CF9000F007C117D', 'files',
+         'B71900100000000000000001 /* InfoPlist.strings in Resources */'),
+    ]:
+        pattern = rf'({owner} /\*[^\n]*\*/ = \{{.*?{field} = \()(.*?)(\);)'
+        match = re.search(pattern, project, re.S)
+        if match is None:
+            raise RuntimeError(f'Missing Xcode Runner {field}')
+        if reference not in match.group(2):
+            project = re.sub(pattern, lambda m: m[1] + m[2] +
+                             f'\t\t\t\t{reference},\n\t\t\t' + m[3],
+                             project, count=1, flags=re.S)
+
+    def add_regions(match: re.Match) -> str:
+        regions = match[1].rstrip()
+        for language in language_ids:
+            if not re.search(rf'\b{language}\s*,', regions):
+                regions += f'\n\t\t\t\t{language},'
+        return 'knownRegions = (' + regions + '\n\t\t\t);'
+    return re.sub(r'knownRegions = \((.*?)\);', add_regions, project, count=1, flags=re.S)
+
+
 def patch_ios() -> None:
     native_icons = ROOT / "native/ios/AppIcon.appiconset"
     if native_icons.exists():
@@ -105,10 +175,15 @@ def patch_ios() -> None:
     if native_app_delegate.exists():
         shutil.copy2(native_app_delegate, ROOT / "ios/Runner/AppDelegate.swift")
 
+    for localization in (ROOT / 'native/ios').glob('*.lproj'):
+        shutil.copytree(localization, ROOT / 'ios/Runner' / localization.name, dirs_exist_ok=True)
+
     info_path = ROOT / "ios/Runner/Info.plist"
     with info_path.open("rb") as handle:
         info = plistlib.load(handle)
-    info["CFBundleDisplayName"] = "Salaty"
+    info["CFBundleDisplayName"] = "My Prayer"
+    info["CFBundleName"] = "My Prayer"
+    info["CFBundleLocalizations"] = ['ar', 'de', 'en', 'es', 'fr', 'ps', 'tr', 'ur']
     info["NSLocationWhenInUseUsageDescription"] = (
         "Salaty uses your location to calculate local prayer times and Qibla direction."
     )
@@ -128,6 +203,7 @@ def patch_ios() -> None:
     if project.exists():
         p = project.read_text(encoding="utf-8")
         p = re.sub(r"IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+;", "IPHONEOS_DEPLOYMENT_TARGET = 16.0;", p)
+        p = localize_ios_project(p)
         project.write_text(p, encoding="utf-8")
 
 
