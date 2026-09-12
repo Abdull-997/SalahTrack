@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,16 +25,21 @@ class _Permissions implements NotificationService {
   int exactSettingsOpened = 0;
   bool fail = false;
   bool failInitialization = false;
+  Completer<void>? initialization;
+  Completer<void>? settingsLaunch;
+  Completer<bool>? permissionRead;
+  bool failSettingsLaunch = false;
 
   @override
   Future<void> initialize() async {
+    await initialization?.future;
     if (failInitialization) throw StateError('Initialization unavailable');
   }
 
   @override
   Future<bool> notificationsAllowed() async {
     if (fail) throw StateError('Unavailable');
-    return allowed;
+    return permissionRead == null ? allowed : await permissionRead!.future;
   }
 
   @override
@@ -45,14 +52,19 @@ class _Permissions implements NotificationService {
   @override
   Future<void> openNotificationSettings() async {
     settingsOpened++;
+    await settingsLaunch?.future;
+    if (failSettingsLaunch) throw StateError('Settings unavailable');
   }
 
   @override
-  Future<bool> canScheduleExactly() async => exactAllowed;
+  Future<bool> canScheduleExactly() async =>
+      permissionRead == null ? exactAllowed : await permissionRead!.future;
 
   @override
   Future<void> openExactAlarmSettings() async {
     exactSettingsOpened++;
+    await settingsLaunch?.future;
+    if (failSettingsLaunch) throw StateError('Settings unavailable');
   }
 
   @override
@@ -82,6 +94,118 @@ void main() {
   setUpAll(initializeDateFormatting);
 
   for (final bool exact in [false, true]) {
+    testWidgets(
+      'returning from settings refreshes an in-flight status read (exact: $exact)',
+      (tester) async {
+        final pendingRead = Completer<bool>();
+        final service = _Permissions()..permissionRead = pendingRead;
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [notificationServiceProvider.overrideWithValue(service)],
+            child: _app(
+              exact
+                  ? const NotificationSettingsScreen.exactAlarms()
+                  : const NotificationSettingsScreen(),
+              AppTheme.dark(),
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.tap(
+          find.widgetWithIcon(OutlinedButton, Icons.open_in_new_rounded),
+        );
+        await tester.pump();
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+        service
+          ..permissionRead = null
+          ..allowed = true
+          ..exactAllowed = true;
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.resumed,
+        );
+        pendingRead.complete(false);
+        await tester.pumpAndSettle();
+        final context = tester.element(find.byType(NotificationSettingsScreen));
+        expect(
+          find.text(
+            AppStrings.of(context)
+                .t(exact ? 'exactAlarmsEnabled' : 'notificationsEnabled'),
+          ),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'system settings open while initialization is pending (exact: $exact)',
+      (tester) async {
+        final service = _Permissions()
+          ..initialization = Completer<void>()
+          ..settingsLaunch = Completer<void>();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [notificationServiceProvider.overrideWithValue(service)],
+            child: _app(
+              exact
+                  ? const NotificationSettingsScreen.exactAlarms()
+                  : const NotificationSettingsScreen(),
+              AppTheme.dark(),
+            ),
+          ),
+        );
+        await tester.pump();
+        final button = find.widgetWithIcon(
+          OutlinedButton,
+          Icons.open_in_new_rounded,
+        );
+        await tester.tap(button);
+        await tester.pump();
+        expect(service.settingsOpened, exact ? 0 : 1);
+        expect(service.exactSettingsOpened, exact ? 1 : 0);
+        expect(tester.widget<OutlinedButton>(button).onPressed, isNull);
+        service.settingsLaunch!.complete();
+        await tester.pump();
+        expect(tester.widget<OutlinedButton>(button).onPressed, isNotNull);
+        service.initialization!.complete();
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('failed settings launch can be retried (exact: $exact)', (
+      tester,
+    ) async {
+      final service = _Permissions()..failSettingsLaunch = true;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [notificationServiceProvider.overrideWithValue(service)],
+          child: _app(
+            exact
+                ? const NotificationSettingsScreen.exactAlarms()
+                : const NotificationSettingsScreen(),
+            AppTheme.dark(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final button = find.widgetWithIcon(
+        OutlinedButton,
+        Icons.open_in_new_rounded,
+      );
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(find.text('Erneut versuchen'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      service.failSettingsLaunch = false;
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(service.settingsOpened, exact ? 0 : 2);
+      expect(service.exactSettingsOpened, exact ? 2 : 0);
+      expect(find.text('Erneut versuchen'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets(
       'system settings open after initialization fails (exact: $exact)',
       (tester) async {

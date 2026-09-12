@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Locale;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/notifications/notification_ids.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
@@ -178,21 +180,32 @@ class LocalNotificationService implements NotificationService {
   }
 
   @override
-  Future<void> openNotificationSettings() async {
-    if (Platform.isAndroid) {
-      await _settingsChannel.invokeMethod<void>('openNotificationSettings');
-      return;
-    }
-    await requestPermission();
-  }
+  Future<void> openNotificationSettings() =>
+      _openSettings('openNotificationSettings');
 
   @override
-  Future<void> openExactAlarmSettings() async {
-    if (Platform.isAndroid) {
-      await _settingsChannel.invokeMethod<void>('openExactAlarmSettings');
-      return;
+  Future<void> openExactAlarmSettings() =>
+      _openSettings('openExactAlarmSettings');
+
+  Future<void> _openSettings(String method) async {
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      try {
+        await _settingsChannel.invokeMethod<void>(method);
+        return;
+      } on MissingPluginException {
+        // Older installed builds may not have the custom settings bridge.
+      } on PlatformException {
+        // Fall back to app details if a device cannot open the specific page.
+      }
     }
-    await requestExactAlarmPermission();
+    // This plugin is already registered on both mobile platforms. On iOS it
+    // opens the app's settings even when permission was previously denied.
+    if (!await Geolocator.openAppSettings()) {
+      throw PlatformException(
+        code: 'settings_unavailable',
+        message: 'Unable to open app settings.',
+      );
+    }
   }
 
   @override

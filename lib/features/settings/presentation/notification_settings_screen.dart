@@ -25,6 +25,8 @@ class _NotificationSettingsScreenState
     with WidgetsBindingObserver {
   bool? _allowed;
   bool _working = false;
+  bool _openingSettings = false;
+  bool _refreshPending = false;
   Object? _error;
 
   @override
@@ -42,7 +44,33 @@ class _NotificationSettingsScreenState
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _update();
+    if (state == AppLifecycleState.resumed) {
+      if (_working) {
+        _refreshPending = true;
+      } else {
+        _update();
+      }
+    }
+  }
+
+  Future<void> _openSettings() async {
+    if (_openingSettings) return;
+    setState(() {
+      _openingSettings = true;
+      _error = null;
+    });
+    try {
+      final NotificationService service = ref.read(notificationServiceProvider);
+      if (widget.isExactAlarm) {
+        await service.openExactAlarmSettings();
+      } else {
+        await service.openNotificationSettings();
+      }
+    } catch (error) {
+      if (mounted) setState(() => _error = error);
+    } finally {
+      if (mounted) setState(() => _openingSettings = false);
+    }
   }
 
   Future<void> _update({
@@ -55,7 +83,6 @@ class _NotificationSettingsScreenState
     });
     try {
       final NotificationService service = ref.read(notificationServiceProvider);
-      // Opening system settings must also work if notification setup fails.
       await action?.call(service);
       if (!mounted) return;
       await service.initialize();
@@ -67,7 +94,13 @@ class _NotificationSettingsScreenState
     } catch (error) {
       if (mounted) setState(() => _error = error);
     } finally {
-      if (mounted) setState(() => _working = false);
+      if (mounted) {
+        setState(() => _working = false);
+        if (_refreshPending) {
+          _refreshPending = false;
+          _update();
+        }
+      }
     }
   }
 
@@ -166,13 +199,7 @@ class _NotificationSettingsScreenState
             ),
             const SizedBox(height: 24),
             OutlinedButton.icon(
-              onPressed: _working
-                  ? null
-                  : () => _update(
-                      action: (service) => widget.isExactAlarm
-                          ? service.openExactAlarmSettings()
-                          : service.openNotificationSettings(),
-                    ),
+              onPressed: _openingSettings ? null : _openSettings,
               icon: const Icon(Icons.open_in_new_rounded),
               label: Text(s.t('openSystemSettings')),
             ),
