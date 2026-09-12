@@ -432,25 +432,28 @@ class _DayCardState extends ConsumerState<_DayCard> {
                       _StatusIcon(status: entry.status),
                       const SizedBox(width: 10),
                       Expanded(child: Text(entry.type.localizedName(locale))),
-                      Flexible(
+                      Expanded(
                         flex: 2,
-                        child: Wrap(
-                          alignment: WrapAlignment.end,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 6,
-                          children: <Widget>[
-                            Text(_statusLabel(context, entry.status)),
-                            if (entry.editedAtUtc != null)
-                              Tooltip(
-                                key: ValueKey<String>('edited-${entry.id}'),
-                                message: s.t('edited'),
-                                child: Icon(
-                                  Icons.edit_outlined,
-                                  size: 16,
-                                  color: scheme.primary,
+                        child: Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: Wrap(
+                            alignment: WrapAlignment.end,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 6,
+                            children: <Widget>[
+                              Text(_statusLabel(context, entry.status)),
+                              if (entry.editedAtUtc != null)
+                                Tooltip(
+                                  key: ValueKey<String>('edited-${entry.id}'),
+                                  message: s.t('edited'),
+                                  child: Icon(
+                                    Icons.edit_outlined,
+                                    size: 16,
+                                    color: scheme.primary,
+                                  ),
                                 ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                       ...<Widget>[
