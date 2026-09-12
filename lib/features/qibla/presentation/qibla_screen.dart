@@ -57,7 +57,9 @@ class _QiblaCompass extends StatelessWidget {
       latitude: latitude,
       longitude: longitude,
     );
-    final Stream<CompassEvent>? events = FlutterCompass.events;
+    final Stream<CompassEvent>? events = TickerMode.valuesOf(context).enabled
+        ? FlutterCompass.events
+        : null;
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
       children: <Widget>[

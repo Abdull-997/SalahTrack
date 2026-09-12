@@ -70,7 +70,15 @@ final Provider<PrayerCoordinator> prayerCoordinatorProvider =
 
 final FutureProvider<PrayerDay?> todayPrayerDayProvider =
     FutureProvider<PrayerDay?>((Ref ref) async {
-      final prefs = ref.watch(settingsControllerProvider);
+      final prefs = ref.watch(
+        settingsControllerProvider.select(
+          (prefs) => (
+            location: prefs.location,
+            prayerSettings: prefs.prayerSettings,
+            localeCode: prefs.localeCode,
+          ),
+        ),
+      );
       final location = prefs.location;
       if (location == null) {
         return null;

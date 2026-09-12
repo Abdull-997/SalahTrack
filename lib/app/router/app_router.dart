@@ -10,8 +10,9 @@ import 'package:salah_focus/features/settings/presentation/settings_screen.dart'
 import 'package:salah_focus/shared/widgets/main_shell.dart';
 
 final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
-  final bool onboardingComplete =
-      ref.read(initialPreferencesProvider).onboardingComplete;
+  final bool onboardingComplete = ref
+      .read(initialPreferencesProvider)
+      .onboardingComplete;
   return GoRouter(
     initialLocation: onboardingComplete ? '/home' : '/onboarding',
     routes: <RouteBase>[
@@ -19,32 +20,60 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
       ),
-      ShellRoute(
-        builder: (context, state, child) => MainShell(child: child),
-        routes: <RouteBase>[
-          GoRoute(
-            path: '/home',
-            builder: (context, state) => const HomeScreen(),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            MainShell(navigationShell: navigationShell),
+        branches: <StatefulShellBranch>[
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/home',
+                pageBuilder: (context, state) => NoTransitionPage<void>(
+                  key: state.pageKey,
+                  child: const HomeScreen(),
+                ),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/tracker',
-            builder: (context, state) => const TrackerScreen(),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/tracker',
+                pageBuilder: (context, state) => NoTransitionPage<void>(
+                  key: state.pageKey,
+                  child: const TrackerScreen(),
+                ),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/qibla',
-            builder: (context, state) => const QiblaScreen(),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/qibla',
+                pageBuilder: (context, state) => NoTransitionPage<void>(
+                  key: state.pageKey,
+                  child: const QiblaScreen(),
+                ),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/settings',
-            builder: (context, state) => const SettingsScreen(),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/settings',
+                pageBuilder: (context, state) => NoTransitionPage<void>(
+                  key: state.pageKey,
+                  child: const SettingsScreen(),
+                ),
+              ),
+            ],
           ),
         ],
       ),
       GoRoute(
         path: '/reminder/:prayerId',
-        builder: (context, state) => PrayerReminderScreen(
-          prayerId: state.pathParameters['prayerId']!,
-        ),
+        builder: (context, state) =>
+            PrayerReminderScreen(prayerId: state.pathParameters['prayerId']!),
       ),
     ],
   );

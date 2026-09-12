@@ -21,21 +21,38 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   Timer? _timer;
-  DateTime _nowUtc = DateTime.now().toUtc();
-  int _lastMinute = -1;
+  late DateTime _nowUtc;
+  late int _lastMinute;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted) return;
-      final DateTime now = DateTime.now().toUtc();
-      setState(() => _nowUtc = now);
-      if (_lastMinute != now.minute) {
-        _lastMinute = now.minute;
-        ref.invalidate(todayPrayerDayProvider);
-      }
+    _nowUtc = ref.read(clockServiceProvider).nowUtc();
+    _lastMinute = _nowUtc.millisecondsSinceEpoch ~/ 60000;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _timer?.cancel();
+    // Kept-alive tabs must not repaint or refresh data while offstage.
+    if (!TickerMode.valuesOf(context).enabled) return;
+    _nowUtc = ref.read(clockServiceProvider).nowUtc();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && TickerMode.valuesOf(context).enabled) _tick();
     });
+  }
+
+  void _tick() {
+    if (!mounted) return;
+    final DateTime now = ref.read(clockServiceProvider).nowUtc();
+    setState(() => _nowUtc = now);
+    final int minute = now.millisecondsSinceEpoch ~/ 60000;
+    if (_lastMinute != minute) {
+      _lastMinute = minute;
+      ref.invalidate(todayPrayerDayProvider);
+    }
   }
 
   @override
@@ -106,6 +123,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           dayAsync.when(
+            skipLoadingOnReload: true,
             data: (PrayerDay? day) {
               if (day == null) {
                 return SliverFillRemaining(

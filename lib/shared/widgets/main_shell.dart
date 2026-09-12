@@ -3,39 +3,20 @@ import 'package:go_router/go_router.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 
 class MainShell extends StatelessWidget {
-  const MainShell({required this.child, super.key});
+  const MainShell({required this.navigationShell, super.key});
 
-  final Widget child;
-
-  int _index(String location) {
-    if (location.startsWith('/tracker')) return 1;
-    if (location.startsWith('/qibla')) return 2;
-    if (location.startsWith('/settings')) return 3;
-    return 0;
-  }
+  final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context) {
     final AppStrings s = AppStrings.of(context);
-    final String location = GoRouterState.of(context).uri.path;
     return Scaffold(
-      body: SafeArea(child: child),
+      body: SafeArea(child: navigationShell),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _index(location),
+        selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (int index) {
-          switch (index) {
-            case 0:
-              context.go('/home');
-              break;
-            case 1:
-              context.go('/tracker');
-              break;
-            case 2:
-              context.go('/qibla');
-              break;
-            case 3:
-              context.go('/settings');
-              break;
+          if (index != navigationShell.currentIndex) {
+            navigationShell.goBranch(index);
           }
         },
         destinations: <NavigationDestination>[

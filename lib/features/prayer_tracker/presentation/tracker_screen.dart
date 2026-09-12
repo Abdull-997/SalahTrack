@@ -16,14 +16,16 @@ class TrackerData {
 }
 
 final trackerDataProvider = FutureProvider<TrackerData>((Ref ref) async {
-  final prefs = ref.watch(settingsControllerProvider);
+  final location = ref.watch(
+    settingsControllerProvider.select((prefs) => prefs.location),
+  );
   final DateTime nowUtc = ref.watch(clockServiceProvider).nowUtc();
-  if (prefs.location == null) {
+  if (location == null) {
     return TrackerData(entries: const <PrayerEntry>[], localNow: nowUtc);
   }
 
   final day = await ref.watch(todayPrayerDayProvider.future);
-  final String timezoneId = day?.timezoneId ?? prefs.location!.timezoneId;
+  final String timezoneId = day?.timezoneId ?? location.timezoneId;
   final DateTime localNow = TimezoneService.toLocal(nowUtc, timezoneId);
   final DateTime first = DateTime(localNow.year, localNow.month, 1);
   // Include the previous two calendar days even across a month/year boundary.
@@ -69,6 +71,7 @@ class TrackerScreen extends ConsumerWidget {
         ],
       ),
       body: tracker.when(
+        skipLoadingOnReload: true,
         data: (TrackerData data) => _TrackerContent(
           entries: data.entries,
           localNow: data.localNow,
