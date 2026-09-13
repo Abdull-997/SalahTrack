@@ -27,6 +27,17 @@ class PrayerCoordinator {
   final PrayerNotificationPlanner _planner;
   final PrayerStateMachine _stateMachine = const PrayerStateMachine();
   final Set<String> _syncedKeys = <String>{};
+  Future<void> _pendingMutation = Future<void>.value();
+
+  Future<T> _serialize<T>(Future<T> Function() action) {
+    final Future<T> result = _pendingMutation.then((_) => action());
+    // A failed operation must not prevent subsequent retries or prayer actions.
+    _pendingMutation = result.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    return result;
+  }
 
   Future<PrayerDay?> loadToday({
     required UserLocation location,
@@ -78,28 +89,35 @@ class PrayerCoordinator {
       );
     }
 
-    final List<PrayerEntry> advanced = <PrayerEntry>[];
-    for (final PrayerEntry entry in day.entries) {
-      final PrayerEntry next = _stateMachine.advance(entry, nowUtc);
-      advanced.add(next);
-      await _repository.saveEntry(next);
-    }
-    day = day.copyWith(entries: advanced);
+    final PrayerDay resolvedDay = day;
+    return _serialize(() async {
+      // A notification action may have completed during the network fetch above.
+      final PrayerDay currentDay =
+          await _repository.day(resolvedDay.localDate) ?? resolvedDay;
+      final List<PrayerEntry> advanced = <PrayerEntry>[];
+      for (final PrayerEntry entry in currentDay.entries) {
+        final PrayerEntry next = _stateMachine.advance(entry, nowUtc);
+        advanced.add(next);
+        await _repository.saveEntry(next);
+      }
+      final PrayerDay updatedDay = currentDay.copyWith(entries: advanced);
 
-    final String today = day.localDate;
-    final String end = _isoDate(horizonLocal);
-    final List<PrayerEntry> upcoming = await _repository.entriesBetween(
-      today,
-      end,
-    );
-    await _planner.reschedule(
-      upcoming,
-      prayerName: (PrayerEntry entry) => entry.type.localizedName(languageCode),
-      languageCode: languageCode,
-      nowUtc: nowUtc,
-    );
+      final String today = updatedDay.localDate;
+      final String end = _isoDate(horizonLocal);
+      final List<PrayerEntry> upcoming = await _repository.entriesBetween(
+        today,
+        end,
+      );
+      await _planner.reschedule(
+        upcoming,
+        prayerName: (PrayerEntry entry) =>
+            entry.type.localizedName(languageCode),
+        languageCode: languageCode,
+        nowUtc: nowUtc,
+      );
 
-    return day;
+      return updatedDay;
+    });
   }
 
   Future<PrayerDay?> _resolveCurrentDay(DateTime nowUtc) async {
@@ -151,7 +169,7 @@ class PrayerCoordinator {
     }
   }
 
-  Future<PrayerEntry?> prayerById(String id) async {
+  Future<PrayerEntry?> prayerById(String id) => _serialize(() async {
     final PrayerEntry? entry = await _database.prayerEntryById(id);
     if (entry == null) {
       return null;
@@ -159,20 +177,24 @@ class PrayerCoordinator {
     final PrayerEntry advanced = _stateMachine.advance(entry, _clock.nowUtc());
     await _repository.saveEntry(advanced);
     return advanced;
-  }
+  });
 
-  Future<PrayerEntry> confirm(PrayerEntry prayer) async {
-    final PrayerEntry updated = _stateMachine.confirm(prayer, _clock.nowUtc());
+  Future<PrayerEntry> confirm(PrayerEntry prayer) => _serialize(() async {
+    final PrayerEntry current =
+        await _database.prayerEntryById(prayer.id) ?? prayer;
+    final PrayerEntry updated = current.status == PrayerStatus.prayed
+        ? current
+        : _stateMachine.confirm(current, _clock.nowUtc());
     await _repository.saveEntry(updated);
     await _notifications.cancelPrayer(updated);
     return updated;
-  }
+  });
 
   /// Corrects a recorded prayer without reviving any old reminders.
   Future<PrayerEntry> correctHistoricalPrayer(
     PrayerEntry prayer, {
     required bool prayed,
-  }) async {
+  }) => _serialize(() async {
     final DateTime now = _clock.nowUtc();
     final bool isPastDay =
         prayer.localDate.compareTo(
@@ -189,37 +211,52 @@ class PrayerCoordinator {
     await _repository.saveEntry(updated);
     await _notifications.cancelPrayer(prayer);
     return updated;
-  }
+  });
 
   Future<PrayerEntry> snooze(
     PrayerEntry prayer,
     PrayerSettings settings,
     String prayerName,
     String languageCode,
-  ) async {
+  ) => _serialize(() async {
+    final PrayerEntry current = _stateMachine.advance(
+      await _database.prayerEntryById(prayer.id) ?? prayer,
+      _clock.nowUtc(),
+    );
+    // Replayed actions and a second tap must not extend an active snooze.
+    if (current.status == PrayerStatus.snoozed &&
+        current.snoozedUntilUtc?.isAfter(_clock.nowUtc()) == true) {
+      return current;
+    }
     final PrayerEntry updated = _stateMachine.snooze(
-      prayer,
+      current,
       _clock.nowUtc(),
       Duration(minutes: settings.snoozeMinutes),
       maximumSnoozes: settings.maxSnoozes,
     );
     await _repository.saveEntry(updated);
-    await _notifications.cancelPrayer(prayer);
-    await _notifications.scheduleSnoozeReminder(
-      updated,
-      prayerName,
-      languageCode: languageCode,
-    );
+    try {
+      await _notifications.scheduleSnoozeReminder(
+        updated,
+        prayerName,
+        languageCode: languageCode,
+      );
+    } catch (_) {
+      await _repository.saveEntry(current);
+      rethrow;
+    }
     return updated;
-  }
+  });
 
   Future<PrayerEntry> skip(
     PrayerEntry prayer,
     PrayerSettings settings,
     String prayerName,
     String languageCode,
-  ) async {
-    final PrayerEntry updated = _stateMachine.skip(prayer);
+  ) => _serialize(() async {
+    final PrayerEntry current =
+        await _database.prayerEntryById(prayer.id) ?? prayer;
+    final PrayerEntry updated = _stateMachine.skip(current);
     await _repository.saveEntry(updated);
     await _notifications.cancelPrayer(prayer);
     if (settings.softReminderAfterSkip) {
@@ -230,22 +267,23 @@ class PrayerCoordinator {
       );
     }
     return updated;
-  }
+  });
 
-  Future<List<PrayerEntry>> entriesBetween(String start, String end) async {
-    final DateTime now = _clock.nowUtc();
-    final List<PrayerEntry> entries = await _repository.entriesBetween(
-      start,
-      end,
-    );
-    final List<PrayerEntry> advanced = <PrayerEntry>[];
-    for (final PrayerEntry entry in entries) {
-      final PrayerEntry next = _stateMachine.advance(entry, now);
-      advanced.add(next);
-      await _repository.saveEntry(next);
-    }
-    return advanced;
-  }
+  Future<List<PrayerEntry>> entriesBetween(String start, String end) =>
+      _serialize(() async {
+        final DateTime now = _clock.nowUtc();
+        final List<PrayerEntry> entries = await _repository.entriesBetween(
+          start,
+          end,
+        );
+        final List<PrayerEntry> advanced = <PrayerEntry>[];
+        for (final PrayerEntry entry in entries) {
+          final PrayerEntry next = _stateMachine.advance(entry, now);
+          advanced.add(next);
+          await _repository.saveEntry(next);
+        }
+        return advanced;
+      });
 
   static String _isoDate(DateTime date) =>
       '${date.year.toString().padLeft(4, '0')}-'

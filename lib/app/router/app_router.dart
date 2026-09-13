@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:salah_focus/core/notifications/prayer_notification_payload.dart';
 import 'package:salah_focus/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:salah_focus/features/prayer_times/presentation/prayer_reminder_screen.dart';
 import 'package:salah_focus/features/prayer_times/presentation/home_screen.dart';
@@ -72,8 +73,22 @@ final Provider<GoRouter> goRouterProvider = Provider<GoRouter>((Ref ref) {
       ),
       GoRoute(
         path: '/reminder/:prayerId',
-        builder: (context, state) =>
-            PrayerReminderScreen(prayerId: state.pathParameters['prayerId']!),
+        // Notification actions can finish immediately. Do not retain an
+        // outgoing Home shell in an entrance animation when Snooze returns
+        // to that same shell, which would duplicate its global key.
+        pageBuilder: (context, state) => NoTransitionPage<void>(
+          key: state.pageKey,
+          child: PrayerReminderScreen(
+            prayerId: state.pathParameters['prayerId']!,
+            action:
+                PrayerNotificationAction.tryParse(
+                  state.uri.queryParameters['action'],
+                ) ??
+                PrayerNotificationAction.open,
+            eventId: state.uri.queryParameters['eventId'],
+            deliveryId: state.uri.queryParameters['delivery'],
+          ),
+        ),
       ),
     ],
   );

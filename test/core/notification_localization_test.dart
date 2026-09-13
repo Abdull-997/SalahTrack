@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:salah_focus/core/notifications/local_notification_service.dart';
+import 'package:salah_focus/core/notifications/notification_ids.dart';
+import 'package:salah_focus/core/notifications/prayer_notification_payload.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
@@ -13,9 +17,19 @@ class _Plugin implements FlutterLocalNotificationsPlugin {
       String? body,
       NotificationDetails details,
       String? payload,
+      int id,
+      TZDateTime scheduledDate,
     })
   >
   scheduled = [];
+  InitializationSettings? settings;
+  DidReceiveNotificationResponseCallback? onResponse;
+  NotificationAppLaunchDetails? launchDetails;
+  Completer<void>? initializeGate;
+  int initializeCalls = 0;
+  bool failSchedule = false;
+  final List<int> cancelled = [];
+  final List<PendingNotificationRequest> pending = [];
 
   @override
   Future<bool?> initialize({
@@ -23,11 +37,25 @@ class _Plugin implements FlutterLocalNotificationsPlugin {
     DidReceiveNotificationResponseCallback? onDidReceiveNotificationResponse,
     DidReceiveBackgroundNotificationResponseCallback?
     onDidReceiveBackgroundNotificationResponse,
-  }) async => true;
+  }) async {
+    initializeCalls++;
+    this.settings = settings;
+    onResponse = onDidReceiveNotificationResponse;
+    await initializeGate?.future;
+    return true;
+  }
 
   @override
   Future<NotificationAppLaunchDetails?>
-  getNotificationAppLaunchDetails() async => null;
+  getNotificationAppLaunchDetails() async => launchDetails;
+
+  @override
+  Future<void> cancel({required int id, String? tag}) async =>
+      cancelled.add(id);
+
+  @override
+  Future<List<PendingNotificationRequest>>
+  pendingNotificationRequests() async => pending;
 
   @override
   Future<void> zonedSchedule({
@@ -40,11 +68,14 @@ class _Plugin implements FlutterLocalNotificationsPlugin {
     String? payload,
     DateTimeComponents? matchDateTimeComponents,
   }) async {
+    if (failSchedule) throw StateError('Scheduling failed');
     scheduled.add((
+      id: id,
       title: title,
       body: body,
       details: notificationDetails,
       payload: payload,
+      scheduledDate: scheduledDate,
     ));
   }
 
@@ -112,15 +143,200 @@ void main() {
         expect(plugin.scheduled[1].details.android!.channelName, channelName);
         expect(
           plugin.scheduled[1].details.android!.channelId,
-          'prayer_reminders',
+          'prayer_alarms_v2',
         );
         for (final item in plugin.scheduled) {
           expect(item.body, isNotEmpty);
           expect(item.body, isNot(contains('your')));
           expect(item.body, isNot(contains('{prayer}')));
         }
-        expect(plugin.scheduled.last.payload, 'soft:test-isha');
+        expect(
+          PrayerNotificationPayload.tryParse(plugin.scheduled.last.payload)!
+              .kind,
+          'soft',
+        );
+        for (final item in plugin.scheduled.take(3)) {
+          final android = item.details.android!;
+          expect(android.fullScreenIntent, isTrue);
+          expect(android.ongoing, isTrue);
+          expect(android.autoCancel, isFalse);
+          expect(android.category, AndroidNotificationCategory.alarm);
+          expect(android.audioAttributesUsage, AudioAttributesUsage.alarm);
+          expect(android.actions!.map((action) => action.id), [
+            'mark_prayed',
+            'snooze',
+          ]);
+          expect(
+            android.actions!.every(
+              (action) =>
+                  action.showsUserInterface && !action.cancelNotification,
+            ),
+            isTrue,
+          );
+          expect(
+            item.details.iOS!.interruptionLevel,
+            InterruptionLevel.timeSensitive,
+          );
+          expect(item.details.iOS!.categoryIdentifier, 'prayer_actions_$code');
+          expect(
+            PrayerNotificationPayload.tryParse(item.payload)!.eventId,
+            isNotEmpty,
+          );
+        }
+        final category = plugin.settings!.iOS!.notificationCategories
+            .singleWhere(
+              (category) => category.identifier == 'prayer_actions_$code',
+            );
+        expect(category.actions.map((action) => action.identifier), [
+          'mark_prayed',
+          'snooze',
+        ]);
+        expect(
+          category.actions.every(
+            (action) => action.options.contains(
+              DarwinNotificationActionOption.foreground,
+            ),
+          ),
+          isTrue,
+        );
+        expect(
+          plugin.scheduled.last.details.android!.fullScreenIntent,
+          isFalse,
+        );
       },
     );
   }
+
+  test(
+    'cold-start responses preserve the action and are consumed once',
+    () async {
+      final plugin = _Plugin()
+        ..launchDetails = const NotificationAppLaunchDetails(
+          true,
+          notificationResponse: NotificationResponse(
+            notificationResponseType:
+                NotificationResponseType.selectedNotificationAction,
+            actionId: 'mark_prayed',
+            payload: 'prayer:2026-09-13:isha',
+          ),
+        );
+      final service = LocalNotificationService(plugin: plugin);
+      final payload = PrayerNotificationPayload.tryParse(
+        await service.takeInitialPayload(),
+      )!;
+      expect(payload.prayerId, '2026-09-13:isha');
+      expect(payload.action, PrayerNotificationAction.markPrayed);
+      expect(await service.takeInitialPayload(), isNull);
+    },
+  );
+
+  test(
+    'initialization is shared and early action callbacks are buffered',
+    () async {
+      final plugin = _Plugin()..initializeGate = Completer<void>();
+      final service = LocalNotificationService(plugin: plugin);
+      final first = service.initialize();
+      final second = service.initialize();
+      plugin.onResponse!(
+        const NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotificationAction,
+          actionId: 'snooze',
+          payload: 'reminder:2026-09-13:isha',
+        ),
+      );
+      plugin.initializeGate!.complete();
+      await Future.wait([first, second]);
+      expect(plugin.initializeCalls, 1);
+      final payload = PrayerNotificationPayload.tryParse(
+        await service.payloads.first,
+      )!;
+      expect(payload.action, PrayerNotificationAction.snooze);
+      expect(payload.prayerId, '2026-09-13:isha');
+    },
+  );
+
+  test('malformed and dismissal responses do not navigate', () async {
+    final plugin = _Plugin();
+    final service = LocalNotificationService(plugin: plugin);
+    await service.initialize();
+    final values = <String>[];
+    final subscription = service.payloads.listen(values.add);
+    plugin.onResponse!(
+      const NotificationResponse(
+        notificationResponseType: NotificationResponseType.selectedNotification,
+        payload: 'invalid',
+      ),
+    );
+    plugin.onResponse!(
+      const NotificationResponse(
+        notificationResponseType:
+            NotificationResponseType.notificationDismissed,
+        payload: 'prayer:2026-09-13:isha',
+      ),
+    );
+    await Future<void>.delayed(Duration.zero);
+    expect(values, isEmpty);
+    await subscription.cancel();
+  });
+
+  test(
+    'snooze schedules a different slot before cancelling the delivered alert',
+    () async {
+      final plugin = _Plugin();
+      final service = LocalNotificationService(plugin: plugin);
+      final now = DateTime.now().toUtc();
+      final entry = PrayerEntry(
+        id: '2026-09-13:isha',
+        localDate: '2026-09-13',
+        type: PrayerType.isha,
+        scheduledAtUtc: now,
+        timezoneId: 'UTC',
+        graceEndsAtUtc: now,
+        trackingEndsAtUtc: now.add(const Duration(hours: 4)),
+        status: PrayerStatus.snoozed,
+        snoozeCount: 1,
+        snoozedUntilUtc: now.add(const Duration(minutes: 20)),
+      );
+      plugin.failSchedule = true;
+      await expectLater(
+        service.scheduleSnoozeReminder(entry, 'Isha', languageCode: 'en'),
+        throwsStateError,
+      );
+      expect(plugin.cancelled, isEmpty);
+      plugin.failSchedule = false;
+      await service.scheduleSnoozeReminder(entry, 'Isha', languageCode: 'en');
+      expect(plugin.scheduled.single.id, NotificationIds.snooze(entry));
+      final deliveredAt = plugin.scheduled.single.scheduledDate.toUtc();
+      expect(deliveredAt.isBefore(entry.snoozedUntilUtc!), isFalse);
+      expect(deliveredAt.difference(entry.snoozedUntilUtc!), lessThan(const Duration(seconds: 1)));
+      expect(deliveredAt.microsecond, 0);
+      expect(deliveredAt.millisecond, 0);
+      expect(plugin.cancelled, contains(NotificationIds.previousSnooze(entry)));
+      expect(plugin.cancelled, isNot(contains(NotificationIds.snooze(entry))));
+      await service.cancelPrayer(entry);
+      expect(plugin.cancelled, contains(NotificationIds.snooze(entry)));
+    },
+  );
+
+  test('planner cancellation recognizes both structured and legacy prayer payloads', () async {
+    final plugin = _Plugin()
+      ..pending.addAll([
+        const PendingNotificationRequest(1, null, null, 'prayer:old-isha'),
+        PendingNotificationRequest(
+          2,
+          null,
+          null,
+          const PrayerNotificationPayload(
+            prayerId: 'new-isha',
+            kind: 'snooze',
+          ).encode(),
+        ),
+        const PendingNotificationRequest(3, null, null, 'soft:old-isha'),
+        const PendingNotificationRequest(4, null, null, 'another-feature'),
+      ]);
+    await LocalNotificationService(plugin: plugin)
+        .cancelAllFuturePrayerNotifications();
+    expect(plugin.cancelled, [1, 2]);
+  });
 }

@@ -23,6 +23,8 @@ class _Permissions implements NotificationService {
   int settingsOpened = 0;
   bool exactAllowed = false;
   int exactSettingsOpened = 0;
+  bool fullScreenAllowed = false;
+  int fullScreenSettingsOpened = 0;
   bool fail = false;
   bool failInitialization = false;
   Completer<void>? initialization;
@@ -68,6 +70,17 @@ class _Permissions implements NotificationService {
   }
 
   @override
+  Future<bool> canUseFullScreenIntent() async =>
+      permissionRead == null ? fullScreenAllowed : await permissionRead!.future;
+
+  @override
+  Future<void> openFullScreenIntentSettings() async {
+    fullScreenSettingsOpened++;
+    await settingsLaunch?.future;
+    if (failSettingsLaunch) throw StateError('Settings unavailable');
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -93,21 +106,23 @@ double _contrast(Color foreground, Color background) {
 void main() {
   setUpAll(initializeDateFormatting);
 
-  for (final bool exact in [false, true]) {
+  for (final String permission in ['notifications', 'exact', 'fullScreen']) {
+    final bool exact = permission == 'exact';
+    final bool fullScreen = permission == 'fullScreen';
+    final Widget screen = fullScreen
+        ? const NotificationSettingsScreen.fullScreenAlarms()
+        : exact
+        ? const NotificationSettingsScreen.exactAlarms()
+        : const NotificationSettingsScreen();
     testWidgets(
-      'returning from settings refreshes an in-flight status read (exact: $exact)',
+      'returning from settings refreshes an in-flight $permission status read',
       (tester) async {
         final pendingRead = Completer<bool>();
         final service = _Permissions()..permissionRead = pendingRead;
         await tester.pumpWidget(
           ProviderScope(
             overrides: [notificationServiceProvider.overrideWithValue(service)],
-            child: _app(
-              exact
-                  ? const NotificationSettingsScreen.exactAlarms()
-                  : const NotificationSettingsScreen(),
-              AppTheme.dark(),
-            ),
+            child: _app(screen, AppTheme.dark()),
           ),
         );
         await tester.pump();
@@ -119,6 +134,7 @@ void main() {
         service
           ..permissionRead = null
           ..allowed = true
+          ..fullScreenAllowed = true
           ..exactAllowed = true;
         tester.binding.handleAppLifecycleStateChanged(
           AppLifecycleState.resumed,
@@ -128,8 +144,13 @@ void main() {
         final context = tester.element(find.byType(NotificationSettingsScreen));
         expect(
           find.text(
-            AppStrings.of(context)
-                .t(exact ? 'exactAlarmsEnabled' : 'notificationsEnabled'),
+            AppStrings.of(context).t(
+              fullScreen
+                  ? 'fullScreenAlarmsEnabled'
+                  : exact
+                  ? 'exactAlarmsEnabled'
+                  : 'notificationsEnabled',
+            ),
           ),
           findsOneWidget,
         );
@@ -138,7 +159,7 @@ void main() {
     );
 
     testWidgets(
-      'system settings open while initialization is pending (exact: $exact)',
+      '$permission system settings open while initialization is pending',
       (tester) async {
         final service = _Permissions()
           ..initialization = Completer<void>()
@@ -146,12 +167,7 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [notificationServiceProvider.overrideWithValue(service)],
-            child: _app(
-              exact
-                  ? const NotificationSettingsScreen.exactAlarms()
-                  : const NotificationSettingsScreen(),
-              AppTheme.dark(),
-            ),
+            child: _app(screen, AppTheme.dark()),
           ),
         );
         await tester.pump();
@@ -161,8 +177,9 @@ void main() {
         );
         await tester.tap(button);
         await tester.pump();
-        expect(service.settingsOpened, exact ? 0 : 1);
+        expect(service.settingsOpened, !exact && !fullScreen ? 1 : 0);
         expect(service.exactSettingsOpened, exact ? 1 : 0);
+        expect(service.fullScreenSettingsOpened, fullScreen ? 1 : 0);
         expect(tester.widget<OutlinedButton>(button).onPressed, isNull);
         service.settingsLaunch!.complete();
         await tester.pump();
@@ -173,19 +190,14 @@ void main() {
       },
     );
 
-    testWidgets('failed settings launch can be retried (exact: $exact)', (
+    testWidgets('failed $permission settings launch can be retried', (
       tester,
     ) async {
       final service = _Permissions()..failSettingsLaunch = true;
       await tester.pumpWidget(
         ProviderScope(
           overrides: [notificationServiceProvider.overrideWithValue(service)],
-          child: _app(
-            exact
-                ? const NotificationSettingsScreen.exactAlarms()
-                : const NotificationSettingsScreen(),
-            AppTheme.dark(),
-          ),
+          child: _app(screen, AppTheme.dark()),
         ),
       );
       await tester.pumpAndSettle();
@@ -200,37 +212,33 @@ void main() {
       service.failSettingsLaunch = false;
       await tester.tap(button);
       await tester.pumpAndSettle();
-      expect(service.settingsOpened, exact ? 0 : 2);
+      expect(service.settingsOpened, !exact && !fullScreen ? 2 : 0);
       expect(service.exactSettingsOpened, exact ? 2 : 0);
+      expect(service.fullScreenSettingsOpened, fullScreen ? 2 : 0);
       expect(find.text('Erneut versuchen'), findsNothing);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets(
-      'system settings open after initialization fails (exact: $exact)',
-      (tester) async {
-        final service = _Permissions()..failInitialization = true;
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [notificationServiceProvider.overrideWithValue(service)],
-            child: _app(
-              exact
-                  ? const NotificationSettingsScreen.exactAlarms()
-                  : const NotificationSettingsScreen(),
-              AppTheme.dark(),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-        await tester.tap(
-          find.widgetWithIcon(OutlinedButton, Icons.open_in_new_rounded),
-        );
-        await tester.pumpAndSettle();
-        expect(service.settingsOpened, exact ? 0 : 1);
-        expect(service.exactSettingsOpened, exact ? 1 : 0);
-        expect(tester.takeException(), isNull);
-      },
-    );
+    testWidgets('$permission system settings open after initialization fails', (
+      tester,
+    ) async {
+      final service = _Permissions()..failInitialization = true;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [notificationServiceProvider.overrideWithValue(service)],
+          child: _app(screen, AppTheme.dark()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.widgetWithIcon(OutlinedButton, Icons.open_in_new_rounded),
+      );
+      await tester.pumpAndSettle();
+      expect(service.settingsOpened, !exact && !fullScreen ? 1 : 0);
+      expect(service.exactSettingsOpened, exact ? 1 : 0);
+      expect(service.fullScreenSettingsOpened, fullScreen ? 1 : 0);
+      expect(tester.takeException(), isNull);
+    });
   }
 
   for (final bool initiallyAllowed in [false, true]) {
@@ -297,6 +305,63 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets('Android full-screen permission page stays dark and refreshes', (
+    tester,
+  ) async {
+    final service = _Permissions();
+    final strings = AppStrings(const Locale('de'));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [notificationServiceProvider.overrideWithValue(service)],
+        child: _app(const SettingsScreen(), AppTheme.dark()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final tile = find.text(strings.t('fullScreenAlarmPermission'));
+    await tester.scrollUntilVisible(tile.hitTestable(), 200);
+    await tester.tap(tile);
+    await tester.pumpAndSettle();
+    final page = find.byType(NotificationSettingsScreen);
+    expect(
+      tester.widget<NotificationSettingsScreen>(page).isFullScreenAlarm,
+      isTrue,
+    );
+    expect(Theme.of(tester.element(page)).brightness, Brightness.dark);
+    expect(find.text(strings.t('fullScreenAlarmsDisabled')), findsOneWidget);
+    expect(service.fullScreenSettingsOpened, 0);
+    expect(service.requests, 0);
+    expect(find.byType(FilledButton), findsNothing);
+    await tester.tap(find.text(strings.t('openFullScreenAlarmSettings')));
+    await tester.pumpAndSettle();
+    expect(service.fullScreenSettingsOpened, 1);
+    expect(service.settingsOpened, 0);
+    expect(service.exactSettingsOpened, 0);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    service.fullScreenAllowed = true;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(find.text(strings.t('fullScreenAlarmsEnabled')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+  testWidgets('iOS settings omit Android full-screen permission', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(child: _app(const SettingsScreen(), AppTheme.dark())),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Snooze-Dauer').hitTestable(),
+      200,
+    );
+    expect(
+      find.text(AppStrings(const Locale('de')).t('fullScreenAlarmPermission')),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets(
     'notification settings stay dark and open Android only explicitly',

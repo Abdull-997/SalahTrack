@@ -6,40 +6,79 @@ import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 
 void main() {
-  test('planner schedules prayer and grace reminder for future prayer', () async {
-    final FakeNotificationService service = FakeNotificationService();
-    final PrayerNotificationPlanner planner = PrayerNotificationPlanner(service);
-    final PrayerEntry entry = _entry(DateTime.utc(2026, 8, 15, 10));
+  test(
+    'planner schedules prayer and grace reminder for future prayer',
+    () async {
+      final FakeNotificationService service = FakeNotificationService();
+      final PrayerNotificationPlanner planner = PrayerNotificationPlanner(
+        service,
+      );
+      final PrayerEntry entry = _entry(DateTime.utc(2026, 8, 15, 10));
 
-    await planner.reschedule(<PrayerEntry>[entry], prayerName: (_) => 'Dhuhr', languageCode: 'en', nowUtc: DateTime.utc(2026, 8, 14, 10));
+      await planner.reschedule(
+        <PrayerEntry>[entry],
+        prayerName: (_) => 'Dhuhr',
+        languageCode: 'en',
+        nowUtc: DateTime.utc(2026, 8, 14, 10),
+      );
 
-    expect(service.cancelledPending, 1);
-    expect(service.prayers, <String>[entry.id]);
-    expect(service.grace, <String>[entry.id]);
-  });
+      expect(service.cancelledPending, 1);
+      expect(service.prayers, <String>[entry.id]);
+      expect(service.grace, <String>[entry.id]);
+    },
+  );
 
   test('planner ignores final prayers', () async {
     final FakeNotificationService service = FakeNotificationService();
-    final PrayerNotificationPlanner planner = PrayerNotificationPlanner(service);
-    final PrayerEntry entry = _entry(DateTime.utc(2026, 8, 15, 10)).copyWith(status: PrayerStatus.prayed);
+    final PrayerNotificationPlanner planner = PrayerNotificationPlanner(
+      service,
+    );
+    final PrayerEntry entry = _entry(DateTime.utc(2026, 8, 15, 10))
+        .copyWith(status: PrayerStatus.prayed);
 
-    await planner.reschedule(<PrayerEntry>[entry], prayerName: (_) => 'Dhuhr', languageCode: 'en', nowUtc: DateTime.utc(2026, 8, 14, 10));
+    await planner.reschedule(
+      <PrayerEntry>[entry],
+      prayerName: (_) => 'Dhuhr',
+      languageCode: 'en',
+      nowUtc: DateTime.utc(2026, 8, 14, 10),
+    );
 
     expect(service.prayers, isEmpty);
     expect(service.grace, isEmpty);
   });
+
+  test(
+    'an active snooze suppresses prayer and grace alerts during refresh',
+    () async {
+      final service = FakeNotificationService();
+      final now = DateTime.utc(2026, 8, 15, 10);
+      final entry = _entry(now).copyWith(
+        status: PrayerStatus.snoozed,
+        snoozedUntilUtc: now.add(const Duration(minutes: 20)),
+      );
+      await PrayerNotificationPlanner(service).reschedule(
+        [entry],
+        prayerName: (_) => 'Dhuhr',
+        languageCode: 'en',
+        nowUtc: now,
+      );
+      expect(service.prayers, isEmpty);
+      expect(service.grace, isEmpty);
+      expect(service.snoozes, [entry.id]);
+    },
+  );
 }
 
 PrayerEntry _entry(DateTime scheduled) => PrayerEntry(
-      id: '2026-08-15:dhuhr',
-      localDate: '2026-08-15',
-      type: PrayerType.dhuhr,
-      scheduledAtUtc: scheduled,
-      timezoneId: 'Europe/Berlin',
-      graceEndsAtUtc: scheduled.add(const Duration(hours: 1)),
-      trackingEndsAtUtc: scheduled.add(const Duration(hours: 4)),
-      status: PrayerStatus.upcoming,
-    );
+  id: '2026-08-15:dhuhr',
+  localDate: '2026-08-15',
+  type: PrayerType.dhuhr,
+  scheduledAtUtc: scheduled,
+  timezoneId: 'Europe/Berlin',
+  graceEndsAtUtc: scheduled.add(const Duration(hours: 1)),
+  trackingEndsAtUtc: scheduled.add(const Duration(hours: 4)),
+  status: PrayerStatus.upcoming,
+);
 
 class FakeNotificationService implements NotificationService {
   @override
@@ -47,10 +86,20 @@ class FakeNotificationService implements NotificationService {
 
   final List<String> prayers = <String>[];
   final List<String> grace = <String>[];
+  final List<String> snoozes = <String>[];
   int cancelledPending = 0;
 
   @override
   Future<bool> canScheduleExactly() async => true;
+
+  @override
+  Future<bool> canUseFullScreenIntent() async => true;
+
+  @override
+  Future<bool> requestFullScreenIntentPermission() async => true;
+
+  @override
+  Future<void> openFullScreenIntentSettings() async {}
 
   @override
   Future<String?> takeInitialPayload() async => null;
@@ -80,14 +129,30 @@ class FakeNotificationService implements NotificationService {
   Future<bool> notificationsAllowed() async => true;
 
   @override
-  Future<void> scheduleGraceReminder(PrayerEntry prayer, String prayerName, {required String languageCode}) async => grace.add(prayer.id);
+  Future<void> scheduleGraceReminder(
+    PrayerEntry prayer,
+    String prayerName, {
+    required String languageCode,
+  }) async => grace.add(prayer.id);
 
   @override
-  Future<void> schedulePrayer(PrayerEntry prayer, String prayerName, {required String languageCode}) async => prayers.add(prayer.id);
+  Future<void> schedulePrayer(
+    PrayerEntry prayer,
+    String prayerName, {
+    required String languageCode,
+  }) async => prayers.add(prayer.id);
 
   @override
-  Future<void> scheduleSnoozeReminder(PrayerEntry prayer, String prayerName, {required String languageCode}) async {}
+  Future<void> scheduleSnoozeReminder(
+    PrayerEntry prayer,
+    String prayerName, {
+    required String languageCode,
+  }) async => snoozes.add(prayer.id);
 
   @override
-  Future<void> scheduleSoftReminder(PrayerEntry prayer, String prayerName, {required String languageCode}) async {}
+  Future<void> scheduleSoftReminder(
+    PrayerEntry prayer,
+    String prayerName, {
+    required String languageCode,
+  }) async {}
 }

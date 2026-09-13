@@ -21,6 +21,12 @@ abstract interface class NotificationService {
 
   Future<bool> canScheduleExactly();
 
+  Future<bool> canUseFullScreenIntent();
+
+  Future<bool> requestFullScreenIntentPermission();
+
+  Future<void> openFullScreenIntentSettings();
+
   Future<void> schedulePrayer(
     PrayerEntry prayer,
     String prayerName, {

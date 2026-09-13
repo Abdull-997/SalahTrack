@@ -20,6 +20,15 @@ class AppStrings {
   static const Map<String, Map<String, String>> _values = {
     ...additionalTranslations,
     'de': {
+      'markAsPrayed': 'Als gebetet markieren',
+      'snoozeAction': 'Später erinnern',
+      'alhamdulillah': 'Alhamdulillah',
+      'fullScreenAlarmPermission': 'Vollbild-Erinnerungen erlauben',
+      'fullScreenAlarmsEnabled': 'Vollbild-Erinnerungen sind aktiviert',
+      'fullScreenAlarmsDisabled': 'Vollbild-Erinnerungen sind deaktiviert',
+      'fullScreenAlarmPermissionHelp': 'Erlaube Gebetserinnerungen, den Bildschirm einzuschalten und bei gesperrtem Gerät im Vollbild zu erscheinen. Android kann bei entsperrtem Gerät stattdessen eine Benachrichtigung anzeigen. Ohne diese Berechtigung erhältst du weiterhin normale Benachrichtigungen.',
+      'openFullScreenAlarmSettings':
+          'Vollbild-Zugriff in Systemeinstellungen öffnen',
       'appName': 'Salaty',
       'tagline': 'Weniger Ablenkung. Mehr Salah.',
       'getStarted': "Los geht's",
@@ -129,6 +138,15 @@ class AppStrings {
       'minutesValue': '{value} Min.',
     },
     'en': {
+      'markAsPrayed': 'Mark as Prayed',
+      'snoozeAction': 'Snooze',
+      'alhamdulillah': 'Alhamdulillah',
+      'fullScreenAlarmPermission': 'Allow full-screen reminders',
+      'fullScreenAlarmsEnabled': 'Full-screen reminders are enabled',
+      'fullScreenAlarmsDisabled': 'Full-screen reminders are disabled',
+      'fullScreenAlarmPermissionHelp': 'Allow prayer reminders to wake the screen and appear full-screen when your device is locked. Android may show a notification instead while your device is unlocked. Without this permission, you still receive regular notifications.',
+      'openFullScreenAlarmSettings':
+          'Open full-screen access in system settings',
       'appName': 'Salaty',
       'tagline': 'Less distraction. More Salah.',
       'getStarted': 'Get started',
@@ -239,6 +257,14 @@ class AppStrings {
       'minutesValue': '{value} min',
     },
     'ar': {
+      'markAsPrayed': 'تسجيل الصلاة كمؤداة',
+      'snoozeAction': 'تأجيل',
+      'alhamdulillah': 'الحمد لله',
+      'fullScreenAlarmPermission': 'السماح بالتذكيرات بملء الشاشة',
+      'fullScreenAlarmsEnabled': 'التذكيرات بملء الشاشة مفعّلة',
+      'fullScreenAlarmsDisabled': 'التذكيرات بملء الشاشة غير مفعّلة',
+      'fullScreenAlarmPermissionHelp': 'اسمح لتذكيرات الصلاة بتشغيل الشاشة والظهور بملء الشاشة عندما يكون جهازك مقفلاً. قد يعرض أندرويد إشعاراً بدلاً من ذلك عند فتح القفل. ستستمر في تلقي الإشعارات العادية دون هذا الإذن.',
+      'openFullScreenAlarmSettings': 'فتح إذن ملء الشاشة في إعدادات النظام',
       'appName': 'صلاتي',
       'tagline': 'تشتيت أقل. صلاة أكثر.',
       'getStarted': 'ابدأ',
@@ -348,6 +374,15 @@ class AppStrings {
       'minutesValue': '{value} دقيقة',
     },
     'ur': {
+      'markAsPrayed': 'نماز ادا شدہ درج کریں',
+      'snoozeAction': 'ملتوی کریں',
+      'alhamdulillah': 'الحمدللہ',
+      'fullScreenAlarmPermission': 'پوری اسکرین کی یاددہانیوں کی اجازت دیں',
+      'fullScreenAlarmsEnabled': 'پوری اسکرین کی یاددہانیاں فعال ہیں',
+      'fullScreenAlarmsDisabled': 'پوری اسکرین کی یاددہانیاں غیر فعال ہیں',
+      'fullScreenAlarmPermissionHelp': 'نماز کی یاددہانیوں کو اسکرین روشن کرنے اور مقفل آلے پر پوری اسکرین میں دکھنے کی اجازت دیں۔ آلہ کھلا ہونے پر اینڈرائیڈ اس کے بجائے اطلاع دکھا سکتا ہے۔ اس اجازت کے بغیر بھی عام اطلاعات موصول ہوتی رہیں گی۔',
+      'openFullScreenAlarmSettings':
+          'سسٹم کی ترتیبات میں پوری اسکرین کی اجازت کھولیں',
       'appName': 'صلاتی',
       'tagline': 'کم توجہ بھٹکنا۔ زیادہ نماز۔',
       'getStarted': 'شروع کریں',
@@ -461,6 +496,15 @@ class AppStrings {
       'minutesValue': '{value} منٹ',
     },
     'ps': {
+      'markAsPrayed': 'لمونځ د ادا شوي په توګه ثبت کړئ',
+      'snoozeAction': 'وروسته یادونه',
+      'alhamdulillah': 'الحمدلله',
+      'fullScreenAlarmPermission': 'د بشپړې پردې یادونو ته اجازه ورکړئ',
+      'fullScreenAlarmsEnabled': 'د بشپړې پردې یادونې فعالې دي',
+      'fullScreenAlarmsDisabled': 'د بشپړې پردې یادونې غیرفعالې دي',
+      'fullScreenAlarmPermissionHelp': 'د لمانځه یادونو ته اجازه ورکړئ چې پرده روښانه کړي او د وسیلې د قلف پر مهال په بشپړه پرده ښکاره شي. کله چې وسیله خلاصه وي، انډرایډ ښايي پر ځای یې خبرتیا وښيي. له دې اجازې پرته به هم عادي خبرتیاوې ترلاسه کوئ.',
+      'openFullScreenAlarmSettings':
+          'د سیسټم په امستنو کې د بشپړې پردې اجازه پرانیزئ',
       'appName': 'صلاتي',
       'tagline': 'لږ ګډوډي. ډېره لمونځ.',
       'getStarted': 'پیل کړئ',

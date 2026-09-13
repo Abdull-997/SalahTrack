@@ -50,9 +50,24 @@ final Provider<NotificationService> notificationServiceProvider =
       ),
     );
 
-final notificationPayloadProvider = StreamProvider<String>(
-  (Ref ref) => ref.watch(notificationServiceProvider).payloads,
-);
+final notificationPayloadProvider =
+    StreamNotifierProvider<NotificationPayloads, String>(
+      NotificationPayloads.new,
+    );
+
+class NotificationPayloads extends StreamNotifier<String> {
+  @override
+  Stream<String> build() => ref.watch(notificationServiceProvider).payloads;
+
+  // These values are tap events, not state snapshots. Riverpod's default
+  // equality filtering would discard a later retry of the same notification.
+  // The app applies its own short duplicate-delivery window.
+  @override
+  bool updateShouldNotify(
+    AsyncValue<String> previous,
+    AsyncValue<String> next,
+  ) => true;
+}
 
 final Provider<ClockService> clockServiceProvider = Provider<ClockService>(
   (Ref ref) => const SystemClockService(),

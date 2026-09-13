@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/app/router/app_router.dart';
+import 'package:salah_focus/core/notifications/prayer_notification_payload.dart';
 import 'package:salah_focus/core/platform/application_locale.dart';
 import 'package:salah_focus/core/theme/app_theme.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
@@ -21,6 +22,9 @@ class SalahFocusApp extends ConsumerStatefulWidget {
 
 class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
   StreamSubscription<UserLocation>? _automaticLocationSubscription;
+  final Map<String, DateTime> _recentNotificationEvents = <String, DateTime>{};
+  int _notificationDelivery = 0;
+  bool _receivedLivePayload = false;
 
   @override
   void initState() {
@@ -46,7 +50,11 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
       _,
       AsyncValue<String> next,
     ) {
-      next.whenData((String payload) => _routePayload(router, payload));
+      next.whenData((String payload) {
+        if (PrayerNotificationPayload.tryParse(payload) == null) return;
+        _receivedLivePayload = true;
+        _routePayload(router, payload);
+      });
     });
     ref.listen(
       settingsControllerProvider,
@@ -107,23 +115,27 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
   Future<void> _handleLaunchPayload() async {
     final service = ref.read(notificationServiceProvider);
     final String? payload = await service.takeInitialPayload();
-    if (!mounted || payload == null) return;
+    // A foreground response is newer than the launch intent. Do not let a
+    // delayed plugin launch read replace the screen selected by that response.
+    if (!mounted || payload == null || _receivedLivePayload) return;
     _routePayload(ref.read(goRouterProvider), payload);
   }
 
   void _routePayload(GoRouter router, String payload) {
-    final String? prayerId = switch (payload) {
-      String value when value.startsWith('prayer:') => value.substring(7),
-      String value when value.startsWith('reminder:') => value.substring(9),
-      String value when value.startsWith('soft:') => value.substring(5),
-      _ => null,
-    };
-    if (prayerId != null) {
-      if (prayerId.isNotEmpty) {
-        router.go('/reminder/${Uri.encodeComponent(prayerId)}');
-        return;
-      }
-    }
-    router.go('/home');
+    final PrayerNotificationPayload? notification =
+        PrayerNotificationPayload.tryParse(payload);
+    if (notification == null) return;
+    final DateTime now = DateTime.now();
+    _recentNotificationEvents.removeWhere((_, receivedAt) =>
+        now.difference(receivedAt) >= const Duration(seconds: 2));
+    final String event = notification.encode();
+    if (_recentNotificationEvents.containsKey(event)) return;
+    _recentNotificationEvents[event] = now;
+    // A later retry of the same notification must reload a failed destination.
+    final Uri route = Uri.parse(notification.routeLocation);
+    router.go(route.replace(queryParameters: <String, String>{
+      ...route.queryParameters,
+      'delivery': '${++_notificationDelivery}',
+    }).toString());
   }
 }

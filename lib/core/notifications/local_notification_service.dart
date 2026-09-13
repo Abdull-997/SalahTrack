@@ -9,6 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/notifications/notification_ids.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
+import 'package:salah_focus/core/notifications/prayer_notification_payload.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -18,7 +19,15 @@ class LocalNotificationService implements NotificationService {
     FlutterLocalNotificationsPlugin? plugin,
     String Function()? languageCode,
   }) : _plugin = plugin ?? FlutterLocalNotificationsPlugin(),
-       _languageCode = languageCode ?? (() => 'en');
+       _languageCode = languageCode ?? (() => 'en') {
+    _payloadController.onListen = () {
+      scheduleMicrotask(() {
+        while (_payloadController.hasListener && _bufferedPayloads.isNotEmpty) {
+          _payloadController.add(_bufferedPayloads.removeAt(0));
+        }
+      });
+    };
+  }
 
   final FlutterLocalNotificationsPlugin _plugin;
   final String Function() _languageCode;
@@ -29,6 +38,8 @@ class LocalNotificationService implements NotificationService {
   final StreamController<String> _payloadController =
       StreamController<String>.broadcast();
   bool _initialized = false;
+  Future<void>? _initializing;
+  final List<String> _bufferedPayloads = <String>[];
   String? _initialPayload;
 
   @override
@@ -37,56 +48,132 @@ class LocalNotificationService implements NotificationService {
   static AndroidNotificationDetails _androidDetails(
     String languageCode, {
     bool reminder = false,
+    bool soft = false,
   }) {
     final AppStrings s = AppStrings(Locale(languageCode));
     return AndroidNotificationDetails(
-      reminder ? 'prayer_reminders' : 'prayer_times',
+      soft ? 'prayer_reminders' : 'prayer_alarms_v2',
       s.t(reminder ? 'prayerReminders' : 'prayerTimes'),
       channelDescription: s.t('reminderBody'),
       importance: Importance.high,
       priority: Priority.high,
-      category: AndroidNotificationCategory.reminder,
+      category: soft
+          ? AndroidNotificationCategory.reminder
+          : AndroidNotificationCategory.alarm,
+      fullScreenIntent: !soft,
+      ongoing: !soft,
+      autoCancel: soft,
+      visibility: NotificationVisibility.public,
+      audioAttributesUsage: soft
+          ? AudioAttributesUsage.notification
+          : AudioAttributesUsage.alarm,
+      actions: <AndroidNotificationAction>[
+        AndroidNotificationAction(
+          'mark_prayed',
+          s.t('markAsPrayed'),
+          showsUserInterface: true,
+          cancelNotification: false,
+        ),
+        AndroidNotificationAction(
+          'snooze',
+          s.t('snoozeAction'),
+          showsUserInterface: true,
+          cancelNotification: false,
+        ),
+      ],
     );
   }
 
-  static const DarwinNotificationDetails _darwinDetails =
+  static DarwinNotificationDetails _darwinDetails(String languageCode) =>
       DarwinNotificationDetails(
         presentAlert: true,
         presentBanner: true,
         presentList: true,
         presentSound: true,
+        interruptionLevel: InterruptionLevel.timeSensitive,
+        categoryIdentifier: 'prayer_actions_$languageCode',
       );
 
   @override
   Future<void> initialize() async {
+    if (_initializing != null) return _initializing;
     if (_initialized) {
       await _syncChannels();
       return;
     }
-    const InitializationSettings settings = InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+    final Future<void> initialization = _initialize();
+    _initializing = initialization;
+    try {
+      await initialization;
+    } finally {
+      _initializing = null;
+    }
+  }
+
+  Future<void> _initialize() async {
+    final InitializationSettings settings = InitializationSettings(
+      android: const AndroidInitializationSettings('@mipmap/ic_launcher'),
       iOS: DarwinInitializationSettings(
         requestAlertPermission: false,
         requestBadgePermission: false,
         requestSoundPermission: false,
+        notificationCategories: <DarwinNotificationCategory>[
+          for (final Locale locale in AppStrings.supportedLocales)
+            DarwinNotificationCategory(
+              'prayer_actions_${locale.languageCode}',
+              actions: <DarwinNotificationAction>[
+                DarwinNotificationAction.plain(
+                  'mark_prayed',
+                  AppStrings(locale).t('markAsPrayed'),
+                  options: <DarwinNotificationActionOption>{
+                    DarwinNotificationActionOption.foreground,
+                  },
+                ),
+                DarwinNotificationAction.plain(
+                  'snooze',
+                  AppStrings(locale).t('snoozeAction'),
+                  options: <DarwinNotificationActionOption>{
+                    DarwinNotificationActionOption.foreground,
+                  },
+                ),
+              ],
+            ),
+        ],
       ),
     );
     await _plugin.initialize(
       settings: settings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        final String? payload = response.payload;
-        if (payload != null && payload.isNotEmpty) {
-          _payloadController.add(payload);
+        final String? payload = _responsePayload(response);
+        if (payload != null) {
+          if (_payloadController.hasListener) {
+            _payloadController.add(payload);
+          } else {
+            _bufferedPayloads.add(payload);
+          }
         }
       },
     );
     final NotificationAppLaunchDetails? launchDetails = await _plugin
         .getNotificationAppLaunchDetails();
     if (launchDetails?.didNotificationLaunchApp == true) {
-      _initialPayload = launchDetails?.notificationResponse?.payload;
+      final NotificationResponse? response =
+          launchDetails?.notificationResponse;
+      if (response != null) _initialPayload = _responsePayload(response);
     }
     _initialized = true;
     await _syncChannels();
+  }
+
+  static String? _responsePayload(NotificationResponse response) {
+    if (response.notificationResponseType ==
+        NotificationResponseType.notificationDismissed) {
+      return null;
+    }
+    return PrayerNotificationPayload.fromResponse(
+      response.payload,
+      response.actionId,
+    )?.encode();
   }
 
   Future<void> _syncChannels() async {
@@ -96,10 +183,11 @@ class LocalNotificationService implements NotificationService {
           .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin
           >();
-      for (final bool reminder in <bool>[false, true]) {
+      for (final bool soft in <bool>[false, true]) {
         final AndroidNotificationDetails details = _androidDetails(
           languageCode,
-          reminder: reminder,
+          reminder: true,
+          soft: soft,
         );
         await android?.createNotificationChannel(
           AndroidNotificationChannel(
@@ -107,6 +195,7 @@ class LocalNotificationService implements NotificationService {
             details.channelName,
             description: details.channelDescription,
             importance: Importance.high,
+            audioAttributesUsage: details.audioAttributesUsage,
           ),
         );
       }
@@ -187,6 +276,34 @@ class LocalNotificationService implements NotificationService {
   Future<void> openExactAlarmSettings() =>
       _openSettings('openExactAlarmSettings');
 
+  @override
+  Future<void> openFullScreenIntentSettings() =>
+      _openSettings('openFullScreenIntentSettings');
+
+  @override
+  Future<bool> canUseFullScreenIntent() async {
+    if (defaultTargetPlatform != TargetPlatform.android) return true;
+    try {
+      return await _settingsChannel.invokeMethod<bool>(
+            'canUseFullScreenIntent',
+          ) ??
+          false;
+    } on MissingPluginException {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> requestFullScreenIntentPermission() async {
+    await initialize();
+    if (!Platform.isAndroid) return true;
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    return await android?.requestFullScreenIntentPermission() ?? false;
+  }
+
   Future<void> _openSettings(String method) async {
     if (defaultTargetPlatform == TargetPlatform.android) {
       try {
@@ -234,9 +351,9 @@ class LocalNotificationService implements NotificationService {
       body: _text(languageCode, 'prayerBody', prayerName),
       details: NotificationDetails(
         android: _androidDetails(languageCode),
-        iOS: _darwinDetails,
+        iOS: _darwinDetails(languageCode),
       ),
-      payload: 'prayer:${prayer.id}',
+      payload: PrayerNotificationPayload(prayerId: prayer.id).encode(),
     );
   }
 
@@ -254,9 +371,12 @@ class LocalNotificationService implements NotificationService {
       body: _text(languageCode, 'graceBody', prayerName),
       details: NotificationDetails(
         android: _androidDetails(languageCode, reminder: true),
-        iOS: _darwinDetails,
+        iOS: _darwinDetails(languageCode),
       ),
-      payload: 'reminder:${prayer.id}',
+      payload: PrayerNotificationPayload(
+        prayerId: prayer.id,
+        kind: 'reminder',
+      ).encode(),
     );
   }
 
@@ -270,7 +390,7 @@ class LocalNotificationService implements NotificationService {
     if (when == null) {
       return;
     }
-    await _schedule(
+    final bool scheduled = await _schedule(
       id: NotificationIds.snooze(prayer),
       whenUtc: when,
       timezoneId: prayer.timezoneId,
@@ -278,10 +398,21 @@ class LocalNotificationService implements NotificationService {
       body: _text(languageCode, 'snoozeBody', prayerName),
       details: NotificationDetails(
         android: _androidDetails(languageCode, reminder: true),
-        iOS: _darwinDetails,
+        iOS: _darwinDetails(languageCode),
       ),
-      payload: 'reminder:${prayer.id}',
+      payload: PrayerNotificationPayload(
+        prayerId: prayer.id,
+        kind: 'snooze',
+      ).encode(),
     );
+    if (!scheduled) {
+      throw StateError('The snooze reminder could not be scheduled.');
+    }
+    // Keep the current alert until its replacement has been accepted by the OS.
+    await _plugin.cancel(id: NotificationIds.prayer(prayer));
+    await _plugin.cancel(id: NotificationIds.grace(prayer));
+    await _plugin.cancel(id: NotificationIds.soft(prayer));
+    await _plugin.cancel(id: NotificationIds.previousSnooze(prayer));
   }
 
   @override
@@ -303,14 +434,17 @@ class LocalNotificationService implements NotificationService {
       title: _text(languageCode, 'softTitle', prayerName),
       body: _text(languageCode, 'softBody', prayerName),
       details: NotificationDetails(
-        android: _androidDetails(languageCode, reminder: true),
-        iOS: _darwinDetails,
+        android: _androidDetails(languageCode, reminder: true, soft: true),
+        iOS: _darwinDetails(languageCode),
       ),
-      payload: 'soft:${prayer.id}',
+      payload: PrayerNotificationPayload(
+        prayerId: prayer.id,
+        kind: 'soft',
+      ).encode(),
     );
   }
 
-  Future<void> _schedule({
+  Future<bool> _schedule({
     required int id,
     required DateTime whenUtc,
     required String timezoneId,
@@ -320,13 +454,21 @@ class LocalNotificationService implements NotificationService {
     required String payload,
   }) async {
     await initialize();
-    if (!await notificationsAllowed()) return;
+    if (!await notificationsAllowed()) return false;
     final DateTime now = DateTime.now().toUtc();
     if (!whenUtc.isAfter(now)) {
-      return;
+      return false;
     }
     final tz.Location location = TimezoneService.locationOrUtc(timezoneId);
-    final tz.TZDateTime scheduled = tz.TZDateTime.from(whenUtc, location);
+    // Native calendar triggers have whole-second precision. Rounding down can
+    // deliver Snooze just before its stored deadline, leaving the reminder
+    // screen in the still-snoozed state with its alarm flags disabled.
+    const int second = Duration.microsecondsPerSecond;
+    final DateTime scheduledUtc = DateTime.fromMicrosecondsSinceEpoch(
+      ((whenUtc.microsecondsSinceEpoch + second - 1) ~/ second) * second,
+      isUtc: true,
+    );
+    final tz.TZDateTime scheduled = tz.TZDateTime.from(scheduledUtc, location);
     final bool exact = await canScheduleExactly();
     await _plugin.zonedSchedule(
       id: id,
@@ -337,8 +479,13 @@ class LocalNotificationService implements NotificationService {
       androidScheduleMode: exact
           ? AndroidScheduleMode.exactAllowWhileIdle
           : AndroidScheduleMode.inexactAllowWhileIdle,
-      payload: payload,
+      payload: PrayerNotificationPayload.fromResponse(
+        payload,
+        null,
+        eventId: '$id:${whenUtc.microsecondsSinceEpoch}',
+      )!.encode(),
     );
+    return true;
   }
 
   static String _text(String languageCode, String key, String prayerName) {
@@ -442,6 +589,7 @@ class LocalNotificationService implements NotificationService {
     await _plugin.cancel(id: NotificationIds.prayer(prayer));
     await _plugin.cancel(id: NotificationIds.grace(prayer));
     await _plugin.cancel(id: NotificationIds.snooze(prayer));
+    await _plugin.cancel(id: NotificationIds.previousSnooze(prayer));
     await _plugin.cancel(id: NotificationIds.soft(prayer));
   }
 
@@ -452,7 +600,9 @@ class LocalNotificationService implements NotificationService {
         .pendingNotificationRequests();
     for (final PendingNotificationRequest request in pending) {
       final String payload = request.payload ?? '';
-      if (payload.startsWith('prayer:') || payload.startsWith('reminder:')) {
+      final parsed = PrayerNotificationPayload.tryParse(payload);
+      // Soft reminders are one-off opt-ins after skipping, not planner entries.
+      if (parsed != null && parsed.kind != 'soft') {
         await _plugin.cancel(id: request.id);
       }
     }

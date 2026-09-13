@@ -16,6 +16,7 @@ class PrayerNotificationPlanner {
   }) async {
     final DateTime now = (nowUtc ?? DateTime.now()).toUtc();
     final DateTime horizon = now.add(Duration(days: horizonDays));
+    if (!await _notifications.notificationsAllowed()) return;
     await _notifications.cancelAllFuturePrayerNotifications();
     for (final PrayerEntry entry in entries) {
       if (entry.status == PrayerStatus.prayed ||
@@ -23,18 +24,31 @@ class PrayerNotificationPlanner {
           entry.status == PrayerStatus.missed) {
         continue;
       }
-      if (entry.scheduledAtUtc.isAfter(now) &&
-          entry.scheduledAtUtc.isBefore(horizon)) {
-        await _notifications.schedulePrayer(entry, prayerName(entry), languageCode: languageCode);
-      }
-      if (entry.graceEndsAtUtc.isAfter(now) &&
-          entry.graceEndsAtUtc.isBefore(horizon)) {
-        await _notifications.scheduleGraceReminder(entry, prayerName(entry), languageCode: languageCode);
-      }
       if (entry.status == PrayerStatus.snoozed &&
           entry.snoozedUntilUtc != null &&
           entry.snoozedUntilUtc!.isAfter(now)) {
-        await _notifications.scheduleSnoozeReminder(entry, prayerName(entry), languageCode: languageCode);
+        await _notifications.scheduleSnoozeReminder(
+          entry,
+          prayerName(entry),
+          languageCode: languageCode,
+        );
+        continue;
+      }
+      if (entry.scheduledAtUtc.isAfter(now) &&
+          entry.scheduledAtUtc.isBefore(horizon)) {
+        await _notifications.schedulePrayer(
+          entry,
+          prayerName(entry),
+          languageCode: languageCode,
+        );
+      }
+      if (entry.graceEndsAtUtc.isAfter(now) &&
+          entry.graceEndsAtUtc.isBefore(horizon)) {
+        await _notifications.scheduleGraceReminder(
+          entry,
+          prayerName(entry),
+          languageCode: languageCode,
+        );
       }
     }
   }

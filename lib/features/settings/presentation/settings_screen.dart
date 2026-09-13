@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salah_focus/app/app_providers.dart';
@@ -122,6 +123,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: _working ? null : _requestExactAlarms,
                 ),
+                if (!kIsWeb &&
+                    defaultTargetPlatform ==
+                        TargetPlatform.android) ...<Widget>[
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.fullscreen_rounded),
+                    title: Text(s.t('fullScreenAlarmPermission')),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: _working ? null : _requestFullScreenAlarms,
+                  ),
+                ],
                 const Divider(height: 1),
                 _SliderTile(
                   title: s.t('gracePeriod'),
@@ -601,6 +613,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
         builder: (_) => const NotificationSettingsScreen.exactAlarms(),
+      ),
+    );
+    if (mounted) ref.invalidate(todayPrayerDayProvider);
+  }
+
+  Future<void> _requestFullScreenAlarms() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => const NotificationSettingsScreen.fullScreenAlarms(),
       ),
     );
     if (mounted) ref.invalidate(todayPrayerDayProvider);

@@ -5,7 +5,12 @@ class NotificationIds {
 
   static int prayer(PrayerEntry entry) => _base(entry) + 1;
   static int grace(PrayerEntry entry) => _base(entry) + 2;
-  static int snooze(PrayerEntry entry) => _base(entry) + 3;
+  // Alternate slots so a replacement can be scheduled before dismissing the
+  // delivered snooze, without cancelling the newly scheduled alarm.
+  static int snooze(PrayerEntry entry) =>
+      _base(entry) + (entry.snoozeCount.isEven ? 3 : 5);
+  static int previousSnooze(PrayerEntry entry) =>
+      _base(entry) + (entry.snoozeCount.isEven ? 5 : 3);
   static int soft(PrayerEntry entry) => _base(entry) + 4;
 
   static int _base(PrayerEntry entry) {

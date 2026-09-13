@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +13,7 @@ import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
+import 'package:salah_focus/features/settings/presentation/notification_settings_screen.dart';
 import 'package:salah_focus/shared/errors/user_error_message.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -79,6 +81,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   working: _working,
                   onNotifications: _requestNotifications,
                   onExactAlarms: _requestExactAlarms,
+                  onFullScreenAlarms: _requestFullScreenAlarms,
                   onFinish: _finish,
                 ),
               ],
@@ -266,6 +269,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       await service.initialize();
       await service.requestExactAlarmPermission();
     });
+  }
+
+  Future<void> _requestFullScreenAlarms() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => const NotificationSettingsScreen.fullScreenAlarms(),
+      ),
+    );
   }
 
   Future<void> _finish() async {
@@ -510,53 +521,65 @@ class _PermissionsPage extends StatelessWidget {
     required this.working,
     required this.onNotifications,
     required this.onExactAlarms,
+    required this.onFullScreenAlarms,
     required this.onFinish,
   });
   final bool working;
   final VoidCallback onNotifications;
   final VoidCallback onExactAlarms;
+  final VoidCallback onFullScreenAlarms;
   final VoidCallback onFinish;
 
   @override
   Widget build(BuildContext context) {
     final AppStrings s = AppStrings.of(context);
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Icon(
-            Icons.notifications_active_outlined,
-            size: 64,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(height: 18),
-          Text(
-            s.t('permissions'),
-            style: Theme.of(context).textTheme.headlineSmall
-                ?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 12),
-          Text(s.t('permissionExplain'), textAlign: TextAlign.center),
-          const SizedBox(height: 24),
-          FilledButton.tonalIcon(
-            onPressed: working ? null : onNotifications,
-            icon: const Icon(Icons.notifications_rounded),
-            label: Text(s.t('notificationPermission')),
-          ),
-          const SizedBox(height: 10),
-          OutlinedButton.icon(
-            onPressed: working ? null : onExactAlarms,
-            icon: const Icon(Icons.alarm_rounded),
-            label: Text(s.t('exactAlarmPermission')),
-          ),
-          const SizedBox(height: 26),
-          FilledButton.icon(
-            onPressed: working ? null : onFinish,
-            icon: const Icon(Icons.check_rounded),
-            label: Text(s.t('finish')),
-          ),
-        ],
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: <Widget>[
+            Icon(
+              Icons.notifications_active_outlined,
+              size: 64,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 18),
+            Text(
+              s.t('permissions'),
+              style: Theme.of(context).textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 12),
+            Text(s.t('permissionExplain'), textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            FilledButton.tonalIcon(
+              onPressed: working ? null : onNotifications,
+              icon: const Icon(Icons.notifications_rounded),
+              label: Text(s.t('notificationPermission')),
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: working ? null : onExactAlarms,
+              icon: const Icon(Icons.alarm_rounded),
+              label: Text(s.t('exactAlarmPermission')),
+            ),
+            if (!kIsWeb &&
+                defaultTargetPlatform == TargetPlatform.android) ...<Widget>[
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                onPressed: working ? null : onFullScreenAlarms,
+                icon: const Icon(Icons.fullscreen_rounded),
+                label: Text(s.t('fullScreenAlarmPermission')),
+              ),
+            ],
+            const SizedBox(height: 26),
+            FilledButton.icon(
+              onPressed: working ? null : onFinish,
+              icon: const Icon(Icons.check_rounded),
+              label: Text(s.t('finish')),
+            ),
+          ],
+        ),
       ),
     );
   }

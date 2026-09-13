@@ -20,6 +20,7 @@ def patch_android() -> None:
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.VIBRATE",
         "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.USE_FULL_SCREEN_INTENT",
     ]
     insertion = "\n".join(
         f'    <uses-permission android:name="{permission}" />'
@@ -61,6 +62,15 @@ def patch_android() -> None:
         )
         if count != 1:
             raise RuntimeError("Could not locate </application> element")
+    if "com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" not in text:
+        text = text.replace(
+            "</application>",
+            '<receiver\n'
+            '            android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver"\n'
+            '            android:exported="false" />\n'
+            '    </application>',
+            1,
+        )
     if (ROOT / "native/android/res/mipmap-anydpi-v26/ic_launcher_app.xml").exists():
         text = text.replace('android:icon="@mipmap/ic_launcher"', 'android:icon="@mipmap/ic_launcher_app"')
     text = re.sub(
@@ -166,6 +176,25 @@ def localize_ios_project(project: str) -> str:
     return re.sub(r'knownRegions = \((.*?)\);', add_regions, project, count=1, flags=re.S)
 
 
+def configure_ios_notification_entitlements(project: str) -> str:
+    """Include Time Sensitive Notifications in every Runner signing configuration."""
+    # Anchor on Runner's Info.plist so test and extension targets retain their signing.
+    configuration = r'(buildSettings = \{)(.*?)(\n\s*\};)'
+
+    def add_entitlements(match: re.Match) -> str:
+        settings = match[2]
+        if not re.search(r'INFOPLIST_FILE = "?Runner/Info\.plist"?;', settings):
+            return match[0]
+        if 'CODE_SIGN_ENTITLEMENTS' in settings:
+            settings = re.sub(r'CODE_SIGN_ENTITLEMENTS = [^;]+;',
+                              'CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;', settings)
+        else:
+            settings += '\n\t\t\t\tCODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;'
+        return match[1] + settings + match[3]
+
+    return re.sub(configuration, add_entitlements, project, flags=re.S)
+
+
 def patch_ios() -> None:
     native_icons = ROOT / "native/ios/AppIcon.appiconset"
     if native_icons.exists():
@@ -174,6 +203,18 @@ def patch_ios() -> None:
     native_app_delegate = ROOT / "native/ios/AppDelegate.swift"
     if native_app_delegate.exists():
         shutil.copy2(native_app_delegate, ROOT / "ios/Runner/AppDelegate.swift")
+
+    native_entitlements = ROOT / "native/ios/Runner.entitlements"
+    if native_entitlements.exists():
+        entitlement_path = ROOT / "ios/Runner/Runner.entitlements"
+        entitlements = {}
+        if entitlement_path.exists():
+            with entitlement_path.open("rb") as handle:
+                entitlements = plistlib.load(handle)
+        with native_entitlements.open("rb") as handle:
+            entitlements.update(plistlib.load(handle))
+        with entitlement_path.open("wb") as handle:
+            plistlib.dump(entitlements, handle, sort_keys=False)
 
     for localization in (ROOT / 'native/ios').glob('*.lproj'):
         shutil.copytree(localization, ROOT / 'ios/Runner' / localization.name, dirs_exist_ok=True)
@@ -204,6 +245,7 @@ def patch_ios() -> None:
         p = project.read_text(encoding="utf-8")
         p = re.sub(r"IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+;", "IPHONEOS_DEPLOYMENT_TARGET = 16.0;", p)
         p = localize_ios_project(p)
+        p = configure_ios_notification_entitlements(p)
         project.write_text(p, encoding="utf-8")
 
 

@@ -34,6 +34,27 @@ void main() {
   setUpAll(initializeDateFormatting);
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
+  for (final Locale locale in AppStrings.supportedLocales) {
+    test(
+      '${locale.languageCode} translates reminder actions and permissions',
+      () {
+        final translations = AppStrings.translations[locale.languageCode]!;
+        for (final key in [
+          'markAsPrayed',
+          'snoozeAction',
+          'alhamdulillah',
+          'fullScreenAlarmPermission',
+          'fullScreenAlarmsEnabled',
+          'fullScreenAlarmsDisabled',
+          'fullScreenAlarmPermissionHelp',
+          'openFullScreenAlarmSettings',
+        ]) {
+          expect(translations[key]?.trim(), isNotEmpty, reason: key);
+        }
+      },
+    );
+  }
+
   for (final String code in ['tr', 'fr', 'es']) {
     final AppStrings s = AppStrings(Locale(code));
     test('$code has every UI key and preserves interpolation parameters', () {
@@ -205,10 +226,12 @@ void main() {
       await tester.scrollUntilVisible(
         find.text(s.t('month')),
         300,
-        scrollable: find.descendant(
-          of: find.byType(TrackerScreen),
-          matching: find.byType(Scrollable),
-        ).first,
+        scrollable: find
+            .descendant(
+              of: find.byType(TrackerScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first,
       );
       expect(find.text(s.t('month')), findsOneWidget);
       expect(find.text('Month'), findsNothing);

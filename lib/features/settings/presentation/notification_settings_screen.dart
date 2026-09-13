@@ -5,15 +5,25 @@ import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/shared/errors/user_error_message.dart';
 
+enum _NotificationPermission { notifications, exactAlarms, fullScreenAlarms }
+
 /// Keeps permission status in the app theme. Operating-system settings are
 /// opened only through the explicitly labelled external-settings button.
 class NotificationSettingsScreen extends ConsumerStatefulWidget {
-  const NotificationSettingsScreen({super.key}) : isExactAlarm = false;
+  const NotificationSettingsScreen({super.key})
+    : _permission = _NotificationPermission.notifications;
 
   const NotificationSettingsScreen.exactAlarms({super.key})
-    : isExactAlarm = true;
+    : _permission = _NotificationPermission.exactAlarms;
 
-  final bool isExactAlarm;
+  const NotificationSettingsScreen.fullScreenAlarms({super.key})
+    : _permission = _NotificationPermission.fullScreenAlarms;
+
+  final _NotificationPermission _permission;
+
+  bool get isExactAlarm => _permission == _NotificationPermission.exactAlarms;
+  bool get isFullScreenAlarm =>
+      _permission == _NotificationPermission.fullScreenAlarms;
 
   @override
   ConsumerState<NotificationSettingsScreen> createState() =>
@@ -61,10 +71,13 @@ class _NotificationSettingsScreenState
     });
     try {
       final NotificationService service = ref.read(notificationServiceProvider);
-      if (widget.isExactAlarm) {
-        await service.openExactAlarmSettings();
-      } else {
-        await service.openNotificationSettings();
+      switch (widget._permission) {
+        case _NotificationPermission.notifications:
+          await service.openNotificationSettings();
+        case _NotificationPermission.exactAlarms:
+          await service.openExactAlarmSettings();
+        case _NotificationPermission.fullScreenAlarms:
+          await service.openFullScreenIntentSettings();
       }
     } catch (error) {
       if (mounted) setState(() => _error = error);
@@ -87,10 +100,21 @@ class _NotificationSettingsScreenState
       if (!mounted) return;
       await service.initialize();
       if (!mounted) return;
-      final bool allowed = widget.isExactAlarm
-          ? await service.canScheduleExactly()
-          : await service.notificationsAllowed();
-      if (mounted) setState(() => _allowed = allowed);
+      final bool allowed = switch (widget._permission) {
+        _NotificationPermission.notifications =>
+          await service.notificationsAllowed(),
+        _NotificationPermission.exactAlarms =>
+          await service.canScheduleExactly(),
+        _NotificationPermission.fullScreenAlarms =>
+          await service.canUseFullScreenIntent(),
+      };
+      if (mounted) {
+        if (_allowed == false && allowed) {
+          // Rebuild pending reminders using the newly granted capabilities.
+          ref.invalidate(todayPrayerDayProvider);
+        }
+        setState(() => _allowed = allowed);
+      }
     } catch (error) {
       if (mounted) setState(() => _error = error);
     } finally {
@@ -108,9 +132,27 @@ class _NotificationSettingsScreenState
   Widget build(BuildContext context) {
     final AppStrings s = AppStrings.of(context);
     final ColorScheme scheme = Theme.of(context).colorScheme;
-    final String permissionKey = widget.isExactAlarm
-        ? 'exactAlarmPermission'
-        : 'notificationPermission';
+    final String permissionKey = switch (widget._permission) {
+      _NotificationPermission.notifications => 'notificationPermission',
+      _NotificationPermission.exactAlarms => 'exactAlarmPermission',
+      _NotificationPermission.fullScreenAlarms => 'fullScreenAlarmPermission',
+    };
+    final String statusKey = switch (widget._permission) {
+      _NotificationPermission.notifications =>
+        _allowed == true ? 'notificationsEnabled' : 'notificationsDisabled',
+      _NotificationPermission.exactAlarms =>
+        _allowed == true ? 'exactAlarmsEnabled' : 'exactAlarmsDisabled',
+      _NotificationPermission.fullScreenAlarms =>
+        _allowed == true
+            ? 'fullScreenAlarmsEnabled'
+            : 'fullScreenAlarmsDisabled',
+    };
+    final String helpKey = switch (widget._permission) {
+      _NotificationPermission.notifications => 'notificationPermissionHelp',
+      _NotificationPermission.exactAlarms => 'exactAlarmPermissionHelp',
+      _NotificationPermission.fullScreenAlarms =>
+        'fullScreenAlarmPermissionHelp',
+    };
     return Scaffold(
       appBar: AppBar(title: Text(s.t(permissionKey))),
       body: SafeArea(
@@ -124,7 +166,9 @@ class _NotificationSettingsScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Icon(
-                      widget.isExactAlarm
+                      widget.isFullScreenAlarm
+                          ? Icons.fullscreen_rounded
+                          : widget.isExactAlarm
                           ? Icons.alarm_rounded
                           : _allowed == true
                           ? Icons.notifications_active_outlined
@@ -137,15 +181,7 @@ class _NotificationSettingsScreenState
                       Semantics(
                         liveRegion: true,
                         child: Text(
-                          s.t(
-                            widget.isExactAlarm
-                                ? (_allowed!
-                                      ? 'exactAlarmsEnabled'
-                                      : 'exactAlarmsDisabled')
-                                : (_allowed!
-                                      ? 'notificationsEnabled'
-                                      : 'notificationsDisabled'),
-                          ),
+                          s.t(statusKey),
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(
                                 color: scheme.onSurface,
@@ -155,11 +191,7 @@ class _NotificationSettingsScreenState
                       ),
                     const SizedBox(height: 12),
                     Text(
-                      s.t(
-                        widget.isExactAlarm
-                            ? 'exactAlarmPermissionHelp'
-                            : 'notificationPermissionHelp',
-                      ),
+                      s.t(helpKey),
                       style: TextStyle(color: scheme.onSurfaceVariant),
                     ),
                     if (_working)
@@ -179,7 +211,9 @@ class _NotificationSettingsScreenState
                         label: Text(s.t('retry')),
                       ),
                     ],
-                    if (_allowed == false && !widget.isExactAlarm) ...<Widget>[
+                    if (_allowed == false &&
+                        widget._permission ==
+                            _NotificationPermission.notifications) ...<Widget>[
                       const SizedBox(height: 24),
                       FilledButton.icon(
                         onPressed: _working
@@ -201,7 +235,13 @@ class _NotificationSettingsScreenState
             OutlinedButton.icon(
               onPressed: _openingSettings ? null : _openSettings,
               icon: const Icon(Icons.open_in_new_rounded),
-              label: Text(s.t('openSystemSettings')),
+              label: Text(
+                s.t(
+                  widget.isFullScreenAlarm
+                      ? 'openFullScreenAlarmSettings'
+                      : 'openSystemSettings',
+                ),
+              ),
             ),
             const SizedBox(height: 12),
             Text(

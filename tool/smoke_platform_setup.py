@@ -34,6 +34,30 @@ with tempfile.TemporaryDirectory() as d:
 };
 knownRegions = (en, Base,);
 IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+DEBUG /* Debug */ = {
+    isa = XCBuildConfiguration;
+    buildSettings = {
+        INFOPLIST_FILE = Runner/Info.plist;
+    };
+};
+RELEASE /* Release */ = {
+    isa = XCBuildConfiguration;
+    buildSettings = {
+        INFOPLIST_FILE = Runner/Info.plist;
+    };
+};
+PROFILE /* Profile */ = {
+    isa = XCBuildConfiguration;
+    buildSettings = {
+        INFOPLIST_FILE = Runner/Info.plist;
+    };
+};
+TESTS /* Tests */ = {
+    isa = XCBuildConfiguration;
+    buildSettings = {
+        GENERATE_INFOPLIST_FILE = YES;
+    };
+};
 ''')
     mod.ROOT=r
     mod.patch_android(); mod.patch_ios()
@@ -43,7 +67,9 @@ IPHONEOS_DEPLOYMENT_TARGET = 13.0;
     txt=manifest.read_text()
     assert txt.index('<manifest') < txt.index('<uses-permission') < txt.index('<application')
     assert 'android:label="@string/app_name"' in txt
-    for token in ['POST_NOTIFICATIONS','SCHEDULE_EXACT_ALARM','ScheduledNotificationReceiver','ScheduledNotificationBootReceiver']:
+    for token in ['POST_NOTIFICATIONS','SCHEDULE_EXACT_ALARM','USE_FULL_SCREEN_INTENT',
+                  'ScheduledNotificationReceiver','ScheduledNotificationBootReceiver',
+                  'ActionBroadcastReceiver']:
         assert token in txt, token
     gradle=(r/'android/app/build.gradle.kts').read_text()
     assert 'isCoreLibraryDesugaringEnabled = true' in gradle
@@ -56,6 +82,10 @@ IPHONEOS_DEPLOYMENT_TARGET = 13.0;
     assert generated_main_activity.read_bytes() == native_main_activity.read_bytes()
     assert (src/'android/app/src/main/kotlin/com/salahfocus/salah_focus/MainActivity.kt').read_bytes() == native_main_activity.read_bytes()
 
+    # Applying the setup again must not duplicate notification permissions/receivers.
+    mod.patch_android()
+    assert manifest.read_text() == txt
+
     with (r/'ios/Runner/Info.plist').open('rb') as h:
         info=plistlib.load(h)
     assert info['CFBundleDisplayName']=='My Prayer'
@@ -65,6 +95,18 @@ IPHONEOS_DEPLOYMENT_TARGET = 13.0;
              'ps': 'زما لمونځ', 'ur': 'میری نماز'}
     project_path = r/'ios/Runner.xcodeproj/project.pbxproj'
     project_text = project_path.read_text()
+    assert project_text.count('CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;') == 3
+    assert mod.configure_ios_notification_entitlements(project_text) == project_text
+    with (r/'ios/Runner/Runner.entitlements').open('rb') as h:
+        entitlements = plistlib.load(h)
+    assert entitlements['com.apple.developer.usernotifications.time-sensitive'] is True
+    entitlements['existing-custom-entitlement'] = True
+    with (r/'ios/Runner/Runner.entitlements').open('wb') as h:
+        plistlib.dump(entitlements, h)
+    mod.patch_ios()
+    assert project_path.read_text() == project_text
+    with (r/'ios/Runner/Runner.entitlements').open('rb') as h:
+        assert plistlib.load(h)['existing-custom-entitlement'] is True
     for language, name in names.items():
         android_name = ET.parse(r/f'android/app/src/main/res/values-{language}/strings.xml')
         assert android_name.find('string').text == name
@@ -79,6 +121,7 @@ IPHONEOS_DEPLOYMENT_TARGET = 13.0;
     app_delegate = (r/'ios/Runner/AppDelegate.swift').read_text()
     if (r/'native/ios/AppDelegate.swift').is_file():
         assert 'GeneratedPluginRegistrant.register' in app_delegate
+        assert 'UNUserNotificationCenter.current().delegate = self' in app_delegate
     else:
         assert app_delegate == '// template'
 print('Platform patch smoke test passed')

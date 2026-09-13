@@ -1,6 +1,14 @@
 /// Complete UI catalogs for Turkish, French and Spanish.
 const Map<String, Map<String, String>> additionalTranslations = {
   'tr': {
+    'markAsPrayed': 'Kılındı olarak işaretle',
+    'snoozeAction': 'Ertele',
+    'alhamdulillah': 'Elhamdülillah',
+    'fullScreenAlarmPermission': 'Tam ekran hatırlatmalara izin ver',
+    'fullScreenAlarmsEnabled': 'Tam ekran hatırlatmalar açık',
+    'fullScreenAlarmsDisabled': 'Tam ekran hatırlatmalar kapalı',
+    'fullScreenAlarmPermissionHelp': 'Namaz hatırlatmalarının ekranı uyandırmasına ve cihaz kilitliyken tam ekran görünmesine izin ver. Cihazın kilidi açıkken Android bunun yerine bildirim gösterebilir. Bu izin olmadan da normal bildirimleri almaya devam edersin.',
+    'openFullScreenAlarmSettings': 'Sistem ayarlarında tam ekran erişimini aç',
     'appName': 'Namazım',
     'tagline': 'Daha az dikkat dağınıklığı. Namaza daha çok zaman.',
     'getStarted': 'Başla',
@@ -117,6 +125,15 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'minutesValue': '{value} dk.',
   },
   'fr': {
+    'markAsPrayed': 'Marquer comme accomplie',
+    'snoozeAction': 'Reporter',
+    'alhamdulillah': 'Alhamdoulillah',
+    'fullScreenAlarmPermission': 'Autoriser les rappels en plein écran',
+    'fullScreenAlarmsEnabled': 'Les rappels en plein écran sont activés',
+    'fullScreenAlarmsDisabled': 'Les rappels en plein écran sont désactivés',
+    'fullScreenAlarmPermissionHelp': 'Autorisez les rappels de prière à allumer l’écran et à s’afficher en plein écran lorsque votre appareil est verrouillé. Lorsqu’il est déverrouillé, Android peut afficher une notification à la place. Sans cette autorisation, vous recevez toujours les notifications ordinaires.',
+    'openFullScreenAlarmSettings':
+        'Ouvrir l’accès plein écran dans les paramètres système',
     'appName': 'Ma prière',
     'tagline': 'Moins de distractions. Plus de temps pour la prière.',
     'getStarted': 'Commencer',
@@ -229,6 +246,17 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'minutesValue': '{value} min',
   },
   'es': {
+    'markAsPrayed': 'Marcar como realizada',
+    'snoozeAction': 'Posponer',
+    'alhamdulillah': 'Alhamdulillah',
+    'fullScreenAlarmPermission': 'Permitir recordatorios a pantalla completa',
+    'fullScreenAlarmsEnabled':
+        'Los recordatorios a pantalla completa están activados',
+    'fullScreenAlarmsDisabled':
+        'Los recordatorios a pantalla completa están desactivados',
+    'fullScreenAlarmPermissionHelp': 'Permite que los recordatorios de oración enciendan la pantalla y se muestren a pantalla completa cuando el dispositivo esté bloqueado. Android puede mostrar una notificación cuando esté desbloqueado. Sin este permiso, seguirás recibiendo las notificaciones habituales.',
+    'openFullScreenAlarmSettings':
+        'Abrir acceso a pantalla completa en ajustes del sistema',
     'appName': 'Mi oración',
     'tagline': 'Menos distracciones. Más tiempo para la oración.',
     'getStarted': 'Empezar',
