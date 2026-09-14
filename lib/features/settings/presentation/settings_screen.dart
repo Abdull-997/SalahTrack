@@ -29,7 +29,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final prefs = ref.watch(settingsControllerProvider);
     final PrayerSettings settings = prefs.prayerSettings;
     return Scaffold(
-      appBar: AppBar(title: Text(s.t('settings'))),
+      appBar: AppBar(
+        title: Text(s.t('settings')),
+        actions: <Widget>[
+          IconButton(
+            key: const ValueKey<String>('settings-info-button'),
+            tooltip: s.t('settingsInfo'),
+            onPressed: _showSettingsInfo,
+            icon: const Icon(Icons.info_outline_rounded),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: <Widget>[
@@ -43,13 +53,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.location_on_outlined),
                   title: Text(s.t('location')),
-                  subtitle: Text(
-                    prefs.location == null
+                  subtitle: _SettingExplanation(
+                    value: prefs.location == null
                         ? s.t('needLocation')
                         : prefs.location!.label.isEmpty
                         ? s.t('currentLocation')
                         : prefs.location!.label,
+                    explanation: s.t('locationHelp'),
                   ),
+                  isThreeLine: true,
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: _working ? null : _changeLocation,
                 ),
@@ -57,12 +69,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.calculate_outlined),
                   title: Text(s.t('calculationMethod')),
-                  subtitle: Text(
-                    _localizedCalculationMethodName(
+                  subtitle: _SettingExplanation(
+                    value: _localizedCalculationMethodName(
                       settings.calculationMethodId,
                       s.locale.languageCode,
                     ),
+                    explanation: s.t('calculationMethodHelp'),
                   ),
+                  isThreeLine: true,
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _chooseCalculationMethod(settings),
                 ),
@@ -70,11 +84,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.balance_rounded),
                   title: Text(s.t('madhhab')),
-                  subtitle: Text(
-                    settings.madhhab == AsrMadhhab.hanafi
+                  subtitle: _SettingExplanation(
+                    value: settings.madhhab == AsrMadhhab.hanafi
                         ? s.t('hanafi')
                         : s.t('standard'),
+                    explanation: s.t('asrCalculationHelp'),
                   ),
+                  isThreeLine: true,
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _chooseMadhhab(settings),
                 ),
@@ -82,12 +98,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.public_rounded),
                   title: Text(s.t('highLatitude')),
-                  subtitle: Text(
-                    _localizedHighLatitudeName(
+                  subtitle: _SettingExplanation(
+                    value: _localizedHighLatitudeName(
                       settings.highLatitudeRule,
                       s.locale.languageCode,
                     ),
+                    explanation: s.t('highLatitudeHelp'),
                   ),
+                  isThreeLine: true,
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _chooseHighLatitude(settings),
                 ),
@@ -95,7 +113,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.tune_rounded),
                   title: Text(s.t('manualAdjustments')),
-                  subtitle: Text(_localizedAdjustmentsSummary(settings, s)),
+                  subtitle: _SettingExplanation(
+                    value: _localizedAdjustmentsSummary(settings, s),
+                    explanation: s.t('minuteAdjustmentsHelp'),
+                  ),
+                  isThreeLine: true,
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _editAdjustments(settings),
                 ),
@@ -137,6 +159,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(height: 1),
                 _SliderTile(
                   title: s.t('gracePeriod'),
+                  description: s.t('gracePeriodHelp'),
                   valueLabel: s.minutes(settings.gracePeriodMinutes),
                   value: settings.gracePeriodMinutes.toDouble(),
                   min: 0,
@@ -149,6 +172,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(height: 1),
                 _SliderTile(
                   title: s.t('snoozeDuration'),
+                  description: s.t('snoozeDurationHelp'),
                   valueLabel: s.minutes(settings.snoozeMinutes),
                   value: settings.snoozeMinutes.toDouble(),
                   min: 5,
@@ -161,16 +185,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(height: 1),
                 ListTile(
                   title: Text(s.t('maxSnoozes')),
-                  subtitle: Text(
-                    settings.maxSnoozes == null
+                  subtitle: _SettingExplanation(
+                    value: settings.maxSnoozes == null
                         ? s.t('unlimited')
                         : s.number(settings.maxSnoozes!),
+                    explanation: s.t('maxSnoozesHelp'),
                   ),
+                  isThreeLine: true,
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _chooseMaxSnoozes(settings),
                 ),
                 SwitchListTile(
                   title: Text(s.t('softReminder')),
+                  subtitle: Text(s.t('softReminderHelp')),
                   value: settings.softReminderAfterSkip,
                   onChanged: (bool value) => _savePrayerSettings(
                     settings.copyWith(softReminderAfterSkip: value),
@@ -187,7 +214,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Card(
             child: ListTile(
               title: Text(s.t('confirmationText')),
-              subtitle: Text(settings.confirmationText),
+              subtitle: _SettingExplanation(
+                value: settings.confirmationText,
+                explanation: s.t('confirmationTextHelp'),
+              ),
+              isThreeLine: true,
               trailing: const Icon(Icons.edit_outlined),
               onTap: () => _editConfirmationText(settings),
             ),
@@ -242,6 +273,120 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
   }
+
+  Future<void> _showSettingsInfo() => showDialog<void>(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      final AppStrings s = AppStrings.of(dialogContext);
+      final String language = s.locale.languageCode;
+      final bool showsFullScreenPermission =
+          !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+      return AlertDialog(
+        title: Text(s.t('settingsInfoTitle')),
+        content: SizedBox(
+          width: 520,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _SettingsHelpGroup(
+                  title: s.t('prayerTimes'),
+                  items: <_SettingsHelpItem>[
+                    _SettingsHelpItem(
+                      title: s.t('location'),
+                      description: s.t('locationHelp'),
+                    ),
+                    _SettingsHelpItem(
+                      title: s.t('calculationMethod'),
+                      description: s.t('calculationMethodHelp'),
+                    ),
+                    _SettingsHelpItem(
+                      title: s.t('madhhab'),
+                      description: s.t('asrCalculationHelp'),
+                    ),
+                    _SettingsHelpItem(
+                      title: s.t('standard'),
+                      description: s.t('standardAsrHelp'),
+                    ),
+                    _SettingsHelpItem(
+                      title: s.t('hanafi'),
+                      description: s.t('hanafiAsrHelp'),
+                    ),
+                    _SettingsHelpItem(
+                      title: s.t('highLatitude'),
+                      description: s.t('highLatitudeHelp'),
+                    ),
+                    for (final HighLatitudeRule rule in HighLatitudeRule.values)
+                      _SettingsHelpItem(
+                        title: _localizedHighLatitudeName(rule, language),
+                        description: s.t(
+                          'highLatitude${rule.name[0].toUpperCase()}${rule.name.substring(1)}Help',
+                        ),
+                      ),
+                    _SettingsHelpItem(
+                      title: s.t('manualAdjustments'),
+                      description: s.t('minuteAdjustmentsHelp'),
+                    ),
+                  ],
+                ),
+                _SettingsHelpGroup(
+                  title: s.t('prayerReminders'),
+                  items: <_SettingsHelpItem>[
+                    _SettingsHelpItem(
+                      title: s.t('gracePeriod'),
+                      description: s.t('gracePeriodHelp'),
+                    ),
+                    _SettingsHelpItem(
+                      title: s.t('snoozeDuration'),
+                      description: s.t('snoozeDurationHelp'),
+                    ),
+                    _SettingsHelpItem(
+                      title: s.t('maxSnoozes'),
+                      description: s.t('maxSnoozesHelp'),
+                    ),
+                    _SettingsHelpItem(
+                      title: s.t('softReminder'),
+                      description: s.t('softReminderHelp'),
+                    ),
+                    _SettingsHelpItem(
+                      title: s.t('confirmationText'),
+                      description: s.t('confirmationTextHelp'),
+                    ),
+                  ],
+                ),
+                _SettingsHelpGroup(
+                  title: s.t('permissions'),
+                  bottomPadding: 0,
+                  items: <_SettingsHelpItem>[
+                    _SettingsHelpItem(
+                      title: s.t('notificationPermission'),
+                      description: s.t('notificationPermissionHelp'),
+                    ),
+                    _SettingsHelpItem(
+                      title: s.t('exactAlarmPermission'),
+                      description: s.t('exactAlarmPermissionHelp'),
+                    ),
+                    if (showsFullScreenPermission)
+                      _SettingsHelpItem(
+                        title: s.t('fullScreenAlarmPermission'),
+                        description: s.t('fullScreenAlarmPermissionHelp'),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: <Widget>[
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(s.t('close')),
+          ),
+        ],
+      );
+    },
+  );
 
   Future<void> _changeLocation() async {
     final AppStrings s = AppStrings.of(context);
@@ -381,20 +526,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (BuildContext context) => SimpleDialog(
         title: Text(AppStrings.of(context).t('calculationMethod')),
-        children: methods.entries
-            .map(
-              (MapEntry<int, String> entry) => SimpleDialogOption(
-                onPressed: () => Navigator.of(context).pop(entry.key),
-                child: _DialogChoice(
-                  selected: entry.key == current.calculationMethodId,
-                  label: _localizedCalculationMethodName(
-                    entry.key,
-                    AppStrings.of(context).locale.languageCode,
-                  ),
+        children: <Widget>[
+          _DialogExplanation(
+            text: AppStrings.of(context).t('calculationMethodHelp'),
+          ),
+          ...methods.entries.map(
+            (MapEntry<int, String> entry) => SimpleDialogOption(
+              onPressed: () => Navigator.of(context).pop(entry.key),
+              child: _DialogChoice(
+                selected: entry.key == current.calculationMethodId,
+                label: _localizedCalculationMethodName(
+                  entry.key,
+                  AppStrings.of(context).locale.languageCode,
                 ),
               ),
-            )
-            .toList(),
+            ),
+          ),
+        ],
       ),
     );
     if (selected != null) {
@@ -411,11 +559,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (BuildContext context) => SimpleDialog(
         title: Text(s.t('madhhab')),
         children: <Widget>[
+          _DialogExplanation(text: s.t('asrCalculationHelp')),
           SimpleDialogOption(
             onPressed: () => Navigator.of(context).pop(AsrMadhhab.standard),
             child: _DialogChoice(
               selected: current.madhhab == AsrMadhhab.standard,
               label: s.t('standard'),
+              description: s.t('standardAsrHelp'),
             ),
           ),
           SimpleDialogOption(
@@ -423,6 +573,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: _DialogChoice(
               selected: current.madhhab == AsrMadhhab.hanafi,
               label: s.t('hanafi'),
+              description: s.t('hanafiAsrHelp'),
             ),
           ),
         ],
@@ -438,20 +589,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (BuildContext context) => SimpleDialog(
         title: Text(AppStrings.of(context).t('highLatitude')),
-        children: HighLatitudeRule.values
-            .map(
-              (HighLatitudeRule rule) => SimpleDialogOption(
-                onPressed: () => Navigator.of(context).pop(rule),
-                child: _DialogChoice(
-                  selected: rule == current.highLatitudeRule,
-                  label: _localizedHighLatitudeName(
-                    rule,
-                    AppStrings.of(context).locale.languageCode,
-                  ),
+        children: <Widget>[
+          _DialogExplanation(
+            text: AppStrings.of(context).t('highLatitudeHelp'),
+          ),
+          ...HighLatitudeRule.values.map(
+            (HighLatitudeRule rule) => SimpleDialogOption(
+              onPressed: () => Navigator.of(context).pop(rule),
+              child: _DialogChoice(
+                selected: rule == current.highLatitudeRule,
+                label: _localizedHighLatitudeName(
+                  rule,
+                  AppStrings.of(context).locale.languageCode,
+                ),
+                description: AppStrings.of(context).t(
+                  'highLatitude${rule.name[0].toUpperCase()}${rule.name.substring(1)}Help',
                 ),
               ),
-            )
-            .toList(),
+            ),
+          ),
+        ],
       ),
     );
     if (selected != null) {
@@ -475,48 +632,50 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     width: 420,
                     child: ListView(
                       shrinkWrap: true,
-                      children: PrayerType.values
-                          .map(
-                            (PrayerType type) => Row(
-                              children: <Widget>[
-                                Expanded(
-                                  child: Text(
-                                    type.localizedName(
-                                      Localizations.localeOf(context)
-                                          .languageCode,
-                                    ),
+                      children: <Widget>[
+                        Text(AppStrings.of(context).t('minuteAdjustmentsHelp')),
+                        const SizedBox(height: 16),
+                        ...PrayerType.values.map(
+                          (PrayerType type) => Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Text(
+                                  type.localizedName(
+                                    Localizations.localeOf(context)
+                                        .languageCode,
                                   ),
                                 ),
-                                IconButton(
-                                  onPressed: (values[type] ?? 0) <= -60
-                                      ? null
-                                      : () => setDialogState(
-                                          () => values[type] =
-                                              (values[type] ?? 0) - 1,
-                                        ),
-                                  icon: const Icon(Icons.remove_rounded),
+                              ),
+                              IconButton(
+                                onPressed: (values[type] ?? 0) <= -60
+                                    ? null
+                                    : () => setDialogState(
+                                        () => values[type] =
+                                            (values[type] ?? 0) - 1,
+                                      ),
+                                icon: const Icon(Icons.remove_rounded),
+                              ),
+                              SizedBox(
+                                width: 64,
+                                child: Text(
+                                  AppStrings.of(context)
+                                      .minutes(values[type] ?? 0),
+                                  textAlign: TextAlign.center,
                                 ),
-                                SizedBox(
-                                  width: 64,
-                                  child: Text(
-                                    AppStrings.of(context)
-                                        .minutes(values[type] ?? 0),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: (values[type] ?? 0) >= 60
-                                      ? null
-                                      : () => setDialogState(
-                                          () => values[type] =
-                                              (values[type] ?? 0) + 1,
-                                        ),
-                                  icon: const Icon(Icons.add_rounded),
-                                ),
-                              ],
-                            ),
-                          )
-                          .toList(),
+                              ),
+                              IconButton(
+                                onPressed: (values[type] ?? 0) >= 60
+                                    ? null
+                                    : () => setDialogState(
+                                        () => values[type] =
+                                            (values[type] ?? 0) + 1,
+                                      ),
+                                icon: const Icon(Icons.add_rounded),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   actions: <Widget>[
@@ -544,6 +703,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (BuildContext context) => SimpleDialog(
         title: Text(AppStrings.of(context).t('maxSnoozes')),
         children: <Widget>[
+          _DialogExplanation(text: AppStrings.of(context).t('maxSnoozesHelp')),
           SimpleDialogOption(
             onPressed: () => Navigator.of(context).pop(-1),
             child: Text(AppStrings.of(context).t('unlimited')),
@@ -573,12 +733,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           context: context,
           builder: (BuildContext context) => AlertDialog(
             title: Text(AppStrings.of(context).t('confirmationText')),
-            content: TextField(
-              controller: controller,
-              maxLength: 80,
-              decoration: InputDecoration(
-                hintText: AppStrings.of(context).t('confirmPrayer'),
-              ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(AppStrings.of(context).t('confirmationTextHelp')),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: controller,
+                  maxLength: 80,
+                  decoration: InputDecoration(
+                    hintText: AppStrings.of(context).t('confirmPrayer'),
+                  ),
+                ),
+              ],
             ),
             actions: <Widget>[
               TextButton(
@@ -793,21 +961,120 @@ class _SectionTitle extends StatelessWidget {
       children: <Widget>[
         Icon(icon, size: 20),
         const SizedBox(width: 8),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleMedium
-              ?.copyWith(fontWeight: FontWeight.w900),
+        Expanded(
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.w900),
+          ),
         ),
       ],
     ),
   );
 }
 
+class _SettingsHelpGroup extends StatelessWidget {
+  const _SettingsHelpGroup({
+    required this.title,
+    required this.items,
+    this.bottomPadding = 24,
+  });
+
+  final String title;
+  final List<_SettingsHelpItem> items;
+  final double bottomPadding;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.only(bottom: bottomPadding),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Theme.of(context).colorScheme.primary,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 14),
+        for (final _SettingsHelpItem item in items) item,
+      ],
+    ),
+  );
+}
+
+class _SettingsHelpItem extends StatelessWidget {
+  const _SettingsHelpItem({required this.title, required this.description});
+
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleSmall
+              ?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          description,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _SettingExplanation extends StatelessWidget {
+  const _SettingExplanation({required this.value, required this.explanation});
+
+  final String value;
+  final String explanation;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: <Widget>[
+      Text(value),
+      const SizedBox(height: 4),
+      Text(explanation),
+    ],
+  );
+}
+
+class _DialogExplanation extends StatelessWidget {
+  const _DialogExplanation({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+    child: Text(
+      text,
+      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+    ),
+  );
+}
+
 class _DialogChoice extends StatelessWidget {
-  const _DialogChoice({required this.selected, required this.label});
+  const _DialogChoice({
+    required this.selected,
+    required this.label,
+    this.description,
+  });
 
   final bool selected;
   final String label;
+  final String? description;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -817,7 +1084,18 @@ class _DialogChoice extends StatelessWidget {
         size: 20,
       ),
       const SizedBox(width: 12),
-      Expanded(child: Text(label)),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(label),
+            if (description != null) ...<Widget>[
+              const SizedBox(height: 3),
+              Text(description!, style: Theme.of(context).textTheme.bodySmall),
+            ],
+          ],
+        ),
+      ),
     ],
   );
 }
@@ -825,6 +1103,7 @@ class _DialogChoice extends StatelessWidget {
 class _SliderTile extends StatelessWidget {
   const _SliderTile({
     required this.title,
+    required this.description,
     required this.valueLabel,
     required this.value,
     required this.min,
@@ -833,6 +1112,7 @@ class _SliderTile extends StatelessWidget {
     required this.onChanged,
   });
   final String title;
+  final String description;
   final String valueLabel;
   final double value;
   final double min;
@@ -854,6 +1134,12 @@ class _SliderTile extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w800),
             ),
           ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          description,
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         Slider(
           value: value.clamp(min, max).toDouble(),

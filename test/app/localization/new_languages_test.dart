@@ -36,7 +36,7 @@ void main() {
 
   for (final Locale locale in AppStrings.supportedLocales) {
     test(
-      '${locale.languageCode} translates reminder actions and permissions',
+      '${locale.languageCode} translates actions, permissions, and help text',
       () {
         final translations = AppStrings.translations[locale.languageCode]!;
         for (final key in [
@@ -48,9 +48,52 @@ void main() {
           'fullScreenAlarmsDisabled',
           'fullScreenAlarmPermissionHelp',
           'openFullScreenAlarmSettings',
+          'settingsInfo',
+          'settingsInfoTitle',
+          'trackerInfo',
+          'trackerInfoTitle',
+          'trackerInfoIntro',
+          'monthInfo',
+          'monthInfoTitle',
+          'monthInfoOverview',
+          'monthCountHelp',
+          'monthAllConfirmedHelp',
+          'monthPartiallyConfirmedHelp',
+          'monthNoneConfirmedHelp',
+          'monthFutureHelp',
+          'monthTodayOutlineHelp',
+          'statusUpcomingHelp',
+          'statusActiveHelp',
+          'statusPendingHelp',
+          'statusSnoozedHelp',
+          'statusPrayedHelp',
+          'statusSkippedHelp',
+          'statusMissedHelp',
+          'locationHelp',
+          'calculationMethodHelp',
+          'asrCalculationHelp',
+          'standardAsrHelp',
+          'hanafiAsrHelp',
+          'highLatitudeHelp',
+          'highLatitudeMiddleOfNightHelp',
+          'highLatitudeOneSeventhHelp',
+          'highLatitudeAngleBasedHelp',
+          'minuteAdjustmentsHelp',
+          'gracePeriodHelp',
+          'snoozeDurationHelp',
+          'maxSnoozesHelp',
+          'softReminderHelp',
+          'confirmationTextHelp',
         ]) {
           expect(translations[key]?.trim(), isNotEmpty, reason: key);
         }
+        expect(
+          AppStrings.translations['en']!.keys.toSet().difference(
+            translations.keys.toSet(),
+          ),
+          isEmpty,
+          reason: '${locale.languageCode} must not fall back to English',
+        );
       },
     );
   }

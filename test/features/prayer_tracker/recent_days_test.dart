@@ -84,15 +84,19 @@ class _Coordinator implements PrayerCoordinator {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-Widget _app(_Coordinator coordinator, DateTime now) => ProviderScope(
+Widget _app(
+  _Coordinator coordinator,
+  DateTime now, {
+  Locale locale = const Locale('de'),
+}) => ProviderScope(
   overrides: [
     initialPreferencesProvider.overrideWithValue(
-      const AppPreferences(
-        prayerSettings: PrayerSettings(),
-        localeCode: 'de',
+      AppPreferences(
+        prayerSettings: const PrayerSettings(),
+        localeCode: locale.languageCode,
         themeMode: 'dark',
         onboardingComplete: true,
-        location: UserLocation(
+        location: const UserLocation(
           latitude: 0,
           longitude: 0,
           city: '',
@@ -108,12 +112,13 @@ Widget _app(_Coordinator coordinator, DateTime now) => ProviderScope(
   ],
   child: MaterialApp(
     theme: AppTheme.dark(),
-    locale: const Locale('de'),
+    locale: locale,
     supportedLocales: AppStrings.supportedLocales,
     localizationsDelegates: const [
       AppStrings.delegate,
       GlobalMaterialLocalizations.delegate,
       GlobalWidgetsLocalizations.delegate,
+      AppStrings.cupertinoFallbackDelegate,
       GlobalCupertinoLocalizations.delegate,
     ],
     home: const TrackerScreen(),
@@ -122,6 +127,190 @@ Widget _app(_Coordinator coordinator, DateTime now) => ProviderScope(
 
 void main() {
   setUpAll(initializeDateFormatting);
+
+  testWidgets('info button explains every tracker status', (tester) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final DateTime now = DateTime.utc(2026, 9, 13, 12);
+    await tester.pumpWidget(_app(_Coordinator(now), now));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.refresh_rounded), findsNothing);
+    await tester.tap(find.byKey(const ValueKey<String>('tracker-info-button')));
+    await tester.pumpAndSettle();
+
+    final AppStrings s = AppStrings(const Locale('de'));
+    expect(find.text(s.t('trackerInfoTitle')), findsOneWidget);
+    expect(find.text(s.t('trackerInfoIntro')), findsOneWidget);
+    for (final PrayerStatus status in PrayerStatus.values) {
+      final String name = status.name;
+      final String key =
+          'status${name[0].toUpperCase()}${name.substring(1)}Help';
+      expect(find.text(s.t(key)), findsOneWidget, reason: key);
+    }
+
+    await tester.tap(find.text(s.t('close')));
+    await tester.pumpAndSettle();
+    expect(find.text(s.t('trackerInfoTitle')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('month info explains counts and uses the real calendar colors', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final DateTime now = DateTime.utc(2026, 9, 13, 12);
+    final _Coordinator coordinator = _Coordinator(now);
+    for (int index = 0; index < coordinator.entries.length; index++) {
+      final PrayerEntry entry = coordinator.entries[index];
+      final PrayerStatus status = switch (entry.localDate) {
+        '2026-09-10' => PrayerStatus.prayed,
+        '2026-09-11' when entry.type.index < 2 => PrayerStatus.prayed,
+        _ => PrayerStatus.missed,
+      };
+      coordinator.entries[index] = entry.copyWith(status: status);
+    }
+    await tester.pumpWidget(_app(coordinator, now));
+    await tester.pumpAndSettle();
+
+    final Finder monthInfo = find.byKey(
+      const ValueKey<String>('month-info-button'),
+    );
+    await tester.scrollUntilVisible(monthInfo, 300);
+    await tester.pumpAndSettle();
+
+    BoxDecoration calendarDecoration(String date) =>
+        tester
+                .widget<DecoratedBox>(
+                  find.byKey(ValueKey<String>('calendar-$date')),
+                )
+                .decoration
+            as BoxDecoration;
+
+    final BoxDecoration complete = calendarDecoration('2026-09-10');
+    final BoxDecoration partial = calendarDecoration('2026-09-11');
+    final BoxDecoration none = calendarDecoration('2026-09-12');
+    final BoxDecoration today = calendarDecoration('2026-09-13');
+    final BoxDecoration future = calendarDecoration('2026-09-14');
+    expect(today.border, isNotNull);
+    expect(future.border, isNull);
+
+    await tester.tap(monthInfo);
+    await tester.pumpAndSettle();
+
+    final AppStrings s = AppStrings(const Locale('de'));
+    for (final String key in <String>[
+      'monthInfoTitle',
+      'monthInfoOverview',
+      'monthCountHelp',
+      'monthAllConfirmedHelp',
+      'monthPartiallyConfirmedHelp',
+      'monthNoneConfirmedHelp',
+      'monthFutureHelp',
+      'monthTodayOutlineHelp',
+    ]) {
+      expect(find.text(s.t(key)), findsOneWidget, reason: key);
+    }
+    expect(find.text('0/5  ·  1/5  ·  5/5'), findsOneWidget);
+
+    BoxDecoration legendDecoration(String key) =>
+        tester
+                .widget<Container>(
+                  find.descendant(
+                    of: find.byKey(ValueKey<String>(key)),
+                    matching: find.byType(Container),
+                  ),
+                )
+                .decoration
+            as BoxDecoration;
+
+    expect(legendDecoration('month-legend-complete').color, complete.color);
+    expect(legendDecoration('month-legend-partial').color, partial.color);
+    expect(legendDecoration('month-legend-none').color, none.color);
+    expect(legendDecoration('month-legend-future').color, future.color);
+    expect(legendDecoration('month-legend-today').color, today.color);
+    expect(legendDecoration('month-legend-today').border, isNotNull);
+
+    await tester.tap(find.text(s.t('close')));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final Locale locale in AppStrings.supportedLocales) {
+    testWidgets(
+      '${locale.languageCode} tracker help is readable on a small screen',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(320, 568);
+        tester.view.devicePixelRatio = 1;
+        tester.binding.platformDispatcher.textScaleFactorTestValue = 1.3;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(
+          tester.binding.platformDispatcher.clearTextScaleFactorTestValue,
+        );
+        final DateTime now = DateTime.utc(2026, 9, 13, 12);
+        await tester.pumpWidget(_app(_Coordinator(now), now, locale: locale));
+        await tester.pumpAndSettle();
+
+        final AppStrings s = AppStrings(locale);
+        final TextDirection expectedDirection =
+            <String>{'ar', 'ps', 'ur'}.contains(locale.languageCode)
+            ? TextDirection.rtl
+            : TextDirection.ltr;
+        final Finder trackerInfo = find.byKey(
+          const ValueKey<String>('tracker-info-button'),
+        );
+        final Size trackerTouchSize = tester.getSize(trackerInfo);
+        expect(trackerTouchSize.width, greaterThanOrEqualTo(48));
+        expect(trackerTouchSize.height, greaterThanOrEqualTo(48));
+        await tester.tap(trackerInfo);
+        await tester.pumpAndSettle();
+        expect(find.text(s.t('trackerInfoTitle')), findsOneWidget);
+        for (final PrayerStatus status in PrayerStatus.values) {
+          final String name = status.name;
+          final String key =
+              'status${name[0].toUpperCase()}${name.substring(1)}Help';
+          expect(find.text(s.t(key)), findsOneWidget, reason: key);
+        }
+        expect(
+          Directionality.of(tester.element(find.byType(AlertDialog))),
+          expectedDirection,
+        );
+        await tester.tap(find.text(s.t('close')).hitTestable());
+        await tester.pumpAndSettle();
+
+        final Finder infoButton = find.byKey(
+          const ValueKey<String>('month-info-button'),
+        );
+        await tester.scrollUntilVisible(infoButton, 250);
+        await tester.pumpAndSettle();
+        final Size touchSize = tester.getSize(infoButton);
+        expect(touchSize.width, greaterThanOrEqualTo(48));
+        expect(touchSize.height, greaterThanOrEqualTo(48));
+        await tester.tap(infoButton);
+        await tester.pumpAndSettle();
+
+        expect(find.text(s.t('monthInfoTitle')), findsOneWidget);
+        expect(find.text(s.t('monthInfoOverview')), findsOneWidget);
+        expect(find.text(s.t('monthCountHelp')), findsOneWidget);
+        expect(find.byType(SingleChildScrollView), findsOneWidget);
+        expect(
+          Directionality.of(tester.element(find.byType(AlertDialog))),
+          expectedDirection,
+        );
+        final Finder close = find.text(s.t('close')).hitTestable();
+        expect(close, findsOneWidget);
+        await tester.tap(close);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   for (final DateTime now in [
     DateTime.utc(2027, 1, 1, 12),

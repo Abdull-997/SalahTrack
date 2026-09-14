@@ -1,5 +1,5 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/additional_translations.dart';
@@ -11,6 +11,11 @@ class AppStrings {
 
   static const LocalizationsDelegate<AppStrings> delegate =
       _AppStringsDelegate();
+
+  /// Flutter has no built-in Pashto Cupertino catalog. The app uses its own
+  /// translated strings, while this fallback supplies framework-only labels.
+  static const LocalizationsDelegate<CupertinoLocalizations>
+  cupertinoFallbackDelegate = _PashtoCupertinoLocalizationsDelegate();
 
   static AppStrings of(BuildContext context) =>
       Localizations.of<AppStrings>(context, AppStrings)!;
@@ -87,11 +92,45 @@ class AppStrings {
       'week': 'Diese Woche',
       'month': 'Monat',
       'confirmedPrayers': 'Bestätigte Gebete',
+      'monthInfo': 'Über die Monatsübersicht',
+      'monthInfoTitle': 'Was zeigt der Monat?',
+      'monthInfoOverview': 'Jedes Feld steht für einen Tag dieses Monats und zeigt, wie viele der fünf Gebete du in der App bestätigt hast.',
+      'monthCountHelp': 'Die erste Zahl zeigt die bestätigten Gebete. Die Gesamtzahl ist immer fünf.',
+      'monthAllConfirmedHelp': 'Alle fünf Gebete bestätigt',
+      'monthPartiallyConfirmedHelp': 'Einige, aber nicht alle Gebete bestätigt',
+      'monthNoneConfirmedHelp': 'An einem vergangenen Tag kein Gebet bestätigt',
+      'monthFutureHelp': 'Heute oder ein zukünftiger Tag ohne Bestätigung',
+      'monthTodayOutlineHelp': 'Der Rahmen markiert den heutigen Tag.',
+      'settingsInfo': 'Hilfe zu den Einstellungen',
+      'settingsInfoTitle': 'Einstellungen erklärt',
+      'trackerInfo': 'Über Gebetsstatus',
+      'trackerInfoTitle': 'Was bedeuten die Statusangaben?',
+      'trackerInfoIntro': '„Bestätigt“ bedeutet, dass du ein Gebet in der App als gebetet markiert hast. Es ist deine persönliche Aufzeichnung; die App bewertet oder überprüft dein Gebet nicht.',
+      'close': 'Schließen',
+      'statusUpcomingHelp': 'Die Gebetszeit hat noch nicht begonnen.',
+      'statusActiveHelp':
+          'Die Gebetszeit hat begonnen und die Erinnerungsfrist läuft.',
+      'statusPendingHelp': 'Die Erinnerungsfrist ist abgelaufen. Die App wartet darauf, dass du das Gebet als gebetet markierst oder die Erinnerung verschiebst.',
+      'statusSnoozedHelp':
+          'Du hast die App gebeten, dich später noch einmal zu erinnern.',
+      'statusPrayedHelp': 'Du hast dieses Gebet als gebetet markiert. Im Tracker zählt es als bestätigtes Gebet.',
+      'statusSkippedHelp': 'Du hast die Erinnerungen für dieses Gebet beendet, ohne es als gebetet zu markieren.',
+      'statusMissedHelp': 'Der Erfassungszeitraum endete, ohne dass das Gebet in der App bestätigt wurde.',
       'calculationMethod': 'Berechnungsmethode',
+      'calculationMethodHelp': 'Wähle die Methode deiner Moschee oder islamischen Autorität. Sie beeinflusst vor allem Fajr und Ischa.',
       'madhhab': 'Asr-Berechnung',
+      'asrCalculationHelp': 'Diese Einstellung ändert, wie der Beginn von Asr berechnet wird. Wähle die Regel deiner Moschee oder Rechtsschule.',
       'standard': 'Standard',
+      'standardAsrHelp': 'Asr beginnt, wenn der Schatten eines Gegenstands zusätzlich zum Mittagsschatten seiner Länge entspricht.',
       'hanafi': 'Hanafi',
+      'hanafiAsrHelp': 'Asr beginnt, wenn der Schatten eines Gegenstands zusätzlich zum Mittagsschatten doppelt so lang ist.',
       'highLatitude': 'Hohe Breitengrade',
+      'highLatitudeHelp': 'Diese Regel schätzt Fajr und Ischa an Orten, an denen die Dämmerung sehr lange dauert oder nicht vollständig verschwindet. Verwende die Empfehlung deiner Moschee.',
+      'highLatitudeMiddleOfNightHelp':
+          'Verwendet die Mitte zwischen Sonnenuntergang und Sonnenaufgang.',
+      'highLatitudeOneSeventhHelp':
+          'Verwendet ein Siebtel der Nacht für die Dämmerungszeit.',
+      'highLatitudeAngleBasedHelp': 'Verwendet den Sonnenwinkel der gewählten Berechnungsmethode, um die Dämmerungszeit zu schätzen.',
       'gracePeriod': 'Erinnerungsfrist',
       'snoozeDuration': 'Snooze-Dauer',
       'confirmationText': 'Bestätigungstext',
@@ -126,6 +165,13 @@ class AppStrings {
       'save': 'Speichern',
       'cancel': 'Abbrechen',
       'manualAdjustments': 'Minutenkorrekturen',
+      'minuteAdjustmentsHelp': 'Mit Plus oder Minus passt du einzelne Gebetszeiten an deine Moschee an. Positive Minuten machen die Zeit später, negative früher. Erinnerungen verwenden die angepasste Zeit.',
+      'locationHelp': 'Wird verwendet, um die Gebetszeiten und die Qibla-Richtung für deinen Ort zu berechnen.',
+      'gracePeriodHelp': 'So lange wartet die App nach Beginn der Gebetszeit, bevor sie fragt, ob du gebetet hast.',
+      'snoozeDurationHelp': 'So lange wartet die App nach „Später erinnern“, bevor sie dich erneut erinnert.',
+      'maxSnoozesHelp': 'Legt fest, wie oft du eine Gebetserinnerung verschieben kannst. Unbegrenzt erlaubt dies bis zum nächsten Gebet.',
+      'softReminderHelp': 'Sendet 45 Minuten später eine sanfte Erinnerung, wenn du eine Erinnerung beendest, ohne das Gebet als gebetet zu markieren.',
+      'confirmationTextHelp': 'Dieser Text wird angezeigt, nachdem du ein Gebet als gebetet markierst. Du kannst ihn nach Wunsch ändern.',
       'maxSnoozes': 'Maximale Snoozes',
       'unlimited': 'Unbegrenzt',
       'genericError': 'Etwas ist schiefgelaufen. Bitte versuche es erneut.',
@@ -203,11 +249,44 @@ class AppStrings {
       'week': 'This week',
       'month': 'Month',
       'confirmedPrayers': 'Confirmed prayers',
+      'monthInfo': 'About the monthly overview',
+      'monthInfoTitle': 'What does the month show?',
+      'monthInfoOverview': 'Each field is one day in this month. It shows how many of the five prayers you confirmed in the app.',
+      'monthCountHelp': 'The first number is the prayers you confirmed. The total is always five.',
+      'monthAllConfirmedHelp': 'All five prayers confirmed',
+      'monthPartiallyConfirmedHelp': 'Some, but not all, prayers confirmed',
+      'monthNoneConfirmedHelp': 'No prayer confirmed on a past day',
+      'monthFutureHelp': 'Today or a future day with no confirmation yet',
+      'monthTodayOutlineHelp': 'The outline marks today.',
+      'settingsInfo': 'Help with settings',
+      'settingsInfoTitle': 'Settings explained',
+      'trackerInfo': 'About prayer statuses',
+      'trackerInfoTitle': 'What do the statuses mean?',
+      'trackerInfoIntro': '“Confirmed” means that you marked a prayer as prayed in the app. It is your personal record; the app does not judge or verify your prayer.',
+      'close': 'Close',
+      'statusUpcomingHelp': 'The prayer time has not started yet.',
+      'statusActiveHelp': 'The prayer time has started and the reminder grace period is running.',
+      'statusPendingHelp': 'The grace period has ended. The app is waiting for you to mark the prayer as prayed or snooze the reminder.',
+      'statusSnoozedHelp': 'You asked the app to remind you again later.',
+      'statusPrayedHelp': 'You marked this prayer as prayed. It counts as a confirmed prayer in the tracker.',
+      'statusSkippedHelp':
+          'You ended reminders for this prayer without marking it as prayed.',
+      'statusMissedHelp': 'The tracking time ended without the prayer being confirmed in the app.',
       'calculationMethod': 'Calculation method',
+      'calculationMethodHelp': 'Choose the method used by your local mosque or Islamic authority. It mainly affects the Fajr and Isha times.',
       'madhhab': 'Asr calculation',
+      'asrCalculationHelp': 'This setting changes how the start of Asr is calculated. Choose the rule followed by your mosque or school of thought.',
       'standard': 'Standard',
+      'standardAsrHelp': 'Asr begins when an object’s shadow equals its length, in addition to the midday shadow.',
       'hanafi': 'Hanafi',
+      'hanafiAsrHelp': 'Asr begins when an object’s shadow is twice its length, in addition to the midday shadow.',
       'highLatitude': 'High latitude rule',
+      'highLatitudeHelp': 'This rule estimates Fajr and Isha in places where twilight lasts unusually long or never fully disappears. Use the rule recommended by your local mosque.',
+      'highLatitudeMiddleOfNightHelp':
+          'Uses the middle point between sunset and sunrise.',
+      'highLatitudeOneSeventhHelp':
+          'Uses one seventh of the night for the twilight period.',
+      'highLatitudeAngleBasedHelp': 'Uses the selected calculation method’s sun angle to estimate the twilight period.',
       'gracePeriod': 'Grace period',
       'snoozeDuration': 'Snooze duration',
       'confirmationText': 'Confirmation text',
@@ -244,6 +323,13 @@ class AppStrings {
       'save': 'Save',
       'cancel': 'Cancel',
       'manualAdjustments': 'Minute adjustments',
+      'minuteAdjustmentsHelp': 'Use plus or minus to move an individual prayer time so it matches your local mosque. Positive minutes make it later; negative minutes make it earlier. Reminders follow the adjusted time.',
+      'locationHelp': 'Used to calculate prayer times and the Qibla direction for your location.',
+      'gracePeriodHelp': 'How long the app waits after a prayer time begins before asking whether you have prayed.',
+      'snoozeDurationHelp': 'How long the app waits before reminding you again after you choose Snooze.',
+      'maxSnoozesHelp': 'How many times you can postpone one prayer reminder. Unlimited allows snoozing until the next prayer.',
+      'softReminderHelp': 'Sends one gentle follow-up 45 minutes later if you end a reminder without marking the prayer as prayed.',
+      'confirmationTextHelp': 'This text appears after you mark a prayer as prayed. You can change it to wording that is meaningful to you.',
       'maxSnoozes': 'Maximum snoozes',
       'unlimited': 'Unlimited',
       'genericError': 'Something went wrong. Please try again.',
@@ -322,11 +408,47 @@ class AppStrings {
       'week': 'هذا الأسبوع',
       'month': 'الشهر',
       'confirmedPrayers': 'الصلوات المؤكدة',
+      'monthInfo': 'حول النظرة الشهرية',
+      'monthInfoTitle': 'ماذا يعرض الشهر؟',
+      'monthInfoOverview': 'يمثل كل مربع يومًا من هذا الشهر، ويعرض عدد الصلوات التي أكّدت أداءها في التطبيق من أصل خمس.',
+      'monthCountHelp':
+          'الرقم الأول هو عدد الصلوات المؤكدة، والمجموع دائمًا خمس صلوات.',
+      'monthAllConfirmedHelp': 'تم تأكيد الصلوات الخمس كلها',
+      'monthPartiallyConfirmedHelp': 'تم تأكيد بعض الصلوات فقط',
+      'monthNoneConfirmedHelp': 'لم تُؤكَّد أي صلاة في يوم مضى',
+      'monthFutureHelp': 'اليوم أو يوم قادم بلا تأكيد حتى الآن',
+      'monthTodayOutlineHelp': 'الإطار يحدد يومنا هذا.',
+      'settingsInfo': 'مساعدة حول الإعدادات',
+      'settingsInfoTitle': 'شرح الإعدادات',
+      'trackerInfo': 'حول حالات الصلاة',
+      'trackerInfoTitle': 'ماذا تعني الحالات؟',
+      'trackerInfoIntro': 'تعني «مؤكدة» أنك وضعت علامة «تمت الصلاة» في التطبيق. هذا سجل شخصي لك؛ لا يحكم التطبيق على صلاتك ولا يتحقق منها.',
+      'close': 'إغلاق',
+      'statusUpcomingHelp': 'لم يدخل وقت الصلاة بعد.',
+      'statusActiveHelp': 'دخل وقت الصلاة، وما زالت مهلة التذكير جارية.',
+      'statusPendingHelp': 'انتهت مهلة التذكير. ينتظر التطبيق أن تضع علامة «تمت الصلاة» أو تؤجل التذكير.',
+      'statusSnoozedHelp': 'طلبت من التطبيق أن يذكّرك مرة أخرى لاحقًا.',
+      'statusPrayedHelp':
+          'وضعت علامة أن هذه الصلاة قد أُديت. وتُحسب صلاة مؤكدة في المتابعة.',
+      'statusSkippedHelp': 'أنهيت تذكيرات هذه الصلاة دون وضع علامة أنها أُديت.',
+      'statusMissedHelp': 'انتهت مدة المتابعة دون تأكيد الصلاة في التطبيق.',
       'calculationMethod': 'طريقة الحساب',
+      'calculationMethodHelp': 'اختر الطريقة التي يستخدمها مسجدك أو الجهة الإسلامية المحلية. تؤثر أساسًا في وقتي الفجر والعشاء.',
       'madhhab': 'حساب العصر',
+      'asrCalculationHelp': 'يغيّر هذا الإعداد طريقة حساب بداية وقت العصر. اختر القاعدة التي يتبعها مسجدك أو مذهبك.',
       'standard': 'قياسي',
+      'standardAsrHelp':
+          'يبدأ العصر عندما يصبح ظل الشيء مساويًا لطوله، إضافة إلى ظل الزوال.',
       'hanafi': 'حنفي',
+      'hanafiAsrHelp':
+          'يبدأ العصر عندما يصبح ظل الشيء ضعف طوله، إضافة إلى ظل الزوال.',
       'highLatitude': 'قاعدة خطوط العرض العليا',
+      'highLatitudeHelp': 'تقدّر هذه القاعدة وقتي الفجر والعشاء في الأماكن التي يطول فيها الشفق جدًا أو لا يختفي تمامًا. اتبع ما يوصي به مسجدك المحلي.',
+      'highLatitudeMiddleOfNightHelp':
+          'تستخدم منتصف الوقت بين غروب الشمس وشروقها.',
+      'highLatitudeOneSeventhHelp': 'تستخدم سُبع الليل لفترة الشفق.',
+      'highLatitudeAngleBasedHelp':
+          'تستخدم زاوية الشمس في طريقة الحساب المختارة لتقدير فترة الشفق.',
       'gracePeriod': 'فترة السماح',
       'snoozeDuration': 'مدة التأجيل',
       'confirmationText': 'نص التأكيد',
@@ -362,6 +484,13 @@ class AppStrings {
       'save': 'حفظ',
       'cancel': 'إلغاء',
       'manualAdjustments': 'تعديلات الدقائق',
+      'minuteAdjustmentsHelp': 'استخدم زائد أو ناقص لمطابقة وقت كل صلاة مع مسجدك المحلي. الدقائق الموجبة تؤخر الوقت والسالبة تقدمه. تتبع التذكيرات الوقت المعدّل.',
+      'locationHelp': 'يُستخدم لحساب مواقيت الصلاة واتجاه القبلة في موقعك.',
+      'gracePeriodHelp': 'الفترة التي ينتظرها التطبيق بعد دخول وقت الصلاة قبل أن يسألك إن كنت قد صليت.',
+      'snoozeDurationHelp': 'المدة التي ينتظرها التطبيق قبل أن يذكّرك مرة أخرى بعد اختيار «ذكّرني لاحقًا».',
+      'maxSnoozesHelp': 'يحدد عدد مرات تأجيل تذكير الصلاة الواحدة. يتيح خيار «بلا حد» التأجيل حتى الصلاة التالية.',
+      'softReminderHelp': 'يرسل تذكيرًا لطيفًا بعد 45 دقيقة إذا أنهيت التذكير دون وضع علامة أن الصلاة أُديت.',
+      'confirmationTextHelp': 'يظهر هذا النص بعد وضع علامة أن الصلاة أُديت. يمكنك تغييره إلى عبارة تناسبك.',
       'maxSnoozes': 'أقصى عدد للتأجيل',
       'unlimited': 'بلا حد',
       'genericError': 'حدث خطأ ما. حاول مرة أخرى.',
@@ -442,11 +571,47 @@ class AppStrings {
       'week': 'اس ہفتے',
       'month': 'مہینہ',
       'confirmedPrayers': 'تصدیق شدہ نمازیں',
+      'monthInfo': 'ماہانہ جائزے کے بارے میں',
+      'monthInfoTitle': 'مہینہ کیا دکھاتا ہے؟',
+      'monthInfoOverview': 'ہر خانہ اس مہینے کا ایک دن ہے۔ یہ دکھاتا ہے کہ پانچ میں سے کتنی نمازوں کی آپ نے ایپ میں تصدیق کی۔',
+      'monthCountHelp':
+          'پہلا عدد تصدیق شدہ نمازوں کی تعداد ہے۔ کل تعداد ہمیشہ پانچ ہے۔',
+      'monthAllConfirmedHelp': 'پانچوں نمازیں تصدیق شدہ ہیں',
+      'monthPartiallyConfirmedHelp': 'کچھ نمازیں تصدیق شدہ ہیں، سب نہیں',
+      'monthNoneConfirmedHelp': 'گزشتہ دن کی کوئی نماز تصدیق شدہ نہیں',
+      'monthFutureHelp': 'آج یا آنے والا دن، ابھی کوئی تصدیق نہیں',
+      'monthTodayOutlineHelp': 'حاشیہ آج کے دن کو ظاہر کرتا ہے۔',
+      'settingsInfo': 'ترتیبات کے بارے میں مدد',
+      'settingsInfoTitle': 'ترتیبات کی وضاحت',
+      'trackerInfo': 'نماز کی حالتوں کے بارے میں',
+      'trackerInfoTitle': 'حالتوں کا کیا مطلب ہے؟',
+      'trackerInfoIntro': '«تصدیق شدہ» کا مطلب ہے کہ آپ نے ایپ میں نماز کو پڑھی ہوئی نشان زد کیا ہے۔ یہ آپ کا ذاتی ریکارڈ ہے؛ ایپ آپ کی نماز کا فیصلہ یا تصدیق نہیں کرتی۔',
+      'close': 'بند کریں',
+      'statusUpcomingHelp': 'نماز کا وقت ابھی شروع نہیں ہوا۔',
+      'statusActiveHelp':
+          'نماز کا وقت شروع ہو گیا ہے اور یاد دہانی کی مہلت جاری ہے۔',
+      'statusPendingHelp': 'یاد دہانی کی مہلت ختم ہو گئی ہے۔ ایپ آپ کے نماز پڑھی ہوئی نشان زد کرنے یا یاد دہانی موخر کرنے کا انتظار کر رہی ہے۔',
+      'statusSnoozedHelp':
+          'آپ نے ایپ سے کہا ہے کہ وہ بعد میں دوبارہ یاد دلائے۔',
+      'statusPrayedHelp': 'آپ نے اس نماز کو پڑھی ہوئی نشان زد کیا ہے۔ یہ ریکارڈ میں تصدیق شدہ نماز شمار ہوتی ہے۔',
+      'statusSkippedHelp': 'آپ نے نماز کو پڑھی ہوئی نشان زد کیے بغیر اس کی یاد دہانیاں بند کر دیں۔',
+      'statusMissedHelp':
+          'ایپ میں نماز کی تصدیق ہوئے بغیر ریکارڈ رکھنے کا وقت ختم ہو گیا۔',
       'calculationMethod': 'حساب کا طریقہ',
+      'calculationMethodHelp': 'اپنی مقامی مسجد یا اسلامی ادارے کا استعمال کردہ طریقہ منتخب کریں۔ اس کا زیادہ اثر فجر اور عشاء کے اوقات پر ہوتا ہے۔',
       'madhhab': 'عصر کا حساب',
+      'asrCalculationHelp': 'یہ ترتیب عصر کے آغاز کا حساب بدلتی ہے۔ اپنی مسجد یا فقہی مسلک کا اصول منتخب کریں۔',
       'standard': 'معیاری',
+      'standardAsrHelp': 'عصر اس وقت شروع ہوتی ہے جب کسی چیز کا سایہ، زوال کے سائے کے علاوہ، اس کی لمبائی کے برابر ہو۔',
       'hanafi': 'حنفی',
+      'hanafiAsrHelp': 'عصر اس وقت شروع ہوتی ہے جب کسی چیز کا سایہ، زوال کے سائے کے علاوہ، اس کی لمبائی سے دوگنا ہو۔',
       'highLatitude': 'بلند عرض البلد کا اصول',
+      'highLatitudeHelp': 'یہ اصول ان جگہوں پر فجر اور عشاء کا اندازہ لگاتا ہے جہاں شفق بہت دیر رہتی ہے یا مکمل طور پر ختم نہیں ہوتی۔ اپنی مقامی مسجد کی سفارش استعمال کریں۔',
+      'highLatitudeMiddleOfNightHelp':
+          'غروبِ آفتاب اور طلوعِ آفتاب کے درمیان آدھا وقت استعمال کرتا ہے۔',
+      'highLatitudeOneSeventhHelp':
+          'شفق کے وقت کے لیے رات کا ساتواں حصہ استعمال کرتا ہے۔',
+      'highLatitudeAngleBasedHelp': 'شفق کے وقت کا اندازہ لگانے کے لیے منتخب طریقۂ حساب کا شمسی زاویہ استعمال کرتا ہے۔',
       'gracePeriod': 'مہلت کی مدت',
       'snoozeDuration': 'موخر کرنے کی مدت',
       'confirmationText': 'تصدیقی متن',
@@ -483,6 +648,13 @@ class AppStrings {
       'save': 'محفوظ کریں',
       'cancel': 'منسوخ',
       'manualAdjustments': 'منٹ کی تبدیلیاں',
+      'minuteAdjustmentsHelp': 'ہر نماز کا وقت مقامی مسجد سے ملانے کے لیے جمع یا تفریق استعمال کریں۔ مثبت منٹ وقت کو بعد میں اور منفی منٹ پہلے کرتے ہیں۔ یاد دہانیاں درست کیے گئے وقت کے مطابق آتی ہیں۔',
+      'locationHelp': 'آپ کے مقام کے مطابق نماز کے اوقات اور قبلہ کی سمت معلوم کرنے کے لیے استعمال ہوتا ہے۔',
+      'gracePeriodHelp': 'نماز کا وقت شروع ہونے کے بعد ایپ اتنی دیر انتظار کرتی ہے، پھر پوچھتی ہے کہ کیا آپ نے نماز پڑھ لی۔',
+      'snoozeDurationHelp': '«بعد میں یاد دلائیں» دبانے کے بعد ایپ اتنی دیر انتظار کر کے دوبارہ یاد دلاتی ہے۔',
+      'maxSnoozesHelp': 'یہ طے کرتا ہے کہ ایک نماز کی یاد دہانی کتنی بار موخر کی جا سکتی ہے۔ «لامحدود» اگلی نماز تک موخر کرنے دیتا ہے۔',
+      'softReminderHelp': 'اگر آپ نماز پڑھی ہوئی نشان زد کیے بغیر یاد دہانی بند کریں تو 45 منٹ بعد ایک نرم یاد دہانی بھیجتا ہے۔',
+      'confirmationTextHelp': 'یہ متن نماز کو پڑھی ہوئی نشان زد کرنے کے بعد دکھائی دیتا ہے۔ آپ اسے اپنے لیے موزوں الفاظ میں بدل سکتے ہیں۔',
       'maxSnoozes': 'زیادہ سے زیادہ موخر کرنا',
       'unlimited': 'لامحدود',
       'genericError': 'کچھ غلط ہو گیا۔ براہ کرم دوبارہ کوشش کریں۔',
@@ -563,11 +735,46 @@ class AppStrings {
       'week': 'دا اونۍ',
       'month': 'میاشت',
       'confirmedPrayers': 'تایید شوي لمونځونه',
+      'monthInfo': 'د میاشتني لید په اړه',
+      'monthInfoTitle': 'میاشت څه ښيي؟',
+      'monthInfoOverview': 'هره خانه د دې میاشتې یوه ورځ ده. دا ښيي چې له پنځو لمونځونو مو څو په اپ کې تایید کړي دي.',
+      'monthCountHelp':
+          'لومړی شمېر د تایید شوو لمونځونو دی. ټول شمېر تل پنځه وي.',
+      'monthAllConfirmedHelp': 'پنځه واړه لمونځونه تایید شوي',
+      'monthPartiallyConfirmedHelp': 'ځینې لمونځونه تایید شوي، خو ټول نه',
+      'monthNoneConfirmedHelp': 'په تېره ورځ کې هېڅ لمونځ نه دی تایید شوی',
+      'monthFutureHelp': 'نن یا راتلونکې ورځ چې لا تایید نه لري',
+      'monthTodayOutlineHelp': 'چوکاټ نننۍ ورځ ښيي.',
+      'settingsInfo': 'د امستنو په اړه مرسته',
+      'settingsInfoTitle': 'د امستنو تشریح',
+      'trackerInfo': 'د لمانځه د حالتونو په اړه',
+      'trackerInfoTitle': 'حالتونه څه معنا لري؟',
+      'trackerInfoIntro': '«تایید شوی» یعنې تاسو په اپ کې لمونځ د ادا شوي په توګه نښه کړی. دا ستاسو شخصي ثبت دی؛ اپ ستاسو د لمانځه قضاوت یا تصدیق نه کوي.',
+      'close': 'تړل',
+      'statusUpcomingHelp': 'د لمانځه وخت لا نه دی پیل شوی.',
+      'statusActiveHelp': 'د لمانځه وخت پیل شوی او د یادونې مهلت روان دی.',
+      'statusPendingHelp': 'د یادونې مهلت پای ته رسېدلی. اپ ستاسو د تایید یا د یادونې د ځنډولو انتظار کوي.',
+      'statusSnoozedHelp': 'تاسو له اپ څخه غوښتي چې وروسته بیا یادونه وکړي.',
+      'statusPrayedHelp': 'تاسو دا لمونځ د ادا شوي په توګه نښه کړی. په څارونکي کې تایید شوی لمونځ شمېرل کېږي.',
+      'statusSkippedHelp': 'تاسو د دې لمانځه یادونې بې له تاییده پای ته رسولې.',
+      'statusMissedHelp':
+          'په اپ کې د لمانځه له تایید پرته د څارنې وخت پای ته ورسېد.',
       'calculationMethod': 'د محاسبې طریقه',
+      'calculationMethodHelp': 'هغه طریقه وټاکئ چې ستاسو سیمه ییز جومات یا اسلامي اداره یې کاروي. دا تر ډېره د سهار او ماخوستن پر وختونو اغېز کوي.',
       'madhhab': 'د مازدیګر محاسبه',
+      'asrCalculationHelp': 'دا امستنه د مازدیګر د پیل محاسبه بدلوي. د خپل جومات یا مذهب قاعده وټاکئ.',
       'standard': 'معیاري',
+      'standardAsrHelp': 'مازدیګر هغه وخت پیلېږي چې د یوه شي سیوری، د غرمې له سیوري سربېره، د هغه له اوږدوالي سره برابر شي.',
       'hanafi': 'حنفي',
+      'hanafiAsrHelp': 'مازدیګر هغه وخت پیلېږي چې د یوه شي سیوری، د غرمې له سیوري سربېره، د هغه د اوږدوالي دوه برابره شي.',
       'highLatitude': 'د لوړې عرض البلد قاعده',
+      'highLatitudeHelp': 'دا قاعده په هغو ځایونو کې د سهار او ماخوستن وختونه اټکلوي چې ماښامنۍ رڼا ډېره اوږده وي یا بیخي نه ورکېږي. د خپل سیمه ییز جومات سپارښتنه وکاروئ.',
+      'highLatitudeMiddleOfNightHelp':
+          'د لمر لوېدو او راختو ترمنځ منځنی وخت کاروي.',
+      'highLatitudeOneSeventhHelp':
+          'د ماښامنۍ رڼا لپاره د شپې اوومه برخه کاروي.',
+      'highLatitudeAngleBasedHelp':
+          'د ماښامنۍ رڼا د اټکل لپاره د ټاکل شوې محاسبې د لمر زاویه کاروي.',
       'gracePeriod': 'د ځنډ موده',
       'snoozeDuration': 'د ځنډولو موده',
       'confirmationText': 'د تایید متن',
@@ -604,6 +811,13 @@ class AppStrings {
       'save': 'ساتل',
       'cancel': 'لغوه',
       'manualAdjustments': 'د دقیقو سمون',
+      'minuteAdjustmentsHelp': 'د هر لمانځه وخت له خپل جومات سره د برابرولو لپاره جمع یا منفي وکاروئ. مثبتې دقیقې وخت وروسته او منفي دقیقې مخکې کوي. یادونې د سم شوي وخت له مخې راځي.',
+      'locationHelp': 'ستاسو د ځای لپاره د لمانځه وختونو او د قبلې لوري د محاسبې لپاره کارېږي.',
+      'gracePeriodHelp': 'اپ د لمانځه د وخت له پیل وروسته همدومره انتظار کوي، بیا پوښتي چې لمونځ مو کړی که نه.',
+      'snoozeDurationHelp': 'د «وروسته یادونه» له ټاکلو وروسته اپ همدومره انتظار کوي او بیا یادونه کوي.',
+      'maxSnoozesHelp': 'ټاکي چې د یوه لمانځه یادونه څو ځله ځنډولی شئ. «نامحدود» تر راتلونکي لمانځه پورې ځنډ ته اجازه ورکوي.',
+      'softReminderHelp': 'که یادونه د لمانځه له تایید پرته پای ته ورسوئ، 45 دقیقې وروسته یوه نرمه یادونه لېږي.',
+      'confirmationTextHelp': 'دا متن د لمانځه له تایید وروسته ښکاري. تاسو یې په خپلو خوښو ټکو بدلولی شئ.',
       'maxSnoozes': 'اعظمي ځنډول',
       'unlimited': 'نامحدود',
       'genericError': 'یوه ستونزه پېښه شوه. بیا هڅه وکړئ.',
@@ -908,4 +1122,23 @@ class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {
 
   @override
   bool shouldReload(covariant LocalizationsDelegate<AppStrings> old) => false;
+}
+
+class _PashtoCupertinoLocalizationsDelegate
+    extends LocalizationsDelegate<CupertinoLocalizations> {
+  const _PashtoCupertinoLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'ps';
+
+  @override
+  Future<CupertinoLocalizations> load(Locale locale) =>
+      SynchronousFuture<CupertinoLocalizations>(
+        const DefaultCupertinoLocalizations(),
+      );
+
+  @override
+  bool shouldReload(
+    covariant LocalizationsDelegate<CupertinoLocalizations> old,
+  ) => false;
 }

@@ -78,6 +78,7 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
         AppStrings.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
+        AppStrings.cupertinoFallbackDelegate,
         GlobalCupertinoLocalizations.delegate,
       ],
       routerConfig: router,

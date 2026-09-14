@@ -113,11 +113,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ],
                     ),
                   ),
-                  IconButton(
-                    tooltip: s.t('refresh'),
-                    onPressed: () => ref.invalidate(todayPrayerDayProvider),
-                    icon: const Icon(Icons.refresh_rounded),
-                  ),
                 ],
               ),
             ),

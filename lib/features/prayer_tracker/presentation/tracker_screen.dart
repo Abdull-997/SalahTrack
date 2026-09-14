@@ -64,9 +64,10 @@ class TrackerScreen extends ConsumerWidget {
         title: Text(s.t('tracker')),
         actions: <Widget>[
           IconButton(
-            tooltip: s.t('refresh'),
-            onPressed: () => refresh(),
-            icon: const Icon(Icons.refresh_rounded),
+            key: const ValueKey<String>('tracker-info-button'),
+            tooltip: s.t('trackerInfo'),
+            onPressed: () => _showTrackerInfo(context),
+            icon: const Icon(Icons.info_outline_rounded),
           ),
         ],
       ),
@@ -100,6 +101,78 @@ class TrackerScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+Future<void> _showTrackerInfo(BuildContext context) => showDialog<void>(
+  context: context,
+  builder: (BuildContext dialogContext) {
+    final AppStrings s = AppStrings.of(dialogContext);
+    return AlertDialog(
+      title: Text(s.t('trackerInfoTitle')),
+      content: SizedBox(
+        width: 480,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(s.t('trackerInfoIntro')),
+              const SizedBox(height: 20),
+              for (final PrayerStatus status in PrayerStatus.values)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _StatusExplanation(status: status),
+                ),
+            ],
+          ),
+        ),
+      ),
+      actions: <Widget>[
+        FilledButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: Text(s.t('close')),
+        ),
+      ],
+    );
+  },
+);
+
+class _StatusExplanation extends StatelessWidget {
+  const _StatusExplanation({required this.status});
+
+  final PrayerStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppStrings s = AppStrings.of(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: _StatusIcon(status: status),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                _statusLabel(context, status),
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                s.t(
+                  'status${status.name[0].toUpperCase()}${status.name.substring(1)}Help',
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -181,10 +254,21 @@ class _TrackerContent extends StatelessWidget {
               ),
             ),
           const SizedBox(height: 18),
-          Text(
-            s.t('month'),
-            style: Theme.of(context).textTheme.titleLarge
-                ?.copyWith(fontWeight: FontWeight.w800),
+          Row(
+            children: <Widget>[
+              Text(
+                s.t('month'),
+                style: Theme.of(context).textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(width: 2),
+              IconButton(
+                key: const ValueKey<String>('month-info-button'),
+                tooltip: s.t('monthInfo'),
+                onPressed: () => _showMonthInfo(context),
+                icon: const Icon(Icons.info_outline_rounded),
+              ),
+            ],
           ),
           const SizedBox(height: 10),
           _MonthGrid(
@@ -508,7 +592,7 @@ class _MonthGrid extends StatelessWidget {
     final int total = prefix + days;
     final ColorScheme scheme = Theme.of(context).colorScheme;
     final TextScaler textScaler = MediaQuery.textScalerOf(context);
-    final double cellHeight = (textScaler.scale(14) + textScaler.scale(12) + 20)
+    final double cellHeight = (textScaler.scale(20) + textScaler.scale(18) + 20)
         .clamp(58.0, double.infinity);
 
     return Card(
@@ -564,20 +648,30 @@ class _MonthGrid extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Text(
-                        s.number(day),
-                        style: TextStyle(
-                          color: foreground,
-                          fontWeight: FontWeight.w800,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          s.number(day),
+                          maxLines: 1,
+                          softWrap: false,
+                          style: TextStyle(
+                            color: foreground,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
-                      Text(
-                        '${s.number(prayed)}/${s.number(5)}',
-                        style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              color: foreground,
-                              fontWeight: FontWeight.w700,
-                            ),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          '${s.number(prayed)}/${s.number(5)}',
+                          maxLines: 1,
+                          softWrap: false,
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: foreground,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
                       ),
                     ],
                   ),
@@ -586,6 +680,152 @@ class _MonthGrid extends StatelessWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+Future<void> _showMonthInfo(BuildContext context) => showDialog<void>(
+  context: context,
+  builder: (BuildContext dialogContext) {
+    final AppStrings s = AppStrings.of(dialogContext);
+    final String countExamples =
+        '${s.number(0)}/${s.number(5)}  ·  '
+        '${s.number(1)}/${s.number(5)}  ·  '
+        '${s.number(5)}/${s.number(5)}';
+    return AlertDialog(
+      title: Text(s.t('monthInfoTitle')),
+      content: SizedBox(
+        width: 480,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(s.t('monthInfoOverview')),
+              const SizedBox(height: 18),
+              Text(
+                countExamples,
+                style: Theme.of(dialogContext).textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 4),
+              Text(s.t('monthCountHelp')),
+              const SizedBox(height: 22),
+              _MonthLegendEntry(
+                swatch: const _MonthLegendSwatch(
+                  key: ValueKey<String>('month-legend-complete'),
+                  prayed: 5,
+                  isPast: true,
+                ),
+                label: s.t('monthAllConfirmedHelp'),
+              ),
+              _MonthLegendEntry(
+                swatch: const _MonthLegendSwatch(
+                  key: ValueKey<String>('month-legend-partial'),
+                  prayed: 1,
+                  isPast: true,
+                ),
+                label: s.t('monthPartiallyConfirmedHelp'),
+              ),
+              _MonthLegendEntry(
+                swatch: const _MonthLegendSwatch(
+                  key: ValueKey<String>('month-legend-none'),
+                  prayed: 0,
+                  isPast: true,
+                ),
+                label: s.t('monthNoneConfirmedHelp'),
+              ),
+              _MonthLegendEntry(
+                swatch: const _MonthLegendSwatch(
+                  key: ValueKey<String>('month-legend-future'),
+                  prayed: 0,
+                  isPast: false,
+                ),
+                label: s.t('monthFutureHelp'),
+              ),
+              _MonthLegendEntry(
+                swatch: const _MonthLegendSwatch(
+                  key: ValueKey<String>('month-legend-today'),
+                  prayed: 0,
+                  isPast: false,
+                  isToday: true,
+                ),
+                label: s.t('monthTodayOutlineHelp'),
+                bottomPadding: 0,
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: <Widget>[
+        FilledButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: Text(s.t('close')),
+        ),
+      ],
+    );
+  },
+);
+
+class _MonthLegendEntry extends StatelessWidget {
+  const _MonthLegendEntry({
+    required this.swatch,
+    required this.label,
+    this.bottomPadding = 14,
+  });
+
+  final Widget swatch;
+  final String label;
+  final double bottomPadding;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.only(bottom: bottomPadding),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        ExcludeSemantics(child: swatch),
+        const SizedBox(width: 12),
+        Expanded(child: Text(label)),
+      ],
+    ),
+  );
+}
+
+class _MonthLegendSwatch extends StatelessWidget {
+  const _MonthLegendSwatch({
+    super.key,
+    required this.prayed,
+    required this.isPast,
+    this.isToday = false,
+  });
+
+  final int prayed;
+  final bool isPast;
+  final bool isToday;
+
+  @override
+  Widget build(BuildContext context) {
+    final (Color background, Color foreground) = _calendarColors(
+      context,
+      prayed: prayed,
+      isPast: isPast,
+    );
+    return Container(
+      width: 38,
+      height: 38,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: background,
+        border: isToday
+            ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2)
+            : null,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        AppStrings.of(context).number(prayed),
+        style: TextStyle(color: foreground, fontWeight: FontWeight.w800),
       ),
     );
   }
