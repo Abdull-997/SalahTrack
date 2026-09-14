@@ -5,6 +5,9 @@ import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/location/location_suggestions.dart';
+import 'package:salah_focus/core/time/timezone_service.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
@@ -656,68 +659,81 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           context: context,
           builder: (BuildContext context) => StatefulBuilder(
             builder: (BuildContext context, StateSetter setDialogState) =>
-                AlertDialog(
-                  title: Text(AppStrings.of(context).t('manualAdjustments')),
-                  content: SizedBox(
-                    width: 420,
-                    child: ListView(
-                      shrinkWrap: true,
-                      children: <Widget>[
-                        Text(AppStrings.of(context).t('minuteAdjustmentsHelp')),
-                        const SizedBox(height: 16),
-                        ...PrayerType.values.map(
-                          (PrayerType type) => Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Text(
-                                  type.localizedName(
-                                    Localizations.localeOf(context)
-                                        .languageCode,
-                                  ),
-                                ),
+                Consumer(
+                  builder: (BuildContext context, WidgetRef dialogRef, _) {
+                    final PrayerDay? day = dialogRef
+                        .watch(todayPrayerDayProvider)
+                        .when(
+                          data: (PrayerDay? value) => value,
+                          error: (_, _) => null,
+                          loading: () => null,
+                        );
+                    final Map<PrayerType, PrayerEntry> entries =
+                        <PrayerType, PrayerEntry>{
+                          for (final PrayerEntry entry
+                              in day?.entries ?? const <PrayerEntry>[])
+                            entry.type: entry,
+                        };
+                    final bool hasAllPrayerTimes = PrayerType.values.every(
+                      entries.containsKey,
+                    );
+                    final AppStrings strings = AppStrings.of(context);
+                    return AlertDialog(
+                      insetPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 24,
+                      ),
+                      title: Text(strings.t('manualAdjustments')),
+                      content: SizedBox(
+                        width: 420,
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: <Widget>[
+                            Text(strings.t('minuteAdjustmentsHelp')),
+                            if (!hasAllPrayerTimes) ...<Widget>[
+                              const SizedBox(height: 14),
+                              _PrayerTimeUnavailableNotice(
+                                text: strings.t('noData'),
                               ),
-                              IconButton(
-                                onPressed: (values[type] ?? 0) <= -60
+                            ],
+                            const SizedBox(height: 16),
+                            for (final PrayerType type in PrayerType.values)
+                              _AdjustmentPrayerRow(
+                                type: type,
+                                time: _adjustmentPreviewTime(
+                                  strings,
+                                  entries[type],
+                                  values[type] ?? 0,
+                                ),
+                                adjustment: strings.minutes(values[type] ?? 0),
+                                onDecrease: (values[type] ?? 0) <= -60
                                     ? null
                                     : () => setDialogState(
                                         () => values[type] =
                                             (values[type] ?? 0) - 1,
                                       ),
-                                icon: const Icon(Icons.remove_rounded),
-                              ),
-                              SizedBox(
-                                width: 64,
-                                child: Text(
-                                  AppStrings.of(context)
-                                      .minutes(values[type] ?? 0),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: (values[type] ?? 0) >= 60
+                                onIncrease: (values[type] ?? 0) >= 60
                                     ? null
                                     : () => setDialogState(
                                         () => values[type] =
                                             (values[type] ?? 0) + 1,
                                       ),
-                                icon: const Icon(Icons.add_rounded),
                               ),
-                            ],
-                          ),
+                          ],
+                        ),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: Text(strings.t('cancel')),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: Text(strings.t('save')),
                         ),
                       ],
-                    ),
-                  ),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: Text(AppStrings.of(context).t('cancel')),
-                    ),
-                    FilledButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      child: Text(AppStrings.of(context).t('save')),
-                    ),
-                  ],
+                    );
+                  },
                 ),
           ),
         ) ??
@@ -725,6 +741,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (accepted) {
       await _savePrayerSettings(current.copyWith(adjustments: values));
     }
+  }
+
+  String _adjustmentPreviewTime(
+    AppStrings strings,
+    PrayerEntry? entry,
+    int adjustment,
+  ) {
+    if (entry == null) return '—';
+    final DateTime previewUtc = entry.scheduledAtUtc.add(
+      Duration(minutes: adjustment - entry.manualOffsetMinutes),
+    );
+    return strings.time(TimezoneService.toLocal(previewUtc, entry.timezoneId));
   }
 
   Future<void> _chooseMaxSnoozes(PrayerSettings current) async {
@@ -1060,6 +1088,98 @@ class _SettingsHelpParagraph extends StatelessWidget {
     child: Text(
       text,
       style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+    ),
+  );
+}
+
+class _PrayerTimeUnavailableNotice extends StatelessWidget {
+  const _PrayerTimeUnavailableNotice({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(14),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const Icon(Icons.schedule_outlined, size: 22),
+          const SizedBox(width: 10),
+          Expanded(child: Text(text)),
+        ],
+      ),
+    ),
+  );
+}
+
+class _AdjustmentPrayerRow extends StatelessWidget {
+  const _AdjustmentPrayerRow({
+    required this.type,
+    required this.time,
+    required this.adjustment,
+    required this.onDecrease,
+    required this.onIncrease,
+  });
+
+  final PrayerType type;
+  final String time;
+  final String adjustment;
+  final VoidCallback? onDecrease;
+  final VoidCallback? onIncrease;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    key: ValueKey<String>('adjustment-row-${type.name}'),
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          type.localizedName(Localizations.localeOf(context).languageCode),
+          style: Theme.of(context).textTheme.titleSmall
+              ?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: Text(
+                time,
+                key: ValueKey<String>('adjustment-time-${type.name}'),
+                style: Theme.of(context).textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w900),
+              ),
+            ),
+            IconButton(
+              key: ValueKey<String>('adjustment-minus-${type.name}'),
+              onPressed: onDecrease,
+              icon: const Icon(Icons.remove_rounded),
+            ),
+            SizedBox(
+              width: 72,
+              child: Text(
+                adjustment,
+                key: ValueKey<String>('adjustment-value-${type.name}'),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            IconButton(
+              key: ValueKey<String>('adjustment-plus-${type.name}'),
+              onPressed: onIncrease,
+              icon: const Icon(Icons.add_rounded),
+            ),
+          ],
+        ),
+      ],
     ),
   );
 }
