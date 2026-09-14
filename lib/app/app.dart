@@ -11,6 +11,8 @@ import 'package:salah_focus/core/notifications/prayer_notification_payload.dart'
 import 'package:salah_focus/core/platform/application_locale.dart';
 import 'package:salah_focus/core/theme/app_theme.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
 
 class SalahFocusApp extends ConsumerStatefulWidget {
@@ -25,6 +27,7 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
   final Map<String, DateTime> _recentNotificationEvents = <String, DateTime>{};
   int _notificationDelivery = 0;
   bool _receivedLivePayload = false;
+  String? _lastRamadanScheduleKey;
 
   @override
   void initState() {
@@ -34,6 +37,7 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
       _handleLaunchPayload();
       _syncAutomaticLocationUpdates();
       _syncFridayPrayerReminders();
+      _syncRamadanReminders();
     });
   }
 
@@ -73,6 +77,18 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
       ),
       (_, _) => _syncFridayPrayerReminders(),
     );
+    ref.listen(
+      settingsControllerProvider.select(
+        (preferences) => (
+          ramadan: preferences.ramadanSettings,
+          localeCode: preferences.localeCode,
+        ),
+      ),
+      (_, _) => _syncRamadanReminders(),
+    );
+    ref.listen<AsyncValue<PrayerDay?>>(todayPrayerDayProvider, (_, next) {
+      if (next.hasValue) _syncRamadanReminders();
+    });
 
     final ThemeMode themeMode = switch (preferences.themeMode) {
       'light' => ThemeMode.light,
@@ -141,6 +157,42 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
           );
     } on Object {
       // Reminder scheduling must never prevent the main interface from loading.
+    }
+  }
+
+  Future<void> _syncRamadanReminders() async {
+    final preferences = ref.read(settingsControllerProvider);
+    PrayerDay? today;
+    if (preferences.ramadanSettings.enabled && preferences.location != null) {
+      try {
+        today = await ref.read(todayPrayerDayProvider.future);
+      } on Object {
+        today = null;
+      }
+    }
+    try {
+      final String scheduleKey = <Object?>[
+        preferences.ramadanSettings.hashCode,
+        preferences.localeCode,
+        today?.localDate,
+        today?.hijriDay,
+        today?.hijriMonth,
+        for (final PrayerEntry entry in today?.entries ?? const <PrayerEntry>[])
+          entry.scheduledAtUtc.microsecondsSinceEpoch,
+      ].join('|');
+      if (_lastRamadanScheduleKey == scheduleKey) return;
+      await ref
+          .read(ramadanReminderCoordinatorProvider)
+          .reschedule(
+            today,
+            preferences.ramadanSettings,
+            nowUtc: ref.read(clockServiceProvider).nowUtc(),
+            languageCode: preferences.localeCode,
+          );
+      _lastRamadanScheduleKey = scheduleKey;
+    } on Object {
+      // Ramadan reminders must never prevent the app from loading or alter
+      // the independent prayer notification schedule.
     }
   }
 

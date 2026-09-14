@@ -4,6 +4,7 @@ import 'dart:ui' show PlatformDispatcher;
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
+import 'package:salah_focus/features/ramadan/domain/ramadan_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppPreferences {
@@ -13,6 +14,9 @@ class AppPreferences {
     required this.themeMode,
     required this.onboardingComplete,
     this.location,
+    this.ramadanSettings = const RamadanSettings(),
+    this.firstLaunchAtUtc,
+    this.reviewRequestAttempted = false,
   });
 
   final PrayerSettings prayerSettings;
@@ -20,6 +24,9 @@ class AppPreferences {
   final String localeCode;
   final String themeMode;
   final bool onboardingComplete;
+  final RamadanSettings ramadanSettings;
+  final DateTime? firstLaunchAtUtc;
+  final bool reviewRequestAttempted;
 
   AppPreferences copyWith({
     PrayerSettings? prayerSettings,
@@ -28,6 +35,9 @@ class AppPreferences {
     String? localeCode,
     String? themeMode,
     bool? onboardingComplete,
+    RamadanSettings? ramadanSettings,
+    DateTime? firstLaunchAtUtc,
+    bool? reviewRequestAttempted,
   }) {
     return AppPreferences(
       prayerSettings: prayerSettings ?? this.prayerSettings,
@@ -35,6 +45,10 @@ class AppPreferences {
       localeCode: localeCode ?? this.localeCode,
       themeMode: themeMode ?? this.themeMode,
       onboardingComplete: onboardingComplete ?? this.onboardingComplete,
+      ramadanSettings: ramadanSettings ?? this.ramadanSettings,
+      firstLaunchAtUtc: firstLaunchAtUtc ?? this.firstLaunchAtUtc,
+      reviewRequestAttempted:
+          reviewRequestAttempted ?? this.reviewRequestAttempted,
     );
   }
 }
@@ -45,6 +59,9 @@ class SettingsRepository {
   static const String _localeKey = 'locale_code';
   static const String _themeKey = 'theme_mode';
   static const String _onboardingKey = 'onboarding_complete';
+  static const String _ramadanSettingsKey = 'ramadan_settings_v1';
+  static const String _firstLaunchKey = 'first_successful_launch_utc';
+  static const String _reviewAttemptedKey = 'review_request_attempted_v1';
 
   Future<AppPreferences> load() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -92,6 +109,31 @@ class SettingsRepository {
       );
     }
     final String storedTheme = prefs.getString(_themeKey) ?? 'system';
+    RamadanSettings ramadanSettings = const RamadanSettings();
+    final String? ramadanJson = prefs.getString(_ramadanSettingsKey);
+    if (ramadanJson != null) {
+      try {
+        final Object? decoded = jsonDecode(ramadanJson);
+        if (decoded is Map) {
+          ramadanSettings = RamadanSettings.fromJson(
+            Map<String, Object?>.from(decoded),
+          );
+        }
+      } on Object {
+        ramadanSettings = const RamadanSettings();
+      }
+    }
+
+    DateTime? firstLaunchAtUtc = DateTime.tryParse(
+      prefs.getString(_firstLaunchKey) ?? '',
+    )?.toUtc();
+    if (firstLaunchAtUtc == null) {
+      firstLaunchAtUtc = DateTime.now().toUtc();
+      await prefs.setString(
+        _firstLaunchKey,
+        firstLaunchAtUtc.toIso8601String(),
+      );
+    }
     return AppPreferences(
       prayerSettings: prayerSettings,
       location: location,
@@ -100,6 +142,9 @@ class SettingsRepository {
           ? storedTheme
           : 'system',
       onboardingComplete: prefs.getBool(_onboardingKey) ?? false,
+      ramadanSettings: ramadanSettings,
+      firstLaunchAtUtc: firstLaunchAtUtc,
+      reviewRequestAttempted: prefs.getBool(_reviewAttemptedKey) ?? false,
     );
   }
 
@@ -126,6 +171,16 @@ class SettingsRepository {
   Future<void> markOnboardingComplete() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_onboardingKey, true);
+  }
+
+  Future<void> saveRamadanSettings(RamadanSettings settings) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_ramadanSettingsKey, jsonEncode(settings.toJson()));
+  }
+
+  Future<void> markReviewRequestAttempted() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_reviewAttemptedKey, true);
   }
 
   String _systemLocaleCode() {

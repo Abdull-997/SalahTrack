@@ -24,6 +24,11 @@ The app is intentionally **not** a religious authority and does not shame or jud
 - configurable confirmation text
 - safe Emergency Unlock with a per-prayer bypass
 - tracker: today, current week and current month
+- automatic, opt-out Ramadan mode based on the cached Hijri calendar
+- Suhur/Fajr and Iftar/Maghrib times with live countdowns
+- separate fasting, Tarawih, Qiyam and simple daily-goal tracking
+- configurable action-free Suhur and Iftar reminders
+- one-time, platform-native review request eligibility after 72 hours
 - Qibla bearing + compass fallback
 - light/dark/system theme
 - German, English and Arabic/RTL UI architecture
@@ -32,7 +37,7 @@ The app is intentionally **not** a religious authority and does not shame or jud
 - native iOS Screen Time bridge using FamilyControls / ManagedSettings / DeviceActivity
 - unit and integration tests
 
-Features explicitly described as later phases in the product specification (Quran, Adhkar library, mosque search, accounts/cloud sync, Watch/Wear OS, family mode, Ramadan tracker and widgets) are not bundled into this first release branch.
+Features explicitly described as later phases in the product specification (Quran, Adhkar library, mosque search, accounts/cloud sync, Watch/Wear OS, family mode and native Home Screen widgets) are not bundled into this first release branch.
 
 ## Required toolchain
 
@@ -248,6 +253,8 @@ SQLite (`sqflite`) stores:
 - Hijri display value from the prayer provider
 - focus sessions
 - Emergency Unlock bypass state
+- fasting, Tarawih and Qiyam records by Ramadan day
+- Ramadan goals and their daily completion history
 
 Small user preferences are stored locally with SharedPreferences:
 
@@ -256,6 +263,8 @@ Small user preferences are stored locally with SharedPreferences:
 - grace/snooze settings
 - theme/language
 - onboarding status
+- Ramadan feature and reminder preferences
+- first-launch and one-time review-request state
 
 No account is required.
 

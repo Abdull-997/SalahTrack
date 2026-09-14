@@ -7,6 +7,9 @@ class PrayerDayMeta {
     required this.localDate,
     required this.timezoneId,
     this.hijriDate,
+    this.hijriDay,
+    this.hijriMonth,
+    this.hijriYear,
     this.sunriseUtc,
     this.sourceKey = '',
   });
@@ -14,6 +17,9 @@ class PrayerDayMeta {
   final String localDate;
   final String timezoneId;
   final String? hijriDate;
+  final int? hijriDay;
+  final int? hijriMonth;
+  final int? hijriYear;
   final DateTime? sunriseUtc;
   final String sourceKey;
 }
@@ -31,7 +37,7 @@ class AppDatabase {
     final String root = await getDatabasesPath();
     final Database db = await openDatabase(
       p.join(root, 'salah_focus.db'),
-      version: 4,
+      version: 5,
       onConfigure: (Database db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -45,6 +51,18 @@ class AppDatabase {
           await db.execute(
             'ALTER TABLE prayer_entries ADD COLUMN edited_at_utc TEXT',
           );
+        }
+        if (oldVersion < 5) {
+          await db.execute(
+            'ALTER TABLE prayer_day_meta ADD COLUMN hijri_day INTEGER',
+          );
+          await db.execute(
+            'ALTER TABLE prayer_day_meta ADD COLUMN hijri_month INTEGER',
+          );
+          await db.execute(
+            'ALTER TABLE prayer_day_meta ADD COLUMN hijri_year INTEGER',
+          );
+          await _createRamadanTables(db);
         }
       },
       onCreate: (Database db, int version) async {
@@ -73,11 +91,15 @@ class AppDatabase {
             local_date TEXT PRIMARY KEY,
             timezone_id TEXT NOT NULL,
             hijri_date TEXT,
+            hijri_day INTEGER,
+            hijri_month INTEGER,
+            hijri_year INTEGER,
             sunrise_utc TEXT,
             fetched_at_utc TEXT NOT NULL,
             source_key TEXT NOT NULL
           )
         ''');
+        await _createRamadanTables(db);
       },
     );
     _database = db;
@@ -196,6 +218,9 @@ class AppDatabase {
     required String localDate,
     required String timezoneId,
     required String? hijriDate,
+    int? hijriDay,
+    int? hijriMonth,
+    int? hijriYear,
     required DateTime? sunriseUtc,
     required String sourceKey,
   }) async {
@@ -204,6 +229,9 @@ class AppDatabase {
       'local_date': localDate,
       'timezone_id': timezoneId,
       'hijri_date': hijriDate,
+      'hijri_day': hijriDay,
+      'hijri_month': hijriMonth,
+      'hijri_year': hijriYear,
       'sunrise_utc': sunriseUtc?.toIso8601String(),
       'fetched_at_utc': DateTime.now().toUtc().toIso8601String(),
       'source_key': sourceKey,
@@ -226,6 +254,9 @@ class AppDatabase {
       localDate: row['local_date']! as String,
       timezoneId: row['timezone_id']! as String,
       hijriDate: row['hijri_date'] as String?,
+      hijriDay: row['hijri_day'] as int?,
+      hijriMonth: row['hijri_month'] as int?,
+      hijriYear: row['hijri_year'] as int?,
       sunriseUtc: row['sunrise_utc'] == null
           ? null
           : DateTime.parse(row['sunrise_utc']! as String).toUtc(),
@@ -250,5 +281,44 @@ class AppDatabase {
       await db.close();
     }
     _database = null;
+  }
+
+  static Future<void> _createRamadanTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ramadan_daily_records (
+        local_date TEXT PRIMARY KEY,
+        hijri_year INTEGER NOT NULL,
+        hijri_day INTEGER NOT NULL,
+        fasting_status TEXT NOT NULL DEFAULT 'notRecorded',
+        tarawih_completed INTEGER,
+        qiyam_completed INTEGER,
+        updated_at_utc TEXT NOT NULL
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_ramadan_records_year_day '
+      'ON ramadan_daily_records(hijri_year, hijri_day)',
+    );
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ramadan_goals (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        created_at_utc TEXT NOT NULL,
+        archived_at_utc TEXT
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ramadan_goal_completions (
+        goal_id TEXT NOT NULL,
+        local_date TEXT NOT NULL,
+        completed_at_utc TEXT NOT NULL,
+        PRIMARY KEY (goal_id, local_date),
+        FOREIGN KEY (goal_id) REFERENCES ramadan_goals(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_ramadan_goal_completion_date '
+      'ON ramadan_goal_completions(local_date)',
+    );
   }
 }

@@ -6,6 +6,9 @@ class PrayerDay {
     required this.timezoneId,
     required this.entries,
     this.hijriDate,
+    this.hijriDay,
+    this.hijriMonth,
+    this.hijriYear,
     this.sunriseUtc,
   });
 
@@ -13,6 +16,9 @@ class PrayerDay {
   final String timezoneId;
   final List<PrayerEntry> entries;
   final String? hijriDate;
+  final int? hijriDay;
+  final int? hijriMonth;
+  final int? hijriYear;
   final DateTime? sunriseUtc;
 
   PrayerDay copyWith({List<PrayerEntry>? entries}) => PrayerDay(
@@ -20,6 +26,9 @@ class PrayerDay {
     timezoneId: timezoneId,
     entries: entries ?? this.entries,
     hijriDate: hijriDate,
+    hijriDay: hijriDay,
+    hijriMonth: hijriMonth,
+    hijriYear: hijriYear,
     sunriseUtc: sunriseUtc,
   );
 }

@@ -4,15 +4,23 @@ import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
+import 'package:salah_focus/features/ramadan/domain/ramadan_calendar.dart';
+import 'package:salah_focus/features/ramadan/presentation/ramadan_tracker_section.dart';
 import 'package:salah_focus/shared/errors/user_error_message.dart';
 
 class TrackerData {
-  const TrackerData({required this.entries, required this.localNow});
+  const TrackerData({
+    required this.entries,
+    required this.localNow,
+    this.prayerDay,
+  });
 
   final List<PrayerEntry> entries;
   final DateTime localNow;
+  final PrayerDay? prayerDay;
 }
 
 final trackerDataProvider = FutureProvider<TrackerData>((Ref ref) async {
@@ -42,7 +50,7 @@ final trackerDataProvider = FutureProvider<TrackerData>((Ref ref) async {
       .watch(prayerCoordinatorProvider)
       .entriesBetween(_iso(start), _iso(last));
 
-  return TrackerData(entries: entries, localNow: localNow);
+  return TrackerData(entries: entries, localNow: localNow, prayerDay: day);
 });
 
 class TrackerScreen extends ConsumerWidget {
@@ -66,6 +74,7 @@ class TrackerScreen extends ConsumerWidget {
         data: (TrackerData data) => _TrackerContent(
           entries: data.entries,
           localNow: data.localNow,
+          prayerDay: data.prayerDay,
           onRefresh: refresh,
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -171,11 +180,13 @@ class _TrackerContent extends StatelessWidget {
   const _TrackerContent({
     required this.entries,
     required this.localNow,
+    required this.prayerDay,
     required this.onRefresh,
   });
 
   final List<PrayerEntry> entries;
   final DateTime localNow;
+  final PrayerDay? prayerDay;
   final Future<void> Function() onRefresh;
 
   @override
@@ -280,6 +291,8 @@ class _TrackerContent extends StatelessWidget {
             byDay: byDay,
             localNow: now,
           ),
+          if (prayerDay != null && RamadanCalendar.isRamadan(prayerDay!))
+            const RamadanTrackerSection(),
         ],
       ),
     );

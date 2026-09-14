@@ -1,6 +1,9 @@
+import 'package:salah_focus/app/localization/ramadan_translations.dart';
+
 /// Complete UI catalogs for Turkish, French and Spanish.
 const Map<String, Map<String, String>> additionalTranslations = {
   'tr': {
+    ...ramadanTrTranslations,
     'fridayPrayer': 'Cuma namazı',
     'fridayPrayerTime': 'Cuma namazı saati',
     'fridayPrayerHelp': 'Yalnızca cuma günleri gösterilir. Yerel caminizin saatini girin. Uygulama 2 saat ve 1 saat önce hatırlatır. Onay gerekmez.',
@@ -183,6 +186,7 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'minutesValue': '{value} dk.',
   },
   'fr': {
+    ...ramadanFrTranslations,
     'fridayPrayer': 'Prière du vendredi',
     'fridayPrayerTime': 'Heure de la prière du vendredi',
     'fridayPrayerHelp': 'Visible uniquement le vendredi. Saisissez l’heure de votre mosquée. L’application envoie un rappel 2 heures et 1 heure avant. Aucune confirmation n’est nécessaire.',
@@ -360,6 +364,7 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'minutesValue': '{value} min',
   },
   'es': {
+    ...ramadanEsTranslations,
     'fridayPrayer': 'Oración del viernes',
     'fridayPrayerTime': 'Hora de la oración del viernes',
     'fridayPrayerHelp': 'Solo se muestra los viernes. Introduce la hora de tu mezquita. La aplicación avisa 2 horas y 1 hora antes. No hace falta confirmar.',

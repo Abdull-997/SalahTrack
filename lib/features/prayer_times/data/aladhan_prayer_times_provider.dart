@@ -60,6 +60,9 @@ class AlAdhanPrayerTimesProvider implements PrayerTimesProvider {
           }
         }
         String? hijriDate;
+        int? hijriDay;
+        int? hijriMonth;
+        int? hijriYear;
         final Object? rawHijri = date['hijri'];
         if (rawHijri is Map) {
           final Map<String, Object?> hijri = Map<String, Object?>.from(
@@ -71,6 +74,9 @@ class AlAdhanPrayerTimesProvider implements PrayerTimesProvider {
               : null;
           final String? monthName = monthMap?['en'] as String?;
           final String? yearPart = hijri['year'] as String?;
+          hijriDay = int.tryParse(dayPart ?? '');
+          hijriMonth = (monthMap?['number'] as num?)?.round();
+          hijriYear = int.tryParse(yearPart ?? '');
           if (dayPart != null && monthName != null && yearPart != null) {
             hijriDate = '$dayPart $monthName $yearPart';
           }
@@ -81,6 +87,9 @@ class AlAdhanPrayerTimesProvider implements PrayerTimesProvider {
             timezoneId: timezoneId,
             timings: timings,
             hijriDate: hijriDate,
+            hijriDay: hijriDay,
+            hijriMonth: hijriMonth,
+            hijriYear: hijriYear,
           ),
         );
       }

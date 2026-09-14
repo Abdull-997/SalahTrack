@@ -59,6 +59,18 @@ Friday Prayer is a separately configured Friday-only event, not a sixth
 never creates a `PrayerEntry`, enters the confirmation state machine, or changes
 the tracker's five-prayer statistics.
 
+## Ramadan boundary
+
+The prayer-time provider persists structured Hijri day, month and year values
+alongside each local prayer day. Ramadan visibility is true only when that
+local day has Hijri month 9 and the persisted Ramadan master switch is enabled.
+Suhur and Iftar reuse the already adjusted Fajr and Maghrib UTC instants.
+
+Ramadan daily records, Tarawih, Qiyam, goals and goal completions use dedicated
+tables in the existing SQLite database. Turning the feature off only changes
+visibility and cancels the dedicated action-free Ramadan notifications; it
+never deletes history and never enters the five-prayer state machine.
+
 ## Focus safety
 
 Focus state and native app shielding are deliberately separate. A failure in native shielding cannot corrupt prayer history or make the basic UI unusable. `PrayerFocusPolicy` caps native focus to 90 minutes after grace ends (or the earlier tracking-window end). Turning Focus off cancels all app-owned native schedules and clears shields.

@@ -12,6 +12,7 @@ import 'package:salah_focus/features/prayer_times/domain/friday_prayer_settings.
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
+import 'package:salah_focus/features/ramadan/domain/ramadan_settings.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
 import 'package:salah_focus/features/settings/presentation/language_selection_screen.dart';
 import 'package:salah_focus/features/settings/presentation/notification_settings_screen.dart';
@@ -243,6 +244,165 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 18),
           _SectionTitle(
+            title: s.t('ramadan'),
+            icon: Icons.nights_stay_outlined,
+            infoKey: 'settings-info-ramadan',
+            infoTooltip: s.t('settingsInfo'),
+            onInfo: () => _showCategoryInfo(
+              title: s.t('ramadan'),
+              items: _ramadanHelpItems(s),
+            ),
+          ),
+          Card(
+            child: Column(
+              children: <Widget>[
+                SwitchListTile(
+                  key: const ValueKey<String>('ramadan-features-enabled'),
+                  secondary: const Icon(Icons.dark_mode_outlined),
+                  title: Text(s.t('ramadanFeatures')),
+                  subtitle: Text(
+                    prefs.ramadanSettings.enabled
+                        ? s.t('ramadanFeaturesOutsideStatus')
+                        : s.t('ramadanHistoryPreserved'),
+                  ),
+                  value: prefs.ramadanSettings.enabled,
+                  onChanged: (bool value) => _saveRamadanSettings(
+                    prefs.ramadanSettings.copyWith(enabled: value),
+                  ),
+                ),
+                const Divider(height: 1),
+                SwitchListTile(
+                  key: const ValueKey<String>('suhur-reminder-enabled'),
+                  secondary: const Icon(Icons.free_breakfast_outlined),
+                  title: Text(s.t('suhurReminder')),
+                  subtitle: Text(
+                    s.t(
+                      'minutesBefore',
+                      params: <String, String>{
+                        'minutes': s.number(
+                          prefs.ramadanSettings.suhurReminderMinutes,
+                        ),
+                      },
+                    ),
+                  ),
+                  value: prefs.ramadanSettings.suhurReminderEnabled,
+                  onChanged: prefs.ramadanSettings.enabled
+                      ? (bool value) => _saveRamadanSettings(
+                          prefs.ramadanSettings.copyWith(
+                            suhurReminderEnabled: value,
+                          ),
+                        )
+                      : null,
+                ),
+                if (prefs.ramadanSettings.enabled &&
+                    prefs.ramadanSettings.suhurReminderEnabled) ...<Widget>[
+                  ListTile(
+                    key: const ValueKey<String>('suhur-reminder-time'),
+                    contentPadding: const EdgeInsetsDirectional.only(
+                      start: 72,
+                      end: 16,
+                    ),
+                    title: Text(s.t('reminderTime')),
+                    subtitle: Text(
+                      s.t(
+                        'minutesBefore',
+                        params: <String, String>{
+                          'minutes': s.number(
+                            prefs.ramadanSettings.suhurReminderMinutes,
+                          ),
+                        },
+                      ),
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => _chooseRamadanReminderMinutes(
+                      prefs.ramadanSettings,
+                      suhur: true,
+                    ),
+                  ),
+                ],
+                const Divider(height: 1),
+                SwitchListTile(
+                  key: const ValueKey<String>('iftar-reminder-enabled'),
+                  secondary: const Icon(Icons.wb_twilight_outlined),
+                  title: Text(s.t('iftarReminder')),
+                  subtitle: Text(
+                    s.t(
+                      'minutesBefore',
+                      params: <String, String>{
+                        'minutes': s.number(
+                          prefs.ramadanSettings.iftarReminderMinutes,
+                        ),
+                      },
+                    ),
+                  ),
+                  value: prefs.ramadanSettings.iftarReminderEnabled,
+                  onChanged: prefs.ramadanSettings.enabled
+                      ? (bool value) => _saveRamadanSettings(
+                          prefs.ramadanSettings.copyWith(
+                            iftarReminderEnabled: value,
+                          ),
+                        )
+                      : null,
+                ),
+                if (prefs.ramadanSettings.enabled &&
+                    prefs.ramadanSettings.iftarReminderEnabled) ...<Widget>[
+                  ListTile(
+                    key: const ValueKey<String>('iftar-reminder-time'),
+                    contentPadding: const EdgeInsetsDirectional.only(
+                      start: 72,
+                      end: 16,
+                    ),
+                    title: Text(s.t('reminderTime')),
+                    subtitle: Text(
+                      s.t(
+                        'minutesBefore',
+                        params: <String, String>{
+                          'minutes': s.number(
+                            prefs.ramadanSettings.iftarReminderMinutes,
+                          ),
+                        },
+                      ),
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => _chooseRamadanReminderMinutes(
+                      prefs.ramadanSettings,
+                      suhur: false,
+                    ),
+                  ),
+                ],
+                const Divider(height: 1),
+                SwitchListTile(
+                  key: const ValueKey<String>('tarawih-tracking-enabled'),
+                  secondary: const Icon(Icons.mosque_outlined),
+                  title: Text(s.t('tarawihTracking')),
+                  value: prefs.ramadanSettings.tarawihTrackingEnabled,
+                  onChanged: prefs.ramadanSettings.enabled
+                      ? (bool value) => _saveRamadanSettings(
+                          prefs.ramadanSettings.copyWith(
+                            tarawihTrackingEnabled: value,
+                          ),
+                        )
+                      : null,
+                ),
+                const Divider(height: 1),
+                SwitchListTile(
+                  key: const ValueKey<String>('qiyam-tracking-enabled'),
+                  secondary: const Icon(Icons.bedtime_outlined),
+                  title: Text(s.t('qiyamTracking')),
+                  value: prefs.ramadanSettings.qiyamTrackingEnabled,
+                  onChanged: prefs.ramadanSettings.enabled
+                      ? (bool value) => _saveRamadanSettings(
+                          prefs.ramadanSettings.copyWith(
+                            qiyamTrackingEnabled: value,
+                          ),
+                        )
+                      : null,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+          _SectionTitle(
             title: s.t('confirmationText'),
             icon: Icons.check_circle_outline_rounded,
             infoKey: 'settings-info-confirmation',
@@ -425,6 +585,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ),
     _SettingsHelpItem(title: s.t('light'), description: s.t('lightThemeHelp')),
     _SettingsHelpItem(title: s.t('dark'), description: s.t('darkThemeHelp')),
+  ];
+
+  List<Widget> _ramadanHelpItems(AppStrings s) => <Widget>[
+    _SettingsHelpParagraph(text: s.t('ramadanFeaturesHelp')),
+    _SettingsHelpItem(
+      title: s.t('ramadanFeatures'),
+      description: s.t('ramadanMasterSwitchHelp'),
+    ),
+    _SettingsHelpItem(title: s.t('suhur'), description: s.t('suhurHelp')),
+    _SettingsHelpItem(title: s.t('iftar'), description: s.t('iftarHelp')),
+    _SettingsHelpItem(
+      title: s.t('fasting'),
+      description: s.t('fastingTrackerHelp'),
+    ),
+    _SettingsHelpItem(title: s.t('tarawih'), description: s.t('tarawihHelp')),
+    _SettingsHelpItem(title: s.t('qiyam'), description: s.t('qiyamHelp')),
+    _SettingsHelpItem(
+      title: s.t('ramadanGoals'),
+      description: s.t('ramadanGoalsHelp'),
+    ),
+    _SettingsHelpParagraph(text: s.t('ramadanHistoryPreserved')),
   ];
 
   Future<void> _showCategoryInfo({
@@ -896,6 +1077,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
     if (mounted) {
       await _syncFridayPrayerReminders();
+      await _syncRamadanReminders();
       ref.invalidate(todayPrayerDayProvider);
     }
   }
@@ -908,6 +1090,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
     if (mounted) {
       await _syncFridayPrayerReminders();
+      await _syncRamadanReminders();
       ref.invalidate(todayPrayerDayProvider);
     }
   }
@@ -919,6 +1102,48 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
     if (mounted) ref.invalidate(todayPrayerDayProvider);
+  }
+
+  Future<void> _saveRamadanSettings(RamadanSettings settings) async {
+    await ref
+        .read(settingsControllerProvider.notifier)
+        .setRamadanSettings(settings);
+  }
+
+  Future<void> _chooseRamadanReminderMinutes(
+    RamadanSettings current, {
+    required bool suhur,
+  }) async {
+    final AppStrings s = AppStrings.of(context);
+    final int? value = await showDialog<int>(
+      context: context,
+      builder: (BuildContext dialogContext) => SimpleDialog(
+        title: Text(s.t('reminderTime')),
+        children: <Widget>[
+          for (final int minutes in <int>[15, 30, 45, 60])
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(dialogContext).pop(minutes),
+              child: _DialogChoice(
+                selected:
+                    minutes ==
+                    (suhur
+                        ? current.suhurReminderMinutes
+                        : current.iftarReminderMinutes),
+                label: s.t(
+                  'minutesBefore',
+                  params: <String, String>{'minutes': s.number(minutes)},
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+    if (value == null) return;
+    await _saveRamadanSettings(
+      suhur
+          ? current.copyWith(suhurReminderMinutes: value)
+          : current.copyWith(iftarReminderMinutes: value),
+    );
   }
 
   Future<void> _savePrayerSettings(PrayerSettings settings) async {
@@ -950,6 +1175,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           );
     } on Object {
       // Saving remains available even if the operating system rejects alarms.
+    }
+  }
+
+  Future<void> _syncRamadanReminders() async {
+    final preferences = ref.read(settingsControllerProvider);
+    PrayerDay? today;
+    try {
+      today = preferences.ramadanSettings.enabled
+          ? await ref.read(todayPrayerDayProvider.future)
+          : null;
+      await ref
+          .read(ramadanReminderCoordinatorProvider)
+          .reschedule(
+            today,
+            preferences.ramadanSettings,
+            nowUtc: ref.read(clockServiceProvider).nowUtc(),
+            languageCode: preferences.localeCode,
+          );
+    } on Object {
+      // Saving and permission changes remain available if scheduling fails.
     }
   }
 

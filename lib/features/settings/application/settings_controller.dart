@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
+import 'package:salah_focus/features/ramadan/domain/ramadan_settings.dart';
 import 'package:salah_focus/features/settings/data/settings_repository.dart';
 
 final Provider<SettingsRepository> settingsRepositoryProvider =
@@ -67,6 +68,17 @@ class SettingsController extends Notifier<AppPreferences> {
   Future<void> completeOnboarding() async {
     state = state.copyWith(onboardingComplete: true);
     await _repository.markOnboardingComplete();
+  }
+
+  Future<void> setRamadanSettings(RamadanSettings settings) async {
+    state = state.copyWith(ramadanSettings: settings);
+    await _repository.saveRamadanSettings(settings);
+  }
+
+  Future<void> markReviewRequestAttempted() async {
+    if (state.reviewRequestAttempted) return;
+    state = state.copyWith(reviewRequestAttempted: true);
+    await _repository.markReviewRequestAttempted();
   }
 
   ThemeMode get themeMode => switch (state.themeMode) {

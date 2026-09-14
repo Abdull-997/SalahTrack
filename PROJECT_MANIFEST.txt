@@ -16,6 +16,11 @@ Implemented MVP areas:
 - iOS Device Activity Monitor extension source + entitlement/plist templates
 - 90-minute native shield hard cap + rolling 48-hour iOS schedule
 - today/week/month tracker
+- automatic Ramadan-only dashboard and tracker visibility
+- Suhur/Fajr and Iftar/Maghrib countdowns and optional reminders
+- separate fasting, Tarawih, Qiyam and Ramadan goal history
+- persisted Ramadan master/individual settings
+- single native in-app review attempt after 72 hours at a calm Home return
 - Qibla bearing + compass fallback
 - settings for location/calculation/madhhab/high-latitude/adjustments/grace/snooze/focus/theme/language
 - source/unit/integration test suite

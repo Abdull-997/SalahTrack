@@ -7,6 +7,7 @@ import 'package:salah_focus/core/notifications/local_notification_service.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/core/notifications/friday_prayer_reminder_planner.dart';
 import 'package:salah_focus/core/time/clock_service.dart';
+import 'package:salah_focus/core/review/app_review_service.dart';
 import 'package:salah_focus/features/prayer_times/application/prayer_coordinator.dart';
 import 'package:salah_focus/features/prayer_times/data/aladhan_prayer_times_provider.dart';
 import 'package:salah_focus/features/prayer_times/data/prayer_times_provider.dart';
@@ -15,6 +16,8 @@ import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_times_repository.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
+import 'package:salah_focus/features/ramadan/application/ramadan_notification_planner.dart';
+import 'package:salah_focus/features/ramadan/application/ramadan_reminder_coordinator.dart';
 
 final Provider<String> deviceTimezoneIdProvider = Provider<String>(
   (Ref ref) => 'UTC',
@@ -74,11 +77,22 @@ final Provider<ClockService> clockServiceProvider = Provider<ClockService>(
   (Ref ref) => const SystemClockService(),
 );
 
+final Provider<AppReviewService> appReviewServiceProvider =
+    Provider<AppReviewService>((Ref ref) => PlatformAppReviewService());
+
 final Provider<FridayPrayerReminderPlanner>
 fridayPrayerReminderPlannerProvider = Provider<FridayPrayerReminderPlanner>(
   (Ref ref) =>
       FridayPrayerReminderPlanner(ref.watch(notificationServiceProvider)),
 );
+
+final Provider<RamadanReminderCoordinator> ramadanReminderCoordinatorProvider =
+    Provider<RamadanReminderCoordinator>(
+      (Ref ref) => RamadanReminderCoordinator(
+        ref.watch(prayerTimesRepositoryProvider),
+        RamadanNotificationPlanner(ref.watch(notificationServiceProvider)),
+      ),
+    );
 
 final Provider<PrayerCoordinator> prayerCoordinatorProvider =
     Provider<PrayerCoordinator>(

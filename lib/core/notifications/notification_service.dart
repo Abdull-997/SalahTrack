@@ -1,5 +1,7 @@
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 
+enum RamadanReminderKind { suhur, iftar }
+
 abstract interface class NotificationService {
   Stream<String> get payloads;
 
@@ -73,4 +75,16 @@ abstract interface class NotificationService {
   Future<void> cancelAllFuturePrayerNotifications();
 
   Future<void> cancelAllFridayPrayerNotifications();
+
+  /// Schedules a normal, action-free Ramadan information reminder.
+  Future<void> scheduleRamadanReminder({
+    required RamadanReminderKind kind,
+    required String localDate,
+    required DateTime reminderAtUtc,
+    required String timezoneId,
+    required int minutesBefore,
+    required String languageCode,
+  });
+
+  Future<void> cancelAllRamadanNotifications();
 }

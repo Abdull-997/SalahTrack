@@ -7,12 +7,18 @@ class RemotePrayerDay {
     required this.timezoneId,
     required this.timings,
     this.hijriDate,
+    this.hijriDay,
+    this.hijriMonth,
+    this.hijriYear,
   });
 
   final String localDate;
   final String timezoneId;
   final Map<String, String> timings;
   final String? hijriDate;
+  final int? hijriDay;
+  final int? hijriMonth;
+  final int? hijriYear;
 }
 
 abstract interface class PrayerTimesProvider {

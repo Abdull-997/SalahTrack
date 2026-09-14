@@ -6,12 +6,15 @@ import 'package:go_router/go_router.dart';
 import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
+import 'package:salah_focus/core/review/review_request_policy.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:salah_focus/features/prayer_times/domain/friday_prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
+import 'package:salah_focus/features/ramadan/domain/ramadan_calendar.dart';
+import 'package:salah_focus/features/ramadan/presentation/ramadan_home_card.dart';
 import 'package:salah_focus/shared/errors/user_error_message.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -23,8 +26,11 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   Timer? _timer;
+  Timer? _reviewTimer;
   late DateTime _nowUtc;
   late int _lastMinute;
+  bool _isVisible = false;
+  bool _hasVisitedHome = false;
 
   @override
   void initState() {
@@ -38,7 +44,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.didChangeDependencies();
     _timer?.cancel();
     // Kept-alive tabs must not repaint or refresh data while offstage.
-    if (!TickerMode.valuesOf(context).enabled) return;
+    if (!TickerMode.valuesOf(context).enabled) {
+      _isVisible = false;
+      _reviewTimer?.cancel();
+      return;
+    }
+    if (!_isVisible) {
+      _isVisible = true;
+      if (_hasVisitedHome) {
+        _reviewTimer?.cancel();
+        _reviewTimer = Timer(const Duration(seconds: 4), _maybeRequestReview);
+      } else {
+        _hasVisitedHome = true;
+      }
+    }
     _nowUtc = ref.read(clockServiceProvider).nowUtc();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -60,7 +79,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _reviewTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _maybeRequestReview() async {
+    if (!mounted || !TickerMode.valuesOf(context).enabled) return;
+    final preferences = ref.read(settingsControllerProvider);
+    final DateTime nowUtc = ref.read(clockServiceProvider).nowUtc();
+    if (!ReviewRequestPolicy.isEligible(preferences, nowUtc)) return;
+
+    final PrayerDay? day = ref.read(todayPrayerDayProvider).value;
+    if (day == null ||
+        day.entries.any(
+          (PrayerEntry entry) =>
+              entry.status == PrayerStatus.active ||
+              entry.status == PrayerStatus.pending ||
+              entry.status == PrayerStatus.snoozed,
+        )) {
+      return;
+    }
+
+    // Persist before invoking the platform API: the OS is allowed to suppress
+    // the dialog, and this automatic request must still happen at most once.
+    await ref
+        .read(settingsControllerProvider.notifier)
+        .markReviewRequestAttempted();
+    try {
+      final service = ref.read(appReviewServiceProvider);
+      if (await service.isAvailable()) await service.requestReview();
+    } on Object {
+      // A store service failure must not disturb Home or cause repeated asks.
+    }
   }
 
   @override
@@ -156,6 +206,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const SizedBox(height: 14),
                     _NextPrayerCard(day: day, nowUtc: _nowUtc),
                     const SizedBox(height: 14),
+                    if (preferences.ramadanSettings.enabled &&
+                        RamadanCalendar.isRamadan(day)) ...<Widget>[
+                      RamadanHomeCard(nowUtc: _nowUtc),
+                      const SizedBox(height: 14),
+                    ],
                     Text(
                       s.t('today'),
                       style: Theme.of(context).textTheme.titleLarge

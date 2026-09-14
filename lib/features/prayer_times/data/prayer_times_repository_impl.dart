@@ -31,6 +31,9 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
       timezoneId: meta?.timezoneId ?? entries.first.timezoneId,
       entries: entries,
       hijriDate: meta?.hijriDate,
+      hijriDay: meta?.hijriDay,
+      hijriMonth: meta?.hijriMonth,
+      hijriYear: meta?.hijriYear,
       sunriseUtc: meta?.sunriseUtc,
     );
   }
@@ -157,6 +160,9 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
         localDate: day.localDate,
         timezoneId: day.timezoneId,
         hijriDate: day.hijriDate,
+        hijriDay: day.hijriDay,
+        hijriMonth: day.hijriMonth,
+        hijriYear: day.hijriYear,
         sunriseUtc: sunriseUtc,
         sourceKey: sourceKey,
       );

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/additional_translations.dart';
+import 'package:salah_focus/app/localization/ramadan_translations.dart';
 
 class AppStrings {
   AppStrings(this.locale);
@@ -25,6 +26,7 @@ class AppStrings {
   static const Map<String, Map<String, String>> _values = {
     ...additionalTranslations,
     'de': {
+      ...ramadanDeTranslations,
       'fridayPrayer': 'Freitagsgebet',
       'fridayPrayerTime': 'Zeit des Freitagsgebets',
       'fridayPrayerHelp': 'Nur freitags sichtbar. Gib die Zeit deiner Moschee ein. Die App erinnert dich 2 Stunden und 1 Stunde vorher. Keine Bestätigung nötig.',
@@ -199,6 +201,7 @@ class AppStrings {
       'minutesValue': '{value} Min.',
     },
     'en': {
+      ...ramadanEnTranslations,
       'fridayPrayer': "Friday Prayer / Jumu'ah",
       'fridayPrayerTime': 'Friday Prayer time',
       'fridayPrayerHelp': 'Shown only on Fridays. Enter your local mosque time. The app reminds you 2 hours and 1 hour before. No confirmation is needed.',
@@ -374,6 +377,7 @@ class AppStrings {
       'minutesValue': '{value} min',
     },
     'ar': {
+      ...ramadanArTranslations,
       'fridayPrayer': 'صلاة الجمعة',
       'fridayPrayerTime': 'وقت صلاة الجمعة',
       'fridayPrayerHelp': 'تظهر يوم الجمعة فقط. أدخل وقت مسجدك. يرسل التطبيق تذكيرًا قبل ساعتين وقبل ساعة. لا يلزم التأكيد.',
@@ -547,6 +551,7 @@ class AppStrings {
       'minutesValue': '{value} دقيقة',
     },
     'ur': {
+      ...ramadanUrTranslations,
       'fridayPrayer': 'نمازِ جمعہ',
       'fridayPrayerTime': 'نمازِ جمعہ کا وقت',
       'fridayPrayerHelp': 'صرف جمعہ کو دکھائی جاتی ہے۔ اپنی مقامی مسجد کا وقت درج کریں۔ ایپ دو گھنٹے اور ایک گھنٹہ پہلے یاد دہانی بھیجتی ہے۔ تصدیق ضروری نہیں۔',
@@ -727,6 +732,7 @@ class AppStrings {
       'minutesValue': '{value} منٹ',
     },
     'ps': {
+      ...ramadanPsTranslations,
       'fridayPrayer': 'د جمعې لمونځ',
       'fridayPrayerTime': 'د جمعې د لمانځه وخت',
       'fridayPrayerHelp': 'یوازې د جمعې په ورځ ښکاري. د خپل جومات وخت ولیکئ. اپ دوه ساعته او یو ساعت مخکې یادونه کوي. تایید ته اړتیا نشته.',

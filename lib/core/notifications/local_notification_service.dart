@@ -104,6 +104,26 @@ class LocalNotificationService implements NotificationService {
     );
   }
 
+  static AndroidNotificationDetails _ramadanAndroidDetails(
+    String languageCode,
+  ) {
+    final AppStrings s = AppStrings(Locale(languageCode));
+    return AndroidNotificationDetails(
+      'ramadan_reminders',
+      s.t('ramadanNotifications'),
+      channelDescription: s.t('ramadanNotificationsHelp'),
+      importance: Importance.high,
+      priority: Priority.high,
+      category: AndroidNotificationCategory.reminder,
+      fullScreenIntent: false,
+      ongoing: false,
+      autoCancel: true,
+      visibility: NotificationVisibility.public,
+      audioAttributesUsage: AudioAttributesUsage.notification,
+      actions: const <AndroidNotificationAction>[],
+    );
+  }
+
   static AndroidNotificationDetails _actionFreePrayerReminderAndroidDetails(
     String languageCode,
   ) {
@@ -257,6 +277,18 @@ class LocalNotificationService implements NotificationService {
           description: fridayDetails.channelDescription,
           importance: Importance.high,
           audioAttributesUsage: fridayDetails.audioAttributesUsage,
+        ),
+      );
+      final AndroidNotificationDetails ramadanDetails = _ramadanAndroidDetails(
+        languageCode,
+      );
+      await android?.createNotificationChannel(
+        AndroidNotificationChannel(
+          ramadanDetails.channelId,
+          ramadanDetails.channelName,
+          description: ramadanDetails.channelDescription,
+          importance: Importance.high,
+          audioAttributesUsage: ramadanDetails.audioAttributesUsage,
         ),
       );
       _channelLanguage = languageCode;
@@ -571,6 +603,35 @@ class LocalNotificationService implements NotificationService {
     );
   }
 
+  @override
+  Future<void> scheduleRamadanReminder({
+    required RamadanReminderKind kind,
+    required String localDate,
+    required DateTime reminderAtUtc,
+    required String timezoneId,
+    required int minutesBefore,
+    required String languageCode,
+  }) async {
+    final AppStrings s = AppStrings(Locale(languageCode));
+    final bool iftar = kind == RamadanReminderKind.iftar;
+    await _schedule(
+      id: NotificationIds.ramadan(localDate, iftar: iftar),
+      whenUtc: reminderAtUtc,
+      timezoneId: timezoneId,
+      title: s.t(iftar ? 'iftar' : 'suhur'),
+      body: s.t(
+        iftar ? 'iftarReminderBody' : 'suhurReminderBody',
+        params: <String, String>{'minutes': s.number(minutesBefore)},
+      ),
+      details: NotificationDetails(
+        android: _ramadanAndroidDetails(languageCode),
+        iOS: _actionFreeDarwinDetails,
+      ),
+      payload: 'ramadan|${kind.name}|$localDate',
+      wrapPrayerPayload: false,
+    );
+  }
+
   Future<bool> _schedule({
     required int id,
     required DateTime whenUtc,
@@ -580,6 +641,7 @@ class LocalNotificationService implements NotificationService {
     required NotificationDetails details,
     required String payload,
     DateTimeComponents? matchDateTimeComponents,
+    bool wrapPrayerPayload = true,
   }) async {
     await initialize();
     if (!await notificationsAllowed()) return false;
@@ -607,11 +669,13 @@ class LocalNotificationService implements NotificationService {
       androidScheduleMode: exact
           ? AndroidScheduleMode.exactAllowWhileIdle
           : AndroidScheduleMode.inexactAllowWhileIdle,
-      payload: PrayerNotificationPayload.fromResponse(
-        payload,
-        null,
-        eventId: '$id:${whenUtc.microsecondsSinceEpoch}',
-      )!.encode(),
+      payload: wrapPrayerPayload
+          ? PrayerNotificationPayload.fromResponse(
+              payload,
+              null,
+              eventId: '$id:${whenUtc.microsecondsSinceEpoch}',
+            )!.encode()
+          : payload,
       matchDateTimeComponents: matchDateTimeComponents,
     );
     return true;
@@ -759,5 +823,17 @@ class LocalNotificationService implements NotificationService {
     // versions or already delivered by the operating system.
     await _plugin.cancel(id: NotificationIds.fridayPrayer(2));
     await _plugin.cancel(id: NotificationIds.fridayPrayer(1));
+  }
+
+  @override
+  Future<void> cancelAllRamadanNotifications() async {
+    await initialize();
+    final List<PendingNotificationRequest> pending = await _plugin
+        .pendingNotificationRequests();
+    for (final PendingNotificationRequest request in pending) {
+      if ((request.payload ?? '').startsWith('ramadan|')) {
+        await _plugin.cancel(id: request.id);
+      }
+    }
   }
 }

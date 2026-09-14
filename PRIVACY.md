@@ -4,7 +4,7 @@ SalahFocus is designed as a local-first prayer companion.
 
 ## Stored on the device
 
-The app stores prayer history, cached prayer times, focus state, settings, selected location and user preferences locally on the device.
+The app stores prayer history, cached prayer times, focus state, settings, selected location, optional Ramadan fasting/Tarawih/Qiyam records, Ramadan goals and user preferences locally on the device.
 
 ## Network use
 
@@ -22,7 +22,7 @@ Location access is requested only after the user chooses automatic location. Per
 
 ## Religious data
 
-Prayer confirmations and prayer history are treated as private local data. They are not sold and are not used for advertising.
+Prayer confirmations, prayer history and optional Ramadan records are treated as private local data. They are not sold and are not used for advertising.
 
 ## Future cloud features
 

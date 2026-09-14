@@ -17,6 +17,12 @@ class NotificationIds {
   static int fridayPrayer(int hoursBefore) =>
       1800000000 + (hoursBefore == 2 ? 1 : 2);
 
+  static int ramadan(String localDate, {required bool iftar}) {
+    final String compact = localDate.replaceAll('-', '');
+    final int date = int.tryParse(compact.substring(2)) ?? 0;
+    return 1700000000 + date * 2 + (iftar ? 1 : 0);
+  }
+
   static int _base(PrayerEntry entry) {
     final String compact = entry.localDate.replaceAll('-', '');
     final int date = int.tryParse(compact.substring(2)) ?? 0;
