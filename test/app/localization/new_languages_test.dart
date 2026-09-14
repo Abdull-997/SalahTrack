@@ -85,6 +85,8 @@ void main() {
           'fridayPrayerReminderOnly',
           'fridayPrayerInTwoHours',
           'fridayPrayerInOneHour',
+          'oneHourRemainingTitle',
+          'oneHourRemainingBody',
           'gracePeriodHelp',
           'snoozeDurationHelp',
           'maxSnoozesHelp',
@@ -97,6 +99,23 @@ void main() {
         ]) {
           expect(translations[key]?.trim(), isNotEmpty, reason: key);
         }
+        final strings = AppStrings(locale);
+        final dhuhr = PrayerType.dhuhr.localizedName(locale.languageCode);
+        final asr = PrayerType.asr.localizedName(locale.languageCode);
+        expect(
+          strings.t(
+            'oneHourRemainingTitle',
+            params: <String, String>{'prayer': dhuhr},
+          ),
+          contains(dhuhr),
+        );
+        expect(
+          strings.t(
+            'oneHourRemainingBody',
+            params: <String, String>{'nextPrayer': asr},
+          ),
+          allOf(contains(asr), isNot(contains(RegExp(r'\{\w+\}')))),
+        );
         expect(
           AppStrings.translations['en']!.keys.toSet().difference(
             translations.keys.toSet(),

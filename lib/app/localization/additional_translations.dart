@@ -7,6 +7,9 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'fridayPrayerReminderOnly': 'Yalnızca hatırlatma · onay gerekmez',
     'fridayPrayerInTwoHours': 'Cuma namazına 2 saat kaldı.',
     'fridayPrayerInOneHour': 'Cuma namazına 1 saat kaldı.',
+    'oneHourRemainingTitle': '{prayer} henüz onaylanmadı',
+    'oneHourRemainingBody':
+        '{nextPrayer} başlamadan önce yaklaşık 1 saat kaldı.',
     'markAsPrayed': 'Kılındı olarak işaretle',
     'snoozeAction': 'Ertele',
     'alhamdulillah': 'Elhamdülillah',
@@ -185,6 +188,9 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'fridayPrayerReminderOnly': 'Rappel uniquement · aucune confirmation',
     'fridayPrayerInTwoHours': 'La prière du vendredi est dans 2 heures.',
     'fridayPrayerInOneHour': 'La prière du vendredi est dans 1 heure.',
+    'oneHourRemainingTitle': '{prayer} pas encore confirmée',
+    'oneHourRemainingBody':
+        'Il reste environ 1 heure avant le début de {nextPrayer}.',
     'markAsPrayed': 'Marquer comme accomplie',
     'snoozeAction': 'Reporter',
     'alhamdulillah': 'Alhamdoulillah',
@@ -357,6 +363,9 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'fridayPrayerReminderOnly': 'Solo recordatorio · sin confirmación',
     'fridayPrayerInTwoHours': 'La oración del viernes es en 2 horas.',
     'fridayPrayerInOneHour': 'La oración del viernes es en 1 hora.',
+    'oneHourRemainingTitle': '{prayer} aún no confirmada',
+    'oneHourRemainingBody':
+        'Queda aproximadamente 1 hora antes de que empiece {nextPrayer}.',
     'markAsPrayed': 'Marcar como realizada',
     'snoozeAction': 'Posponer',
     'alhamdulillah': 'Alhamdulillah',

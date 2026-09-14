@@ -12,6 +12,7 @@ class NotificationIds {
   static int previousSnooze(PrayerEntry entry) =>
       _base(entry) + (entry.snoozeCount.isEven ? 5 : 3);
   static int soft(PrayerEntry entry) => _base(entry) + 4;
+  static int oneHourRemaining(PrayerEntry entry) => _base(entry) + 6;
 
   static int fridayPrayer(int hoursBefore) =>
       1800000000 + (hoursBefore == 2 ? 1 : 2);

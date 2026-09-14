@@ -51,6 +51,15 @@ abstract interface class NotificationService {
     required String languageCode,
   });
 
+  /// Schedules the action-free reminder one hour before the next prayer.
+  Future<void> scheduleOneHourRemainingReminder(
+    PrayerEntry prayer,
+    PrayerEntry nextPrayer,
+    String prayerName,
+    String nextPrayerName, {
+    required String languageCode,
+  });
+
   /// Schedules one action-free reminder that repeats every Friday.
   Future<void> scheduleFridayPrayerReminder({
     required DateTime firstReminderAtUtc,

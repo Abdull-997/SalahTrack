@@ -104,6 +104,26 @@ class LocalNotificationService implements NotificationService {
     );
   }
 
+  static AndroidNotificationDetails _actionFreePrayerReminderAndroidDetails(
+    String languageCode,
+  ) {
+    final AppStrings s = AppStrings(Locale(languageCode));
+    return AndroidNotificationDetails(
+      'prayer_reminders',
+      s.t('prayerReminders'),
+      channelDescription: s.t('reminderBody'),
+      importance: Importance.high,
+      priority: Priority.high,
+      category: AndroidNotificationCategory.reminder,
+      fullScreenIntent: false,
+      ongoing: false,
+      autoCancel: true,
+      visibility: NotificationVisibility.public,
+      audioAttributesUsage: AudioAttributesUsage.notification,
+      actions: const <AndroidNotificationAction>[],
+    );
+  }
+
   static DarwinNotificationDetails _darwinDetails(String languageCode) =>
       DarwinNotificationDetails(
         presentAlert: true,
@@ -114,7 +134,7 @@ class LocalNotificationService implements NotificationService {
         categoryIdentifier: 'prayer_actions_$languageCode',
       );
 
-  static const DarwinNotificationDetails _fridayPrayerDarwinDetails =
+  static const DarwinNotificationDetails _actionFreeDarwinDetails =
       DarwinNotificationDetails(
         presentAlert: true,
         presentBanner: true,
@@ -485,6 +505,38 @@ class LocalNotificationService implements NotificationService {
   }
 
   @override
+  Future<void> scheduleOneHourRemainingReminder(
+    PrayerEntry prayer,
+    PrayerEntry nextPrayer,
+    String prayerName,
+    String nextPrayerName, {
+    required String languageCode,
+  }) async {
+    final AppStrings s = AppStrings(Locale(languageCode));
+    await _schedule(
+      id: NotificationIds.oneHourRemaining(prayer),
+      whenUtc: nextPrayer.scheduledAtUtc.subtract(const Duration(hours: 1)),
+      timezoneId: nextPrayer.timezoneId,
+      title: s.t(
+        'oneHourRemainingTitle',
+        params: <String, String>{'prayer': prayerName},
+      ),
+      body: s.t(
+        'oneHourRemainingBody',
+        params: <String, String>{'nextPrayer': nextPrayerName},
+      ),
+      details: NotificationDetails(
+        android: _actionFreePrayerReminderAndroidDetails(languageCode),
+        iOS: _actionFreeDarwinDetails,
+      ),
+      payload: PrayerNotificationPayload(
+        prayerId: prayer.id,
+        kind: 'oneHourRemaining',
+      ).encode(),
+    );
+  }
+
+  @override
   Future<void> scheduleFridayPrayerReminder({
     required DateTime firstReminderAtUtc,
     required String timezoneId,
@@ -509,7 +561,7 @@ class LocalNotificationService implements NotificationService {
       ),
       details: NotificationDetails(
         android: _fridayPrayerAndroidDetails(languageCode),
-        iOS: _fridayPrayerDarwinDetails,
+        iOS: _actionFreeDarwinDetails,
       ),
       payload: PrayerNotificationPayload(
         prayerId: 'friday-prayer-$hoursBefore-hours',
@@ -668,6 +720,7 @@ class LocalNotificationService implements NotificationService {
     await _plugin.cancel(id: NotificationIds.snooze(prayer));
     await _plugin.cancel(id: NotificationIds.previousSnooze(prayer));
     await _plugin.cancel(id: NotificationIds.soft(prayer));
+    await _plugin.cancel(id: NotificationIds.oneHourRemaining(prayer));
   }
 
   @override
@@ -680,7 +733,12 @@ class LocalNotificationService implements NotificationService {
       final parsed = PrayerNotificationPayload.tryParse(payload);
       // Soft reminders are one-off opt-ins after skipping, not planner entries.
       if (parsed != null &&
-          <String>{'prayer', 'reminder', 'snooze'}.contains(parsed.kind)) {
+          <String>{
+            'prayer',
+            'reminder',
+            'snooze',
+            'oneHourRemaining',
+          }.contains(parsed.kind)) {
         await _plugin.cancel(id: request.id);
       }
     }

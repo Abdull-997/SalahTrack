@@ -321,6 +321,72 @@ void main() {
       expect(plugin.cancelled, isNot(contains(NotificationIds.snooze(entry))));
       await service.cancelPrayer(entry);
       expect(plugin.cancelled, contains(NotificationIds.snooze(entry)));
+      expect(
+        plugin.cancelled,
+        contains(NotificationIds.oneHourRemaining(entry)),
+      );
+    },
+  );
+
+  test(
+    'one-hour remaining reminder uses the next prayer and is action-free',
+    () async {
+      final plugin = _Plugin();
+      final service = LocalNotificationService(plugin: plugin);
+      final now = DateTime.now().toUtc();
+      final dhuhr = PrayerEntry(
+        id: '2026-09-13:dhuhr',
+        localDate: '2026-09-13',
+        type: PrayerType.dhuhr,
+        scheduledAtUtc: now.add(const Duration(hours: 1)),
+        timezoneId: 'UTC',
+        graceEndsAtUtc: now.add(const Duration(hours: 2)),
+        trackingEndsAtUtc: now.add(const Duration(hours: 5)),
+        status: PrayerStatus.upcoming,
+      );
+      final asr = PrayerEntry(
+        id: '2026-09-13:asr',
+        localDate: '2026-09-13',
+        type: PrayerType.asr,
+        scheduledAtUtc: now.add(const Duration(hours: 3)),
+        timezoneId: 'UTC',
+        graceEndsAtUtc: now.add(const Duration(hours: 4)),
+        trackingEndsAtUtc: now.add(const Duration(hours: 7)),
+        status: PrayerStatus.upcoming,
+      );
+
+      await service.scheduleOneHourRemainingReminder(
+        dhuhr,
+        asr,
+        'Dhuhr',
+        'Asr',
+        languageCode: 'en',
+      );
+
+      final item = plugin.scheduled.single;
+      expect(item.id, NotificationIds.oneHourRemaining(dhuhr));
+      expect(item.title, 'Dhuhr not confirmed yet');
+      expect(item.body, 'You have about 1 hour left before Asr begins.');
+      final expected = asr.scheduledAtUtc.subtract(const Duration(hours: 1));
+      expect(item.scheduledDate.toUtc().isBefore(expected), isFalse);
+      expect(
+        item.scheduledDate.toUtc().difference(expected),
+        lessThan(const Duration(seconds: 1)),
+      );
+      expect(item.matchDateTimeComponents, isNull);
+      final android = item.details.android!;
+      expect(android.channelId, 'prayer_reminders');
+      expect(android.fullScreenIntent, isFalse);
+      expect(android.ongoing, isFalse);
+      expect(android.autoCancel, isTrue);
+      expect(android.category, AndroidNotificationCategory.reminder);
+      expect(android.audioAttributesUsage, AudioAttributesUsage.notification);
+      expect(android.actions, isEmpty);
+      expect(item.details.iOS!.categoryIdentifier, isNull);
+      final payload = PrayerNotificationPayload.tryParse(item.payload)!;
+      expect(payload.kind, 'oneHourRemaining');
+      expect(payload.action, PrayerNotificationAction.open);
+      expect(payload.routeLocation, '/home');
     },
   );
 
@@ -405,10 +471,19 @@ void main() {
             kind: 'fridayPrayer',
           ).encode(),
         ),
+        PendingNotificationRequest(
+          6,
+          null,
+          null,
+          const PrayerNotificationPayload(
+            prayerId: 'new-dhuhr',
+            kind: 'oneHourRemaining',
+          ).encode(),
+        ),
       ]);
     await LocalNotificationService(plugin: plugin)
         .cancelAllFuturePrayerNotifications();
-    expect(plugin.cancelled, [1, 2]);
+    expect(plugin.cancelled, [1, 2, 6]);
   });
 
   test(

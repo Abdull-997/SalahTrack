@@ -38,6 +38,17 @@ void main() {
     });
   }
 
+  for (final kind in ['fridayPrayer', 'oneHourRemaining']) {
+    test('$kind payload opens Home without a prayer decision', () {
+      final parsed = PrayerNotificationPayload.tryParse(
+        PrayerNotificationPayload(prayerId: id, kind: kind).encode(),
+      )!;
+      expect(parsed.kind, kind);
+      expect(parsed.action, PrayerNotificationAction.open);
+      expect(parsed.routeLocation, '/home');
+    });
+  }
+
   test(
     'actual action buttons override embedded action and body only opens',
     () {

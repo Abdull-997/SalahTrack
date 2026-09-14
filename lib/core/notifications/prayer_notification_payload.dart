@@ -41,7 +41,8 @@ class PrayerNotificationPayload {
     'eventId': ?eventId,
   });
 
-  String get routeLocation => kind == 'fridayPrayer'
+  String get routeLocation =>
+      <String>{'fridayPrayer', 'oneHourRemaining'}.contains(kind)
       ? '/home'
       : Uri(
           pathSegments: <String>['', 'reminder', prayerId],
@@ -60,6 +61,7 @@ class PrayerNotificationPayload {
     'reminder',
     'snooze',
     'soft',
+    'oneHourRemaining',
     'fridayPrayer',
   };
 

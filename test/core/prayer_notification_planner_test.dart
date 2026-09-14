@@ -67,6 +67,106 @@ void main() {
       expect(service.snoozes, [entry.id]);
     },
   );
+
+  test(
+    'one-hour reminders use only the three requested prayer pairs',
+    () async {
+      final service = FakeNotificationService();
+      final entries = <PrayerEntry>[
+        _entryFor(PrayerType.fajr, DateTime.utc(2026, 8, 15, 5)),
+        _entryFor(PrayerType.dhuhr, DateTime.utc(2026, 8, 15, 13, 28)),
+        _entryFor(PrayerType.asr, DateTime.utc(2026, 8, 15, 16)),
+        _entryFor(PrayerType.maghrib, DateTime.utc(2026, 8, 15, 19)),
+        _entryFor(PrayerType.isha, DateTime.utc(2026, 8, 15, 20, 30)),
+      ];
+
+      await PrayerNotificationPlanner(service).reschedule(
+        entries,
+        prayerName: (entry) => entry.type.name,
+        languageCode: 'en',
+        nowUtc: DateTime.utc(2026, 8, 15, 10),
+      );
+
+      expect(
+        service.oneHourRemaining,
+        <({String prayerId, String nextPrayerId, DateTime scheduledAtUtc})>[
+          (
+            prayerId: '2026-08-15:dhuhr',
+            nextPrayerId: '2026-08-15:asr',
+            scheduledAtUtc: DateTime.utc(2026, 8, 15, 15),
+          ),
+          (
+            prayerId: '2026-08-15:asr',
+            nextPrayerId: '2026-08-15:maghrib',
+            scheduledAtUtc: DateTime.utc(2026, 8, 15, 18),
+          ),
+          (
+            prayerId: '2026-08-15:maghrib',
+            nextPrayerId: '2026-08-15:isha',
+            scheduledAtUtc: DateTime.utc(2026, 8, 15, 19, 30),
+          ),
+        ],
+      );
+    },
+  );
+
+  test('confirmed prayers do not receive a one-hour reminder', () async {
+    final service = FakeNotificationService();
+    await PrayerNotificationPlanner(service).reschedule(
+      <PrayerEntry>[
+        _entryFor(
+          PrayerType.dhuhr,
+          DateTime.utc(2026, 8, 15, 13, 28),
+          status: PrayerStatus.prayed,
+        ),
+        _entryFor(PrayerType.asr, DateTime.utc(2026, 8, 15, 16)),
+        _entryFor(PrayerType.maghrib, DateTime.utc(2026, 8, 15, 19)),
+        _entryFor(PrayerType.isha, DateTime.utc(2026, 8, 15, 20, 30)),
+      ],
+      prayerName: (entry) => entry.type.name,
+      languageCode: 'en',
+      nowUtc: DateTime.utc(2026, 8, 15, 10),
+    );
+
+    expect(service.oneHourRemaining.map((item) => item.prayerId), <String>[
+      '2026-08-15:asr',
+      '2026-08-15:maghrib',
+    ]);
+  });
+
+  test(
+    'rescheduling replaces reminders and uses updated prayer times',
+    () async {
+      final service = FakeNotificationService();
+      final planner = PrayerNotificationPlanner(service);
+      List<PrayerEntry> entries({required int asrMinute}) => <PrayerEntry>[
+        _entryFor(PrayerType.dhuhr, DateTime.utc(2026, 8, 15, 13, 28)),
+        _entryFor(PrayerType.asr, DateTime.utc(2026, 8, 15, 16, asrMinute)),
+        _entryFor(PrayerType.maghrib, DateTime.utc(2026, 8, 15, 19)),
+        _entryFor(PrayerType.isha, DateTime.utc(2026, 8, 15, 20, 30)),
+      ];
+
+      await planner.reschedule(
+        entries(asrMinute: 0),
+        prayerName: (entry) => entry.type.name,
+        languageCode: 'en',
+        nowUtc: DateTime.utc(2026, 8, 15, 10),
+      );
+      await planner.reschedule(
+        entries(asrMinute: 5),
+        prayerName: (entry) => entry.type.name,
+        languageCode: 'en',
+        nowUtc: DateTime.utc(2026, 8, 15, 10),
+      );
+
+      expect(service.cancelledPending, 2);
+      expect(service.oneHourRemaining, hasLength(3));
+      expect(
+        service.oneHourRemaining.first.scheduledAtUtc,
+        DateTime.utc(2026, 8, 15, 15, 5),
+      );
+    },
+  );
 }
 
 PrayerEntry _entry(DateTime scheduled) => PrayerEntry(
@@ -80,6 +180,21 @@ PrayerEntry _entry(DateTime scheduled) => PrayerEntry(
   status: PrayerStatus.upcoming,
 );
 
+PrayerEntry _entryFor(
+  PrayerType type,
+  DateTime scheduled, {
+  PrayerStatus status = PrayerStatus.upcoming,
+}) => PrayerEntry(
+  id: '2026-08-15:${type.name}',
+  localDate: '2026-08-15',
+  type: type,
+  scheduledAtUtc: scheduled,
+  timezoneId: 'Europe/Berlin',
+  graceEndsAtUtc: scheduled.add(const Duration(hours: 1)),
+  trackingEndsAtUtc: scheduled.add(const Duration(hours: 4)),
+  status: status,
+);
+
 class FakeNotificationService implements NotificationService {
   @override
   Stream<String> get payloads => const Stream<String>.empty();
@@ -87,6 +202,9 @@ class FakeNotificationService implements NotificationService {
   final List<String> prayers = <String>[];
   final List<String> grace = <String>[];
   final List<String> snoozes = <String>[];
+  final List<({String prayerId, String nextPrayerId, DateTime scheduledAtUtc})>
+  oneHourRemaining =
+      <({String prayerId, String nextPrayerId, DateTime scheduledAtUtc})>[];
   int cancelledPending = 0;
 
   @override
@@ -105,7 +223,10 @@ class FakeNotificationService implements NotificationService {
   Future<String?> takeInitialPayload() async => null;
 
   @override
-  Future<void> cancelAllFuturePrayerNotifications() async => cancelledPending++;
+  Future<void> cancelAllFuturePrayerNotifications() async {
+    cancelledPending++;
+    oneHourRemaining.clear();
+  }
 
   @override
   Future<void> cancelAllFridayPrayerNotifications() async {}
@@ -158,6 +279,21 @@ class FakeNotificationService implements NotificationService {
     String prayerName, {
     required String languageCode,
   }) async {}
+
+  @override
+  Future<void> scheduleOneHourRemainingReminder(
+    PrayerEntry prayer,
+    PrayerEntry nextPrayer,
+    String prayerName,
+    String nextPrayerName, {
+    required String languageCode,
+  }) async => oneHourRemaining.add((
+    prayerId: prayer.id,
+    nextPrayerId: nextPrayer.id,
+    scheduledAtUtc: nextPrayer.scheduledAtUtc.subtract(
+      const Duration(hours: 1),
+    ),
+  ));
 
   @override
   Future<void> scheduleFridayPrayerReminder({
