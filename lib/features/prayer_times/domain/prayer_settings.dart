@@ -1,4 +1,5 @@
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
+import 'package:salah_focus/features/prayer_times/domain/friday_prayer_settings.dart';
 
 enum AsrMadhhab { standard, hanafi }
 
@@ -15,6 +16,7 @@ class PrayerSettings {
     this.softReminderAfterSkip = true,
     this.confirmationText = 'Ich habe gebetet',
     this.adjustments = const <PrayerType, int>{},
+    this.fridayPrayer = const FridayPrayerSettings(),
   });
 
   final int calculationMethodId;
@@ -26,6 +28,7 @@ class PrayerSettings {
   final bool softReminderAfterSkip;
   final String confirmationText;
   final Map<PrayerType, int> adjustments;
+  final FridayPrayerSettings fridayPrayer;
 
   static const Map<String, String> _defaultConfirmationTexts = <String, String>{
     'bn': 'আমি নামাজ পড়েছি',
@@ -74,6 +77,7 @@ class PrayerSettings {
     bool? softReminderAfterSkip,
     String? confirmationText,
     Map<PrayerType, int>? adjustments,
+    FridayPrayerSettings? fridayPrayer,
   }) {
     return PrayerSettings(
       calculationMethodId: calculationMethodId ?? this.calculationMethodId,
@@ -86,6 +90,7 @@ class PrayerSettings {
           softReminderAfterSkip ?? this.softReminderAfterSkip,
       confirmationText: confirmationText ?? this.confirmationText,
       adjustments: adjustments ?? this.adjustments,
+      fridayPrayer: fridayPrayer ?? this.fridayPrayer,
     );
   }
 
@@ -102,10 +107,12 @@ class PrayerSettings {
       for (final PrayerType type in PrayerType.values)
         type.name: adjustmentFor(type),
     },
+    'fridayPrayer': fridayPrayer.toJson(),
   };
 
   factory PrayerSettings.fromJson(Map<String, Object?> json) {
     final Object? rawAdjustments = json['adjustments'];
+    final Object? rawFridayPrayer = json['fridayPrayer'];
     final Map<PrayerType, int> adjustments = <PrayerType, int>{};
     if (rawAdjustments is Map) {
       for (final MapEntry<Object?, Object?> entry in rawAdjustments.entries) {
@@ -142,6 +149,11 @@ class PrayerSettings {
               rawConfirmation.length > 80 ? 80 : rawConfirmation.length,
             ),
       adjustments: adjustments,
+      fridayPrayer: rawFridayPrayer is Map
+          ? FridayPrayerSettings.fromJson(
+              Map<String, Object?>.from(rawFridayPrayer),
+            )
+          : const FridayPrayerSettings(),
     );
   }
 

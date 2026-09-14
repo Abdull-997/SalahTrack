@@ -24,6 +24,7 @@ const List<String> _allCategoryHelpKeys = <String>[
   'highLatitudeOneSeventhHelp',
   'highLatitudeAngleBasedHelp',
   'minuteAdjustmentsHelp',
+  'fridayPrayerHelp',
   'gracePeriodHelp',
   'snoozeDurationHelp',
   'maxSnoozesHelp',
@@ -53,6 +54,7 @@ const List<_HelpCategory> _helpCategories = <_HelpCategory>[
       'highLatitudeOneSeventhHelp',
       'highLatitudeAngleBasedHelp',
       'minuteAdjustmentsHelp',
+      'fridayPrayerHelp',
     ],
   ),
   (
@@ -255,8 +257,9 @@ void main() {
       final Finder permissionInfo = find.byKey(
         const ValueKey<String>('settings-info-permissions'),
       );
-      await tester.ensureVisible(permissionInfo);
-      await tester.tap(permissionInfo);
+      await tester.scrollUntilVisible(permissionInfo, 250);
+      await tester.pumpAndSettle();
+      await tester.tap(permissionInfo.hitTestable());
       await tester.pumpAndSettle();
       final AppStrings s = AppStrings(const Locale('en'));
       final Finder dialog = find.byType(AlertDialog);

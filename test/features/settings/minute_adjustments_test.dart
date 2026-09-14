@@ -157,10 +157,7 @@ void main() {
           final Finder plus = find.byKey(
             const ValueKey<String>('adjustment-plus-fajr'),
           );
-          await Scrollable.ensureVisible(
-            tester.element(plus),
-            alignment: 0.5,
-          );
+          await Scrollable.ensureVisible(tester.element(plus), alignment: 0.5);
           await tester.pumpAndSettle();
           expect(plus.hitTestable(), findsOneWidget);
           expect(tester.getSize(plus).width, greaterThanOrEqualTo(48));

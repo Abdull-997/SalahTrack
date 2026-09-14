@@ -29,11 +29,14 @@ class PrayerReminderScreen extends ConsumerStatefulWidget {
   final String? deliveryId;
 
   @override
-  ConsumerState<PrayerReminderScreen> createState() => _PrayerReminderScreenState();
+  ConsumerState<PrayerReminderScreen> createState() =>
+      _PrayerReminderScreenState();
 }
 
 class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
-  static const MethodChannel _alarmChannel = MethodChannel('salah_focus/prayer_alarm');
+  static const MethodChannel _alarmChannel = MethodChannel(
+    'salah_focus/prayer_alarm',
+  );
   PrayerEntry? _prayer;
   Object? _loadError;
   String? _actionError;
@@ -44,7 +47,8 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
   int _generation = 0;
   Timer? _snoozeDeadline;
 
-  bool get _android => !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+  bool get _android =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
   @override
   void initState() {
@@ -56,7 +60,8 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
   void didUpdateWidget(covariant PrayerReminderScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.prayerId != widget.prayerId ||
-        oldWidget.action != widget.action || oldWidget.eventId != widget.eventId ||
+        oldWidget.action != widget.action ||
+        oldWidget.eventId != widget.eventId ||
         oldWidget.deliveryId != widget.deliveryId) {
       unawaited(_loadPrayer());
     }
@@ -71,21 +76,33 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
 
   DateTime get _now => ref.read(clockServiceProvider).nowUtc();
 
-  bool get _alreadySnoozed => _prayer?.status == PrayerStatus.snoozed &&
+  bool get _alreadySnoozed =>
+      _prayer?.status == PrayerStatus.snoozed &&
       (_prayer?.snoozedUntilUtc?.isAfter(_now) ?? false);
 
   bool get _canSnooze {
     final PrayerEntry? prayer = _prayer;
     if (prayer == null || prayer.status.isFinal || _confirmed) return false;
-    final PrayerSettings settings = ref.read(settingsControllerProvider).prayerSettings;
-    return (settings.maxSnoozes == null || prayer.snoozeCount < settings.maxSnoozes!) &&
-        _now.add(Duration(minutes: settings.snoozeMinutes)).isBefore(prayer.trackingEndsAtUtc);
+    final PrayerSettings settings = ref
+        .read(settingsControllerProvider)
+        .prayerSettings;
+    return (settings.maxSnoozes == null ||
+            prayer.snoozeCount < settings.maxSnoozes!) &&
+        _now
+            .add(Duration(minutes: settings.snoozeMinutes))
+            .isBefore(prayer.trackingEndsAtUtc);
   }
 
   // If a snooze limit or expired window removes the alternative, allow a safe
   // exit. A reminder must never force somebody to record a prayer they did not pray.
-  bool get _mustChoose => _android && _loaded && _loadError == null &&
-      _actionError == null && !_confirmed && !_alreadySnoozed && _canSnooze;
+  bool get _mustChoose =>
+      _android &&
+      _loaded &&
+      _loadError == null &&
+      _actionError == null &&
+      !_confirmed &&
+      !_alreadySnoozed &&
+      _canSnooze;
 
   Future<void> _loadPrayer() async {
     final int generation = ++_generation;
@@ -99,7 +116,9 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
     try {
       // Read storage on every delivery; the family provider may contain an old
       // pending entry from an earlier visit or before an action was completed.
-      final PrayerEntry? entry = await ref.read(prayerCoordinatorProvider).prayerById(widget.prayerId);
+      final PrayerEntry? entry = await ref
+          .read(prayerCoordinatorProvider)
+          .prayerById(widget.prayerId);
       if (!mounted || generation != _generation) return;
       setState(() {
         _prayer = entry;
@@ -132,9 +151,13 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
     _setAlarmActive(_mustChoose);
     _snoozeDeadline?.cancel();
     if (!_canSnooze || _prayer == null) return;
-    final int minutes = ref.read(settingsControllerProvider).prayerSettings.snoozeMinutes;
+    final int minutes = ref
+        .read(settingsControllerProvider)
+        .prayerSettings
+        .snoozeMinutes;
     final Duration remaining = _prayer!.trackingEndsAtUtc
-        .subtract(Duration(minutes: minutes)).difference(_now);
+        .subtract(Duration(minutes: minutes))
+        .difference(_now);
     if (remaining <= Duration.zero) return;
     _snoozeDeadline = Timer(remaining, () {
       if (!mounted) return;
@@ -151,7 +174,9 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
 
   Future<void> _sendAlarmState(bool active) async {
     try {
-      await _alarmChannel.invokeMethod<void>('setAlarmActive', <String, bool>{'active': active});
+      await _alarmChannel.invokeMethod<void>('setAlarmActive', <String, bool>{
+        'active': active,
+      });
     } on MissingPluginException {
       // Widget tests and non-native hosts do not have the Android channel.
     } on PlatformException {
@@ -170,11 +195,17 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
         body: !_loaded
             ? const Center(child: CircularProgressIndicator())
             : _loadError != null
-            ? _Message(icon: Icons.error_outline_rounded,
-                text: userErrorMessage(context, _loadError!), action: _close)
+            ? _Message(
+                icon: Icons.error_outline_rounded,
+                text: userErrorMessage(context, _loadError!),
+                action: _close,
+              )
             : _prayer == null
-            ? _Message(icon: Icons.notifications_off_outlined,
-                text: AppStrings.of(context).t('noData'), action: _close)
+            ? _Message(
+                icon: Icons.notifications_off_outlined,
+                text: AppStrings.of(context).t('noData'),
+                action: _close,
+              )
             : _content(context, _prayer!),
       ),
     );
@@ -189,55 +220,97 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
         padding: const EdgeInsets.all(28),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
-          child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-            Icon(completed ? Icons.check_circle_rounded : Icons.notifications_active_rounded,
-                size: 76, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 20),
-            Text(prayer.type.localizedName(language), textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900)),
-            const SizedBox(height: 10),
-            if (completed) ...<Widget>[
-              Text(s.t('alhamdulillah'), textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall),
-              const SizedBox(height: 10),
-              Text(s.t('accepted'), textAlign: TextAlign.center),
-            ] else
-              Text(s.t(_alreadySnoozed ? 'snoozed' : prayer.status.isFinal ? prayer.status.name : 'reminderBody'),
-                  textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge),
-            const SizedBox(height: 30),
-            if (!completed) ...<Widget>[
-              FilledButton.icon(
-                onPressed: _working ? null : _confirm,
-                icon: const Icon(Icons.check_rounded), label: Text(s.t('markAsPrayed')),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(
+                completed
+                    ? Icons.check_circle_rounded
+                    : Icons.notifications_active_rounded,
+                size: 76,
+                color: Theme.of(context).colorScheme.primary,
               ),
-              if (!prayer.status.isFinal && !_alreadySnoozed) ...<Widget>[
-                const SizedBox(height: 10),
-                FilledButton.tonalIcon(
-                  onPressed: _working || !_canSnooze ? null : _snooze,
-                  icon: const Icon(Icons.snooze_rounded),
-                  label: Text(s.t('snoozeIn', params: <String, String>{
-                    'minutes': s.number(ref.read(settingsControllerProvider).prayerSettings.snoozeMinutes),
-                  })),
+              const SizedBox(height: 20),
+              Text(
+                prayer.type.localizedName(language),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineMedium
+                    ?.copyWith(fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 10),
+              if (completed) ...<Widget>[
+                Text(
+                  s.t('alhamdulillah'),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                if (!_canSnooze) ...<Widget>[
-                  const SizedBox(height: 12),
-                  Text(s.t('snoozeUnavailable'), textAlign: TextAlign.center),
+                const SizedBox(height: 10),
+                Text(s.t('accepted'), textAlign: TextAlign.center),
+              ] else
+                Text(
+                  s.t(
+                    _alreadySnoozed
+                        ? 'snoozed'
+                        : prayer.status.isFinal
+                        ? prayer.status.name
+                        : 'reminderBody',
+                  ),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              const SizedBox(height: 30),
+              if (!completed) ...<Widget>[
+                FilledButton.icon(
+                  onPressed: _working ? null : _confirm,
+                  icon: const Icon(Icons.check_rounded),
+                  label: Text(s.t('markAsPrayed')),
+                ),
+                if (!prayer.status.isFinal && !_alreadySnoozed) ...<Widget>[
+                  const SizedBox(height: 10),
+                  FilledButton.tonalIcon(
+                    onPressed: _working || !_canSnooze ? null : _snooze,
+                    icon: const Icon(Icons.snooze_rounded),
+                    label: Text(
+                      s.t(
+                        'snoozeIn',
+                        params: <String, String>{
+                          'minutes': s.number(
+                            ref
+                                .read(settingsControllerProvider)
+                                .prayerSettings
+                                .snoozeMinutes,
+                          ),
+                        },
+                      ),
+                    ),
+                  ),
+                  if (!_canSnooze) ...<Widget>[
+                    const SizedBox(height: 12),
+                    Text(s.t('snoozeUnavailable'), textAlign: TextAlign.center),
+                  ],
                 ],
               ],
+              if (_actionError != null) ...<Widget>[
+                const SizedBox(height: 12),
+                Text(
+                  _actionError!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ],
+              if (_working) ...<Widget>[
+                const SizedBox(height: 16),
+                const CircularProgressIndicator(),
+              ],
+              if (!_mustChoose) ...<Widget>[
+                const SizedBox(height: 10),
+                TextButton(
+                  onPressed: _working ? null : _close,
+                  child: Text(s.t('home')),
+                ),
+              ],
             ],
-            if (_actionError != null) ...<Widget>[
-              const SizedBox(height: 12),
-              Text(_actionError!, textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
-            ],
-            if (_working) ...<Widget>[
-              const SizedBox(height: 16), const CircularProgressIndicator(),
-            ],
-            if (!_mustChoose) ...<Widget>[
-              const SizedBox(height: 10),
-              TextButton(onPressed: _working ? null : _close, child: Text(s.t('home'))),
-            ],
-          ]),
+          ),
         ),
       ),
     );
@@ -270,13 +343,20 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
       }
       final PrayerEntry updated;
       if (snooze) {
-        final PrayerSettings settings = ref.read(settingsControllerProvider).prayerSettings;
+        final PrayerSettings settings = ref
+            .read(settingsControllerProvider)
+            .prayerSettings;
         final String language = Localizations.localeOf(context).languageCode;
-        updated = await coordinator.snooze(current, settings,
-            current.type.localizedName(language), language);
+        updated = await coordinator.snooze(
+          current,
+          settings,
+          current.type.localizedName(language),
+          language,
+        );
       } else {
         updated = current.status == PrayerStatus.prayed
-            ? current : await coordinator.confirm(current);
+            ? current
+            : await coordinator.confirm(current);
       }
       if (!mounted || generation != _generation) return;
       ref.invalidate(prayerByIdProvider(prayerId));
@@ -289,9 +369,11 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
       if (snooze) _close();
     } catch (error) {
       if (!mounted || generation != _generation) return;
-      setState(() => _actionError = snooze && error is StateError
-          ? AppStrings.of(context).t('snoozeUnavailable')
-          : userErrorMessage(context, error));
+      setState(
+        () => _actionError = snooze && error is StateError
+            ? AppStrings.of(context).t('snoozeUnavailable')
+            : userErrorMessage(context, error),
+      );
       _setAlarmActive(false);
     } finally {
       if (mounted && generation == _generation) {
@@ -303,7 +385,11 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
 }
 
 class _Message extends StatelessWidget {
-  const _Message({required this.icon, required this.text, required this.action});
+  const _Message({
+    required this.icon,
+    required this.text,
+    required this.action,
+  });
   final IconData icon;
   final String text;
   final VoidCallback action;
@@ -312,11 +398,19 @@ class _Message extends StatelessWidget {
   Widget build(BuildContext context) => Center(
     child: Padding(
       padding: const EdgeInsets.all(28),
-      child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-        Icon(icon, size: 56), const SizedBox(height: 16),
-        Text(text, textAlign: TextAlign.center), const SizedBox(height: 16),
-        FilledButton.tonal(onPressed: action, child: Text(AppStrings.of(context).t('home'))),
-      ]),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Icon(icon, size: 56),
+          const SizedBox(height: 16),
+          Text(text, textAlign: TextAlign.center),
+          const SizedBox(height: 16),
+          FilledButton.tonal(
+            onPressed: action,
+            child: Text(AppStrings.of(context).t('home')),
+          ),
+        ],
+      ),
     ),
   );
 }

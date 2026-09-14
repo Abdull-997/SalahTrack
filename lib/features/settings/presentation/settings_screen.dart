@@ -8,6 +8,7 @@ import 'package:salah_focus/core/location/location_suggestions.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
+import 'package:salah_focus/features/prayer_times/domain/friday_prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
@@ -108,6 +109,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _editAdjustments(settings),
                 ),
+                const Divider(height: 1),
+                SwitchListTile(
+                  key: const ValueKey<String>('friday-prayer-enabled'),
+                  secondary: const Icon(Icons.mosque_outlined),
+                  title: Text(s.t('fridayPrayer')),
+                  subtitle: Text(_fridayPrayerTime(s, settings.fridayPrayer)),
+                  value: settings.fridayPrayer.enabled,
+                  onChanged: _working
+                      ? null
+                      : (bool enabled) => _savePrayerSettings(
+                          settings.copyWith(
+                            fridayPrayer: settings.fridayPrayer.copyWith(
+                              enabled: enabled,
+                            ),
+                          ),
+                        ),
+                ),
+                if (settings.fridayPrayer.enabled) ...<Widget>[
+                  const Divider(height: 1),
+                  ListTile(
+                    key: const ValueKey<String>('friday-prayer-time'),
+                    leading: const Icon(Icons.access_time_rounded),
+                    title: Text(s.t('fridayPrayerTime')),
+                    subtitle: Text(_fridayPrayerTime(s, settings.fridayPrayer)),
+                    trailing: const Icon(Icons.edit_outlined),
+                    onTap: _working
+                        ? null
+                        : () => _chooseFridayPrayerTime(settings),
+                  ),
+                ],
               ],
             ),
           ),
@@ -342,6 +373,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _SettingsHelpItem(
         title: s.t('manualAdjustments'),
         description: s.t('minuteAdjustmentsHelp'),
+      ),
+      _SettingsHelpItem(
+        title: s.t('fridayPrayer'),
+        description: s.t('fridayPrayerHelp'),
       ),
     ];
   }
@@ -649,6 +684,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  Future<void> _chooseFridayPrayerTime(PrayerSettings current) async {
+    final FridayPrayerSettings fridayPrayer = current.fridayPrayer;
+    final AppStrings s = AppStrings.of(context);
+    final TimeOfDay? selected = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(
+        hour: fridayPrayer.hour,
+        minute: fridayPrayer.minute,
+      ),
+      helpText: s.t('fridayPrayerTime'),
+      cancelText: s.t('cancel'),
+      confirmText: s.t('save'),
+    );
+    if (selected == null) return;
+    await _savePrayerSettings(
+      current.copyWith(
+        fridayPrayer: fridayPrayer.copyWith(
+          minutesFromMidnight: selected.hour * 60 + selected.minute,
+        ),
+      ),
+    );
+  }
+
   Future<void> _editAdjustments(PrayerSettings current) async {
     final Map<PrayerType, int> values = <PrayerType, int>{
       for (final PrayerType type in PrayerType.values)
@@ -756,6 +814,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return strings.time(TimezoneService.toLocal(previewUtc, entry.timezoneId));
   }
 
+  String _fridayPrayerTime(AppStrings strings, FridayPrayerSettings settings) =>
+      strings.time(DateTime(2000, 1, 1, settings.hour, settings.minute));
+
   Future<void> _chooseMaxSnoozes(PrayerSettings current) async {
     final int? value = await showDialog<int>(
       context: context,
@@ -833,7 +894,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         builder: (_) => const NotificationSettingsScreen(),
       ),
     );
-    if (mounted) ref.invalidate(todayPrayerDayProvider);
+    if (mounted) {
+      await _syncFridayPrayerReminders();
+      ref.invalidate(todayPrayerDayProvider);
+    }
   }
 
   Future<void> _requestExactAlarms() async {
@@ -842,7 +906,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         builder: (_) => const NotificationSettingsScreen.exactAlarms(),
       ),
     );
-    if (mounted) ref.invalidate(todayPrayerDayProvider);
+    if (mounted) {
+      await _syncFridayPrayerReminders();
+      ref.invalidate(todayPrayerDayProvider);
+    }
   }
 
   Future<void> _requestFullScreenAlarms() async {
@@ -855,10 +922,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _savePrayerSettings(PrayerSettings settings) async {
+    final FridayPrayerSettings previous = ref
+        .read(settingsControllerProvider)
+        .prayerSettings
+        .fridayPrayer;
     await ref
         .read(settingsControllerProvider.notifier)
         .setPrayerSettings(settings);
+    if (settings.fridayPrayer != previous) {
+      await _syncFridayPrayerReminders();
+    }
     ref.invalidate(todayPrayerDayProvider);
+  }
+
+  Future<void> _syncFridayPrayerReminders() async {
+    final preferences = ref.read(settingsControllerProvider);
+    try {
+      await ref
+          .read(fridayPrayerReminderPlannerProvider)
+          .reschedule(
+            preferences.prayerSettings.fridayPrayer,
+            timezoneId:
+                preferences.location?.timezoneId ??
+                ref.read(deviceTimezoneIdProvider),
+            languageCode: preferences.localeCode,
+            nowUtc: ref.read(clockServiceProvider).nowUtc(),
+          );
+    } on Object {
+      // Saving remains available even if the operating system rejects alarms.
+    }
   }
 
   Future<void> _run(Future<void> Function() action) async {

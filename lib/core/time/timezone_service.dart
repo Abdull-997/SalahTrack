@@ -1,4 +1,4 @@
-﻿import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -14,7 +14,9 @@ class TimezoneService {
     }
     try {
       final dynamic rawTimezone = await FlutterTimezone.getLocalTimezone();
-      final String timezoneId = rawTimezone is String ? rawTimezone : rawTimezone.name as String;
+      final String timezoneId = rawTimezone is String
+          ? rawTimezone
+          : rawTimezone.name as String;
       final tz.Location location = tz.getLocation(timezoneId);
       tz.setLocalLocation(location);
       return timezoneId;
@@ -41,8 +43,8 @@ class TimezoneService {
     if (dateParts.length != 3) {
       throw const FormatException('Invalid ISO date.');
     }
-    final RegExpMatch? timeMatch =
-        RegExp(r'^(\d{1,2}):(\d{2})').firstMatch(hhmm.trim());
+    final RegExpMatch? timeMatch = RegExp(r'^(\d{1,2}):(\d{2})')
+        .firstMatch(hhmm.trim());
     if (timeMatch == null) {
       throw FormatException('Invalid prayer time: $hhmm');
     }

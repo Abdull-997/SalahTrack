@@ -210,6 +210,37 @@ void main() {
   });
 
   testRouting(
+    'Friday Prayer tap opens Home without a decision or prayer state lookup',
+    (tester) async {
+      final notifications = _Notifications()
+        ..initial = Future.value(
+          const PrayerNotificationPayload(
+            prayerId: 'friday-prayer-2-hours',
+            kind: 'fridayPrayer',
+          ).encode(),
+        );
+      final coordinator = _Coordinator();
+      final container = await _mount(tester, notifications, coordinator);
+
+      expect(
+        container
+            .read(goRouterProvider)
+            .routeInformationProvider
+            .value
+            .uri
+            .path,
+        '/home',
+      );
+      expect(find.byType(PrayerReminderScreen), findsNothing);
+      expect(find.text('Mark as Prayed'), findsNothing);
+      expect(find.text('Snooze'), findsNothing);
+      expect(coordinator.reads, 0);
+      expect(coordinator.confirms, 0);
+      expect(coordinator.snoozes, 0);
+    },
+  );
+
+  testRouting(
     'warm Mark as Prayed opens target, executes once and stays on success',
     (tester) async {
       final notifications = _Notifications();

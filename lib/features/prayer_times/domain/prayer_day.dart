@@ -16,10 +16,10 @@ class PrayerDay {
   final DateTime? sunriseUtc;
 
   PrayerDay copyWith({List<PrayerEntry>? entries}) => PrayerDay(
-        localDate: localDate,
-        timezoneId: timezoneId,
-        entries: entries ?? this.entries,
-        hijriDate: hijriDate,
-        sunriseUtc: sunriseUtc,
-      );
+    localDate: localDate,
+    timezoneId: timezoneId,
+    entries: entries ?? this.entries,
+    hijriDate: hijriDate,
+    sunriseUtc: sunriseUtc,
+  );
 }

@@ -51,7 +51,17 @@ abstract interface class NotificationService {
     required String languageCode,
   });
 
+  /// Schedules one action-free reminder that repeats every Friday.
+  Future<void> scheduleFridayPrayerReminder({
+    required DateTime firstReminderAtUtc,
+    required String timezoneId,
+    required int hoursBefore,
+    required String languageCode,
+  });
+
   Future<void> cancelPrayer(PrayerEntry prayer);
 
   Future<void> cancelAllFuturePrayerNotifications();
+
+  Future<void> cancelAllFridayPrayerNotifications();
 }

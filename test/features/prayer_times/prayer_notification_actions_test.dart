@@ -41,36 +41,42 @@ void main() {
     await database.upsertPrayerEntry(original);
   });
 
-  test('concurrent snooze responses schedule once and consume one snooze', () async {
-    final results = await Future.wait([
-      coordinator.snooze(original, settings, 'Isha', 'en'),
-      coordinator.snooze(original, settings, 'Isha', 'en'),
-    ]);
+  test(
+    'concurrent snooze responses schedule once and consume one snooze',
+    () async {
+      final results = await Future.wait([
+        coordinator.snooze(original, settings, 'Isha', 'en'),
+        coordinator.snooze(original, settings, 'Isha', 'en'),
+      ]);
 
-    final stored = (await database.prayerEntryById(original.id))!;
-    final until = clock.now.add(const Duration(minutes: 20));
-    expect(stored.status, PrayerStatus.snoozed);
-    expect(stored.snoozeCount, 1);
-    expect(stored.snoozedUntilUtc, until);
-    expect(results.map((entry) => entry.snoozedUntilUtc), [until, until]);
-    expect(results.map((entry) => entry.snoozeCount), [1, 1]);
-    expect(notifications.snoozeAttempts, 1);
-    expect(notifications.scheduled.single.snoozedUntilUtc, until);
-  });
+      final stored = (await database.prayerEntryById(original.id))!;
+      final until = clock.now.add(const Duration(minutes: 20));
+      expect(stored.status, PrayerStatus.snoozed);
+      expect(stored.snoozeCount, 1);
+      expect(stored.snoozedUntilUtc, until);
+      expect(results.map((entry) => entry.snoozedUntilUtc), [until, until]);
+      expect(results.map((entry) => entry.snoozeCount), [1, 1]);
+      expect(notifications.snoozeAttempts, 1);
+      expect(notifications.scheduled.single.snoozedUntilUtc, until);
+    },
+  );
 
-  test('replayed confirmation preserves the first confirmation timestamp', () async {
-    final confirmed = await coordinator.confirm(original);
-    clock.now = clock.now.add(const Duration(minutes: 5));
+  test(
+    'replayed confirmation preserves the first confirmation timestamp',
+    () async {
+      final confirmed = await coordinator.confirm(original);
+      clock.now = clock.now.add(const Duration(minutes: 5));
 
-    // A notification can replay its original, now stale prayer entry.
-    final replayed = await coordinator.confirm(original);
-    final stored = (await database.prayerEntryById(original.id))!;
-    expect(replayed.status, PrayerStatus.prayed);
-    expect(replayed.confirmedAtUtc, confirmed.confirmedAtUtc);
-    expect(stored.confirmedAtUtc, confirmed.confirmedAtUtc);
-    expect(notifications.cancelled, [original.id, original.id]);
-    expect(notifications.activeSnoozes, isEmpty);
-  });
+      // A notification can replay its original, now stale prayer entry.
+      final replayed = await coordinator.confirm(original);
+      final stored = (await database.prayerEntryById(original.id))!;
+      expect(replayed.status, PrayerStatus.prayed);
+      expect(replayed.confirmedAtUtc, confirmed.confirmedAtUtc);
+      expect(stored.confirmedAtUtc, confirmed.confirmedAtUtc);
+      expect(notifications.cancelled, [original.id, original.id]);
+      expect(notifications.activeSnoozes, isEmpty);
+    },
+  );
 
   test('confirmation queued during snooze cancels its replacement', () async {
     final snoozing = coordinator.snooze(original, settings, 'Isha', 'en');
@@ -85,19 +91,22 @@ void main() {
     expect(notifications.activeSnoozes, isEmpty);
   });
 
-  test('snooze queued during confirmation cannot reopen a prayed entry', () async {
-    final confirming = coordinator.confirm(original);
-    final snoozing = coordinator.snooze(original, settings, 'Isha', 'en');
-    await expectLater(snoozing, throwsA(isA<StateError>()));
-    await confirming;
+  test(
+    'snooze queued during confirmation cannot reopen a prayed entry',
+    () async {
+      final confirming = coordinator.confirm(original);
+      final snoozing = coordinator.snooze(original, settings, 'Isha', 'en');
+      await expectLater(snoozing, throwsA(isA<StateError>()));
+      await confirming;
 
-    final stored = (await database.prayerEntryById(original.id))!;
-    expect(stored.status, PrayerStatus.prayed);
-    expect(stored.snoozedUntilUtc, isNull);
-    expect(stored.snoozeCount, 0);
-    expect(notifications.snoozeAttempts, 0);
-    expect(notifications.activeSnoozes, isEmpty);
-  });
+      final stored = (await database.prayerEntryById(original.id))!;
+      expect(stored.status, PrayerStatus.prayed);
+      expect(stored.snoozedUntilUtc, isNull);
+      expect(stored.snoozeCount, 0);
+      expect(notifications.snoozeAttempts, 0);
+      expect(notifications.activeSnoozes, isEmpty);
+    },
+  );
 
   test('failed scheduling rolls back the snooze and permits a retry', () async {
     notifications.failNextSnooze = true;
@@ -171,7 +180,8 @@ class _Repository implements PrayerTimesRepository {
   final AppDatabase database;
 
   @override
-  Future<void> saveEntry(PrayerEntry entry) => database.upsertPrayerEntry(entry);
+  Future<void> saveEntry(PrayerEntry entry) =>
+      database.upsertPrayerEntry(entry);
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

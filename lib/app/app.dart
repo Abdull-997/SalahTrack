@@ -33,6 +33,7 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
       ApplicationLocale.followSystem();
       _handleLaunchPayload();
       _syncAutomaticLocationUpdates();
+      _syncFridayPrayerReminders();
     });
   }
 
@@ -59,6 +60,18 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
     ref.listen(
       settingsControllerProvider,
       (_, _) => _syncAutomaticLocationUpdates(),
+    );
+    ref.listen(
+      settingsControllerProvider.select(
+        (preferences) => (
+          fridayPrayer: preferences.prayerSettings.fridayPrayer,
+          timezoneId:
+              preferences.location?.timezoneId ??
+              ref.read(deviceTimezoneIdProvider),
+          localeCode: preferences.localeCode,
+        ),
+      ),
+      (_, _) => _syncFridayPrayerReminders(),
     );
 
     final ThemeMode themeMode = switch (preferences.themeMode) {
@@ -113,6 +126,24 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
         });
   }
 
+  Future<void> _syncFridayPrayerReminders() async {
+    final preferences = ref.read(settingsControllerProvider);
+    try {
+      await ref
+          .read(fridayPrayerReminderPlannerProvider)
+          .reschedule(
+            preferences.prayerSettings.fridayPrayer,
+            timezoneId:
+                preferences.location?.timezoneId ??
+                ref.read(deviceTimezoneIdProvider),
+            languageCode: preferences.localeCode,
+            nowUtc: ref.read(clockServiceProvider).nowUtc(),
+          );
+    } on Object {
+      // Reminder scheduling must never prevent the main interface from loading.
+    }
+  }
+
   Future<void> _handleLaunchPayload() async {
     final service = ref.read(notificationServiceProvider);
     final String? payload = await service.takeInitialPayload();
@@ -127,16 +158,24 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
         PrayerNotificationPayload.tryParse(payload);
     if (notification == null) return;
     final DateTime now = DateTime.now();
-    _recentNotificationEvents.removeWhere((_, receivedAt) =>
-        now.difference(receivedAt) >= const Duration(seconds: 2));
+    _recentNotificationEvents.removeWhere(
+      (_, receivedAt) =>
+          now.difference(receivedAt) >= const Duration(seconds: 2),
+    );
     final String event = notification.encode();
     if (_recentNotificationEvents.containsKey(event)) return;
     _recentNotificationEvents[event] = now;
     // A later retry of the same notification must reload a failed destination.
     final Uri route = Uri.parse(notification.routeLocation);
-    router.go(route.replace(queryParameters: <String, String>{
-      ...route.queryParameters,
-      'delivery': '${++_notificationDelivery}',
-    }).toString());
+    router.go(
+      route
+          .replace(
+            queryParameters: <String, String>{
+              ...route.queryParameters,
+              'delivery': '${++_notificationDelivery}',
+            },
+          )
+          .toString(),
+    );
   }
 }

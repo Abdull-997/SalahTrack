@@ -5,6 +5,7 @@ import 'package:salah_focus/core/location/location_service.dart';
 import 'package:salah_focus/core/location/location_service_impl.dart';
 import 'package:salah_focus/core/notifications/local_notification_service.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
+import 'package:salah_focus/core/notifications/friday_prayer_reminder_planner.dart';
 import 'package:salah_focus/core/time/clock_service.dart';
 import 'package:salah_focus/features/prayer_times/application/prayer_coordinator.dart';
 import 'package:salah_focus/features/prayer_times/data/aladhan_prayer_times_provider.dart';
@@ -71,6 +72,12 @@ class NotificationPayloads extends StreamNotifier<String> {
 
 final Provider<ClockService> clockServiceProvider = Provider<ClockService>(
   (Ref ref) => const SystemClockService(),
+);
+
+final Provider<FridayPrayerReminderPlanner>
+fridayPrayerReminderPlannerProvider = Provider<FridayPrayerReminderPlanner>(
+  (Ref ref) =>
+      FridayPrayerReminderPlanner(ref.watch(notificationServiceProvider)),
 );
 
 final Provider<PrayerCoordinator> prayerCoordinatorProvider =

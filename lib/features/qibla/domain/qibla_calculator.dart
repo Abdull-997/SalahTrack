@@ -11,12 +11,16 @@ class QiblaCalculator {
     final double lat2 = _radians(kaabaLatitude);
     final double deltaLongitude = _radians(kaabaLongitude - longitude);
     final double y = math.sin(deltaLongitude) * math.cos(lat2);
-    final double x = math.cos(lat1) * math.sin(lat2) -
+    final double x =
+        math.cos(lat1) * math.sin(lat2) -
         math.sin(lat1) * math.cos(lat2) * math.cos(deltaLongitude);
     return (_degrees(math.atan2(y, x)) + 360) % 360;
   }
 
-  static double relativeAngle({required double qiblaBearing, required double heading}) {
+  static double relativeAngle({
+    required double qiblaBearing,
+    required double heading,
+  }) {
     double angle = qiblaBearing - heading;
     while (angle > 180) {
       angle -= 360;

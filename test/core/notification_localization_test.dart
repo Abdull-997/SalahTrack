@@ -19,6 +19,7 @@ class _Plugin implements FlutterLocalNotificationsPlugin {
       String? payload,
       int id,
       TZDateTime scheduledDate,
+      DateTimeComponents? matchDateTimeComponents,
     })
   >
   scheduled = [];
@@ -76,6 +77,7 @@ class _Plugin implements FlutterLocalNotificationsPlugin {
       details: notificationDetails,
       payload: payload,
       scheduledDate: scheduledDate,
+      matchDateTimeComponents: matchDateTimeComponents,
     ));
   }
 
@@ -309,13 +311,73 @@ void main() {
       expect(plugin.scheduled.single.id, NotificationIds.snooze(entry));
       final deliveredAt = plugin.scheduled.single.scheduledDate.toUtc();
       expect(deliveredAt.isBefore(entry.snoozedUntilUtc!), isFalse);
-      expect(deliveredAt.difference(entry.snoozedUntilUtc!), lessThan(const Duration(seconds: 1)));
+      expect(
+        deliveredAt.difference(entry.snoozedUntilUtc!),
+        lessThan(const Duration(seconds: 1)),
+      );
       expect(deliveredAt.microsecond, 0);
       expect(deliveredAt.millisecond, 0);
       expect(plugin.cancelled, contains(NotificationIds.previousSnooze(entry)));
       expect(plugin.cancelled, isNot(contains(NotificationIds.snooze(entry))));
       await service.cancelPrayer(entry);
       expect(plugin.cancelled, contains(NotificationIds.snooze(entry)));
+    },
+  );
+
+  test(
+    'Friday Prayer reminders are weekly, localized, and action-free',
+    () async {
+      final plugin = _Plugin();
+      final service = LocalNotificationService(
+        plugin: plugin,
+        languageCode: () => 'en',
+      );
+      final DateTime friday = DateTime.now().toUtc().add(
+        const Duration(days: 7),
+      );
+
+      await service.scheduleFridayPrayerReminder(
+        firstReminderAtUtc: friday,
+        timezoneId: 'UTC',
+        hoursBefore: 2,
+        languageCode: 'en',
+      );
+      await service.scheduleFridayPrayerReminder(
+        firstReminderAtUtc: friday.add(const Duration(hours: 1)),
+        timezoneId: 'UTC',
+        hoursBefore: 1,
+        languageCode: 'en',
+      );
+
+      expect(plugin.scheduled, hasLength(2));
+      expect(plugin.scheduled.map((item) => item.id), <int>[
+        NotificationIds.fridayPrayer(2),
+        NotificationIds.fridayPrayer(1),
+      ]);
+      expect(plugin.scheduled.map((item) => item.body), <String>[
+        'Friday Prayer is in 2 hours.',
+        'Friday Prayer is in 1 hour.',
+      ]);
+      for (final item in plugin.scheduled) {
+        expect(
+          item.matchDateTimeComponents,
+          DateTimeComponents.dayOfWeekAndTime,
+        );
+        final AndroidNotificationDetails android = item.details.android!;
+        expect(android.channelId, 'friday_prayer_reminders');
+        expect(android.fullScreenIntent, isFalse);
+        expect(android.ongoing, isFalse);
+        expect(android.autoCancel, isTrue);
+        expect(android.category, AndroidNotificationCategory.reminder);
+        expect(android.audioAttributesUsage, AudioAttributesUsage.notification);
+        expect(android.actions, isEmpty);
+        expect(item.details.iOS!.categoryIdentifier, isNull);
+        final PrayerNotificationPayload payload =
+            PrayerNotificationPayload.tryParse(item.payload)!;
+        expect(payload.kind, 'fridayPrayer');
+        expect(payload.action, PrayerNotificationAction.open);
+        expect(payload.routeLocation, '/home');
+      }
     },
   );
 
@@ -334,9 +396,50 @@ void main() {
         ),
         const PendingNotificationRequest(3, null, null, 'soft:old-isha'),
         const PendingNotificationRequest(4, null, null, 'another-feature'),
+        PendingNotificationRequest(
+          5,
+          null,
+          null,
+          const PrayerNotificationPayload(
+            prayerId: 'friday-prayer-2-hours',
+            kind: 'fridayPrayer',
+          ).encode(),
+        ),
       ]);
     await LocalNotificationService(plugin: plugin)
         .cancelAllFuturePrayerNotifications();
     expect(plugin.cancelled, [1, 2]);
   });
+
+  test(
+    'Friday Prayer cancellation leaves normal prayer reminders alone',
+    () async {
+      final plugin = _Plugin()
+        ..pending.addAll([
+          PendingNotificationRequest(
+            1,
+            null,
+            null,
+            const PrayerNotificationPayload(prayerId: 'normal-prayer').encode(),
+          ),
+          PendingNotificationRequest(
+            2,
+            null,
+            null,
+            const PrayerNotificationPayload(
+              prayerId: 'friday-prayer-1-hours',
+              kind: 'fridayPrayer',
+            ).encode(),
+          ),
+        ]);
+
+      await LocalNotificationService(plugin: plugin)
+          .cancelAllFridayPrayerNotifications();
+
+      expect(plugin.cancelled, isNot(contains(1)));
+      expect(plugin.cancelled, contains(2));
+      expect(plugin.cancelled, contains(NotificationIds.fridayPrayer(2)));
+      expect(plugin.cancelled, contains(NotificationIds.fridayPrayer(1)));
+    },
+  );
 }

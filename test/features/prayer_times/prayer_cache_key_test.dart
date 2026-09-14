@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:salah_focus/features/prayer_times/data/prayer_cache_key.dart';
+import 'package:salah_focus/features/prayer_times/domain/friday_prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
@@ -19,26 +20,18 @@ void main() {
     final String baseKey = PrayerCacheKey.build(duesseldorf, base);
 
     expect(
-      PrayerCacheKey.build(
-        duesseldorf,
-        base.copyWith(calculationMethodId: 13),
-      ),
+      PrayerCacheKey.build(duesseldorf, base.copyWith(calculationMethodId: 13)),
       isNot(baseKey),
     );
     expect(
       PrayerCacheKey.build(
         duesseldorf,
-        base.copyWith(
-          adjustments: <PrayerType, int>{PrayerType.fajr: 2},
-        ),
+        base.copyWith(adjustments: <PrayerType, int>{PrayerType.fajr: 2}),
       ),
       isNot(baseKey),
     );
     expect(
-      PrayerCacheKey.build(
-        duesseldorf,
-        base.copyWith(gracePeriodMinutes: 30),
-      ),
+      PrayerCacheKey.build(duesseldorf, base.copyWith(gracePeriodMinutes: 30)),
       isNot(baseKey),
     );
   });
@@ -59,4 +52,22 @@ void main() {
       isNot(PrayerCacheKey.build(istanbul, settings)),
     );
   });
+
+  test(
+    'Friday Prayer settings do not invalidate astronomical prayer times',
+    () {
+      const PrayerSettings base = PrayerSettings();
+      final PrayerSettings withFridayPrayer = base.copyWith(
+        fridayPrayer: const FridayPrayerSettings(
+          enabled: true,
+          minutesFromMidnight: 14 * 60,
+        ),
+      );
+
+      expect(
+        PrayerCacheKey.build(duesseldorf, withFridayPrayer),
+        PrayerCacheKey.build(duesseldorf, base),
+      );
+    },
+  );
 }

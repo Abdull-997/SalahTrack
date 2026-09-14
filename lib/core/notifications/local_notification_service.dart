@@ -84,6 +84,26 @@ class LocalNotificationService implements NotificationService {
     );
   }
 
+  static AndroidNotificationDetails _fridayPrayerAndroidDetails(
+    String languageCode,
+  ) {
+    final AppStrings s = AppStrings(Locale(languageCode));
+    return AndroidNotificationDetails(
+      'friday_prayer_reminders',
+      s.t('fridayPrayer'),
+      channelDescription: s.t('fridayPrayerHelp'),
+      importance: Importance.high,
+      priority: Priority.high,
+      category: AndroidNotificationCategory.reminder,
+      fullScreenIntent: false,
+      ongoing: false,
+      autoCancel: true,
+      visibility: NotificationVisibility.public,
+      audioAttributesUsage: AudioAttributesUsage.notification,
+      actions: const <AndroidNotificationAction>[],
+    );
+  }
+
   static DarwinNotificationDetails _darwinDetails(String languageCode) =>
       DarwinNotificationDetails(
         presentAlert: true,
@@ -92,6 +112,15 @@ class LocalNotificationService implements NotificationService {
         presentSound: true,
         interruptionLevel: InterruptionLevel.timeSensitive,
         categoryIdentifier: 'prayer_actions_$languageCode',
+      );
+
+  static const DarwinNotificationDetails _fridayPrayerDarwinDetails =
+      DarwinNotificationDetails(
+        presentAlert: true,
+        presentBanner: true,
+        presentList: true,
+        presentSound: true,
+        interruptionLevel: InterruptionLevel.timeSensitive,
       );
 
   @override
@@ -199,6 +228,17 @@ class LocalNotificationService implements NotificationService {
           ),
         );
       }
+      final AndroidNotificationDetails fridayDetails =
+          _fridayPrayerAndroidDetails(languageCode);
+      await android?.createNotificationChannel(
+        AndroidNotificationChannel(
+          fridayDetails.channelId,
+          fridayDetails.channelName,
+          description: fridayDetails.channelDescription,
+          importance: Importance.high,
+          audioAttributesUsage: fridayDetails.audioAttributesUsage,
+        ),
+      );
       _channelLanguage = languageCode;
     }
   }
@@ -444,6 +484,41 @@ class LocalNotificationService implements NotificationService {
     );
   }
 
+  @override
+  Future<void> scheduleFridayPrayerReminder({
+    required DateTime firstReminderAtUtc,
+    required String timezoneId,
+    required int hoursBefore,
+    required String languageCode,
+  }) async {
+    if (hoursBefore != 1 && hoursBefore != 2) {
+      throw ArgumentError.value(
+        hoursBefore,
+        'hoursBefore',
+        'Friday Prayer reminders must be one or two hours early.',
+      );
+    }
+    final AppStrings s = AppStrings(Locale(languageCode));
+    await _schedule(
+      id: NotificationIds.fridayPrayer(hoursBefore),
+      whenUtc: firstReminderAtUtc,
+      timezoneId: timezoneId,
+      title: s.t('fridayPrayer'),
+      body: s.t(
+        hoursBefore == 2 ? 'fridayPrayerInTwoHours' : 'fridayPrayerInOneHour',
+      ),
+      details: NotificationDetails(
+        android: _fridayPrayerAndroidDetails(languageCode),
+        iOS: _fridayPrayerDarwinDetails,
+      ),
+      payload: PrayerNotificationPayload(
+        prayerId: 'friday-prayer-$hoursBefore-hours',
+        kind: 'fridayPrayer',
+      ).encode(),
+      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+    );
+  }
+
   Future<bool> _schedule({
     required int id,
     required DateTime whenUtc,
@@ -452,6 +527,7 @@ class LocalNotificationService implements NotificationService {
     required String body,
     required NotificationDetails details,
     required String payload,
+    DateTimeComponents? matchDateTimeComponents,
   }) async {
     await initialize();
     if (!await notificationsAllowed()) return false;
@@ -484,6 +560,7 @@ class LocalNotificationService implements NotificationService {
         null,
         eventId: '$id:${whenUtc.microsecondsSinceEpoch}',
       )!.encode(),
+      matchDateTimeComponents: matchDateTimeComponents,
     );
     return true;
   }
@@ -602,9 +679,27 @@ class LocalNotificationService implements NotificationService {
       final String payload = request.payload ?? '';
       final parsed = PrayerNotificationPayload.tryParse(payload);
       // Soft reminders are one-off opt-ins after skipping, not planner entries.
-      if (parsed != null && parsed.kind != 'soft') {
+      if (parsed != null &&
+          <String>{'prayer', 'reminder', 'snooze'}.contains(parsed.kind)) {
         await _plugin.cancel(id: request.id);
       }
     }
+  }
+
+  @override
+  Future<void> cancelAllFridayPrayerNotifications() async {
+    await initialize();
+    final List<PendingNotificationRequest> pending = await _plugin
+        .pendingNotificationRequests();
+    for (final PendingNotificationRequest request in pending) {
+      final parsed = PrayerNotificationPayload.tryParse(request.payload);
+      if (parsed?.kind == 'fridayPrayer') {
+        await _plugin.cancel(id: request.id);
+      }
+    }
+    // Fixed IDs also replace/cancel notifications created by older payload
+    // versions or already delivered by the operating system.
+    await _plugin.cancel(id: NotificationIds.fridayPrayer(2));
+    await _plugin.cancel(id: NotificationIds.fridayPrayer(1));
   }
 }

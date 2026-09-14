@@ -18,13 +18,13 @@ class UserLocation {
   String get label => city.isEmpty ? country : '$city, $country';
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'latitude': latitude,
-        'longitude': longitude,
-        'city': city,
-        'country': country,
-        'timezoneId': timezoneId,
-        'isAutomatic': isAutomatic,
-      };
+    'latitude': latitude,
+    'longitude': longitude,
+    'city': city,
+    'country': country,
+    'timezoneId': timezoneId,
+    'isAutomatic': isAutomatic,
+  };
 
   factory UserLocation.fromJson(Map<String, Object?> json) {
     final double latitude = (json['latitude']! as num).toDouble();

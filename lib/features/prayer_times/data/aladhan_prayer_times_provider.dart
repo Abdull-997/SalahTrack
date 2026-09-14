@@ -31,14 +31,18 @@ class AlAdhanPrayerTimesProvider implements PrayerTimesProvider {
       final Map<String, Object?> root = _map(response.data, 'root');
       final Object? rawData = root['data'];
       if (rawData is! List<Object?>) {
-        throw const PrayerDataException('Prayer API returned no calendar data.');
+        throw const PrayerDataException(
+          'Prayer API returned no calendar data.',
+        );
       }
       final List<RemotePrayerDay> days = <RemotePrayerDay>[];
       for (final Object? item in rawData) {
         final Map<String, Object?> day = _map(item, 'day');
         final Map<String, Object?> date = _map(day['date'], 'date');
-        final Map<String, Object?> gregorian =
-            _map(date['gregorian'], 'gregorian');
+        final Map<String, Object?> gregorian = _map(
+          date['gregorian'],
+          'gregorian',
+        );
         final String rawDate = gregorian['date']! as String;
         final List<String> dmy = rawDate.split('-');
         if (dmy.length != 3) {
@@ -48,8 +52,7 @@ class AlAdhanPrayerTimesProvider implements PrayerTimesProvider {
         final Map<String, Object?> meta = _map(day['meta'], 'meta');
         final String timezoneId =
             (meta['timezone'] as String?) ?? location.timezoneId;
-        final Map<String, Object?> rawTimings =
-            _map(day['timings'], 'timings');
+        final Map<String, Object?> rawTimings = _map(day['timings'], 'timings');
         final Map<String, String> timings = <String, String>{};
         for (final MapEntry<String, Object?> entry in rawTimings.entries) {
           if (entry.value is String) {
@@ -59,8 +62,9 @@ class AlAdhanPrayerTimesProvider implements PrayerTimesProvider {
         String? hijriDate;
         final Object? rawHijri = date['hijri'];
         if (rawHijri is Map) {
-          final Map<String, Object?> hijri =
-              Map<String, Object?>.from(rawHijri);
+          final Map<String, Object?> hijri = Map<String, Object?>.from(
+            rawHijri,
+          );
           final String? dayPart = hijri['day'] as String?;
           final Map<String, Object?>? monthMap = hijri['month'] is Map
               ? Map<String, Object?>.from(hijri['month']! as Map)

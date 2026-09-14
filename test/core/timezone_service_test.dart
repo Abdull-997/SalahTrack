@@ -24,8 +24,14 @@ void main() {
   });
 
   test('timezone conversion follows DST instead of fixed UTC offsets', () {
-    final winter = TimezoneService.toLocal(DateTime.utc(2026, 1, 15, 12), 'Europe/Berlin');
-    final summer = TimezoneService.toLocal(DateTime.utc(2026, 8, 14, 12), 'Europe/Berlin');
+    final winter = TimezoneService.toLocal(
+      DateTime.utc(2026, 1, 15, 12),
+      'Europe/Berlin',
+    );
+    final summer = TimezoneService.toLocal(
+      DateTime.utc(2026, 8, 14, 12),
+      'Europe/Berlin',
+    );
     expect(winter.hour, 13);
     expect(summer.hour, 14);
   });

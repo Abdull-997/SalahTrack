@@ -108,6 +108,9 @@ class FakeNotificationService implements NotificationService {
   Future<void> cancelAllFuturePrayerNotifications() async => cancelledPending++;
 
   @override
+  Future<void> cancelAllFridayPrayerNotifications() async {}
+
+  @override
   Future<void> cancelPrayer(PrayerEntry prayer) async {}
 
   @override
@@ -153,6 +156,14 @@ class FakeNotificationService implements NotificationService {
   Future<void> scheduleSoftReminder(
     PrayerEntry prayer,
     String prayerName, {
+    required String languageCode,
+  }) async {}
+
+  @override
+  Future<void> scheduleFridayPrayerReminder({
+    required DateTime firstReminderAtUtc,
+    required String timezoneId,
+    required int hoursBefore,
     required String languageCode,
   }) async {}
 }

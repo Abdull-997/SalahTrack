@@ -19,8 +19,9 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
 
   @override
   Future<PrayerDay?> day(String localDate) async {
-    final List<PrayerEntry> entries =
-        await _database.prayerEntriesForDate(localDate);
+    final List<PrayerEntry> entries = await _database.prayerEntriesForDate(
+      localDate,
+    );
     if (entries.isEmpty) {
       return null;
     }
@@ -35,10 +36,8 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
   }
 
   @override
-  Future<List<PrayerEntry>> entriesBetween(
-    String startDate,
-    String endDate,
-  ) => _database.prayerEntriesBetween(startDate, endDate);
+  Future<List<PrayerEntry>> entriesBetween(String startDate, String endDate) =>
+      _database.prayerEntriesBetween(startDate, endDate);
 
   @override
   Future<bool> hasCachedMonth(
@@ -64,7 +63,8 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
       settings: settings,
     );
 
-    final List<List<_ScheduledPrayer>> scheduledDays = <List<_ScheduledPrayer>>[];
+    final List<List<_ScheduledPrayer>> scheduledDays =
+        <List<_ScheduledPrayer>>[];
     for (final RemotePrayerDay day in remote) {
       final List<_ScheduledPrayer> scheduled = <_ScheduledPrayer>[];
       for (final PrayerType type in PrayerType.values) {
@@ -119,8 +119,9 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
         final DateTime rawGrace = current.instantUtc.add(
           Duration(minutes: settings.gracePeriodMinutes),
         );
-        final DateTime latestGrace =
-            trackingEnd.subtract(const Duration(minutes: 1));
+        final DateTime latestGrace = trackingEnd.subtract(
+          const Duration(minutes: 1),
+        );
         final DateTime graceEnd = rawGrace.isBefore(latestGrace)
             ? rawGrace
             : latestGrace;
@@ -173,11 +174,7 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
         settings: settings,
         sourceKey: sourceKey,
       );
-      await _linkDayToNext(
-        lastDate,
-        settings: settings,
-        sourceKey: sourceKey,
-      );
+      await _linkDayToNext(lastDate, settings: settings, sourceKey: sourceKey);
     }
   }
 
@@ -189,7 +186,8 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
     final String nextDate = _shiftIsoDate(localDate, 1);
     final PrayerDayMeta? currentMeta = await _database.dayMeta(localDate);
     final PrayerDayMeta? nextMeta = await _database.dayMeta(nextDate);
-    if (currentMeta?.sourceKey != sourceKey || nextMeta?.sourceKey != sourceKey) {
+    if (currentMeta?.sourceKey != sourceKey ||
+        nextMeta?.sourceKey != sourceKey) {
       return;
     }
     final PrayerEntry? isha = await _database.prayerEntryById(
@@ -204,8 +202,9 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
       return;
     }
 
-    final DateTime latestGrace =
-        fajr.scheduledAtUtc.subtract(const Duration(minutes: 1));
+    final DateTime latestGrace = fajr.scheduledAtUtc.subtract(
+      const Duration(minutes: 1),
+    );
     final DateTime requestedGrace = isha.scheduledAtUtc.add(
       Duration(minutes: settings.gracePeriodMinutes),
     );
@@ -238,15 +237,19 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
     if (parts.length != 3) {
       throw FormatException('Invalid local date: $localDate');
     }
-    final DateTime shifted =
-        DateTime.utc(parts[0], parts[1], parts[2]).add(Duration(days: days));
+    final DateTime shifted = DateTime.utc(
+      parts[0],
+      parts[1],
+      parts[2],
+    ).add(Duration(days: days));
     return '${shifted.year.toString().padLeft(4, '0')}-'
         '${shifted.month.toString().padLeft(2, '0')}-'
         '${shifted.day.toString().padLeft(2, '0')}';
   }
 
   @override
-  Future<void> saveEntry(PrayerEntry entry) => _database.upsertPrayerEntry(entry);
+  Future<void> saveEntry(PrayerEntry entry) =>
+      _database.upsertPrayerEntry(entry);
 }
 
 class _ScheduledPrayer {

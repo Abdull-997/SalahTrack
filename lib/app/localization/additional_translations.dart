@@ -1,6 +1,12 @@
 /// Complete UI catalogs for Turkish, French and Spanish.
 const Map<String, Map<String, String>> additionalTranslations = {
   'tr': {
+    'fridayPrayer': 'Cuma namazı',
+    'fridayPrayerTime': 'Cuma namazı saati',
+    'fridayPrayerHelp': 'Yalnızca cuma günleri gösterilir. Yerel caminizin saatini girin. Uygulama 2 saat ve 1 saat önce hatırlatır. Onay gerekmez.',
+    'fridayPrayerReminderOnly': 'Yalnızca hatırlatma · onay gerekmez',
+    'fridayPrayerInTwoHours': 'Cuma namazına 2 saat kaldı.',
+    'fridayPrayerInOneHour': 'Cuma namazına 1 saat kaldı.',
     'markAsPrayed': 'Kılındı olarak işaretle',
     'snoozeAction': 'Ertele',
     'alhamdulillah': 'Elhamdülillah',
@@ -173,6 +179,12 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'minutesValue': '{value} dk.',
   },
   'fr': {
+    'fridayPrayer': 'Prière du vendredi',
+    'fridayPrayerTime': 'Heure de la prière du vendredi',
+    'fridayPrayerHelp': 'Visible uniquement le vendredi. Saisissez l’heure de votre mosquée. L’application envoie un rappel 2 heures et 1 heure avant. Aucune confirmation n’est nécessaire.',
+    'fridayPrayerReminderOnly': 'Rappel uniquement · aucune confirmation',
+    'fridayPrayerInTwoHours': 'La prière du vendredi est dans 2 heures.',
+    'fridayPrayerInOneHour': 'La prière du vendredi est dans 1 heure.',
     'markAsPrayed': 'Marquer comme accomplie',
     'snoozeAction': 'Reporter',
     'alhamdulillah': 'Alhamdoulillah',
@@ -339,6 +351,12 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'minutesValue': '{value} min',
   },
   'es': {
+    'fridayPrayer': 'Oración del viernes',
+    'fridayPrayerTime': 'Hora de la oración del viernes',
+    'fridayPrayerHelp': 'Solo se muestra los viernes. Introduce la hora de tu mezquita. La aplicación avisa 2 horas y 1 hora antes. No hace falta confirmar.',
+    'fridayPrayerReminderOnly': 'Solo recordatorio · sin confirmación',
+    'fridayPrayerInTwoHours': 'La oración del viernes es en 2 horas.',
+    'fridayPrayerInOneHour': 'La oración del viernes es en 1 hora.',
     'markAsPrayed': 'Marcar como realizada',
     'snoozeAction': 'Posponer',
     'alhamdulillah': 'Alhamdulillah',

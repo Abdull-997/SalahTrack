@@ -41,13 +41,15 @@ class PrayerNotificationPayload {
     'eventId': ?eventId,
   });
 
-  String get routeLocation => Uri(
-    pathSegments: <String>['', 'reminder', prayerId],
-    queryParameters: <String, String>{
-      'action': action.value,
-      'eventId': ?eventId,
-    },
-  ).toString();
+  String get routeLocation => kind == 'fridayPrayer'
+      ? '/home'
+      : Uri(
+          pathSegments: <String>['', 'reminder', prayerId],
+          queryParameters: <String, String>{
+            'action': action.value,
+            'eventId': ?eventId,
+          },
+        ).toString();
 
   static final RegExp _identifier = RegExp(
     r'^[a-zA-Z0-9][a-zA-Z0-9:_-]{0,199}$',
@@ -58,6 +60,7 @@ class PrayerNotificationPayload {
     'reminder',
     'snooze',
     'soft',
+    'fridayPrayer',
   };
 
   static PrayerNotificationPayload? tryParse(String? payload) {

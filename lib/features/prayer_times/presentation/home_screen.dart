@@ -8,7 +8,9 @@ import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
+import 'package:salah_focus/features/prayer_times/domain/friday_prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
 import 'package:salah_focus/shared/errors/user_error_message.dart';
 
@@ -160,10 +162,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ?.copyWith(fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 12),
-                    for (final PrayerEntry prayer in day.entries) ...<Widget>[
-                      _PrayerTile(prayer: prayer),
-                      const SizedBox(height: 10),
-                    ],
+                    if (_isFriday(day.localDate) &&
+                        preferences.prayerSettings.fridayPrayer.enabled)
+                      for (final PrayerEntry prayer in day.entries) ...<Widget>[
+                        _PrayerTile(prayer: prayer),
+                        const SizedBox(height: 10),
+                        if (prayer.type == PrayerType.dhuhr) ...<Widget>[
+                          _FridayPrayerTile(
+                            settings: preferences.prayerSettings.fridayPrayer,
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                      ]
+                    else
+                      for (final PrayerEntry prayer in day.entries) ...<Widget>[
+                        _PrayerTile(prayer: prayer),
+                        const SizedBox(height: 10),
+                      ],
                   ],
                 ),
               );
@@ -181,6 +196,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
+}
+
+bool _isFriday(String localDate) {
+  final DateTime? date = DateTime.tryParse(localDate);
+  return date?.weekday == DateTime.friday;
 }
 
 class _NextPrayerCard extends StatelessWidget {
@@ -354,6 +374,65 @@ class _PrayerTile extends ConsumerWidget {
               ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FridayPrayerTile extends StatelessWidget {
+  const _FridayPrayerTile({required this.settings});
+
+  final FridayPrayerSettings settings;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppStrings s = AppStrings.of(context);
+    final Color primary = Theme.of(context).colorScheme.primary;
+    final String time = s.time(
+      DateTime(2000, 1, 1, settings.hour, settings.minute),
+    );
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        child: Row(
+          children: <Widget>[
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: primary.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.mosque_outlined, color: primary, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    s.t('fridayPrayer'),
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    s.t('fridayPrayerReminderOnly'),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              time,
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
+          ],
         ),
       ),
     );

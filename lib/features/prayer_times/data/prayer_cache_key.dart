@@ -9,7 +9,9 @@ import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 abstract final class PrayerCacheKey {
   static String build(UserLocation location, PrayerSettings settings) {
     final String adjustments = PrayerType.values
-        .map((PrayerType type) => '${type.name}:${settings.adjustmentFor(type)}')
+        .map(
+          (PrayerType type) => '${type.name}:${settings.adjustmentFor(type)}',
+        )
         .join(',');
     return '${location.latitude.toStringAsFixed(5)}|'
         '${location.longitude.toStringAsFixed(5)}|'
