@@ -7,7 +7,13 @@ import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/theme/app_theme.dart';
 import 'package:salah_focus/features/settings/presentation/settings_screen.dart';
 
-const List<String> _settingsHelpKeys = <String>[
+typedef _HelpCategory = ({
+  String buttonKey,
+  String titleKey,
+  List<String> helpKeys,
+});
+
+const List<String> _allCategoryHelpKeys = <String>[
   'locationHelp',
   'calculationMethodHelp',
   'asrCalculationHelp',
@@ -25,6 +31,64 @@ const List<String> _settingsHelpKeys = <String>[
   'confirmationTextHelp',
   'notificationPermissionHelp',
   'exactAlarmPermissionHelp',
+  'fullScreenAlarmPermissionHelp',
+  'systemThemeHelp',
+  'lightThemeHelp',
+  'darkThemeHelp',
+  'languageHelp',
+];
+
+const List<_HelpCategory> _helpCategories = <_HelpCategory>[
+  (
+    buttonKey: 'settings-info-prayer-times',
+    titleKey: 'prayerTimes',
+    helpKeys: <String>[
+      'locationHelp',
+      'calculationMethodHelp',
+      'asrCalculationHelp',
+      'standardAsrHelp',
+      'hanafiAsrHelp',
+      'highLatitudeHelp',
+      'highLatitudeMiddleOfNightHelp',
+      'highLatitudeOneSeventhHelp',
+      'highLatitudeAngleBasedHelp',
+      'minuteAdjustmentsHelp',
+    ],
+  ),
+  (
+    buttonKey: 'settings-info-permissions',
+    titleKey: 'permissions',
+    helpKeys: <String>[
+      'notificationPermissionHelp',
+      'exactAlarmPermissionHelp',
+      'fullScreenAlarmPermissionHelp',
+    ],
+  ),
+  (
+    buttonKey: 'settings-info-reminders',
+    titleKey: 'prayerReminders',
+    helpKeys: <String>[
+      'gracePeriodHelp',
+      'snoozeDurationHelp',
+      'maxSnoozesHelp',
+      'softReminderHelp',
+    ],
+  ),
+  (
+    buttonKey: 'settings-info-confirmation',
+    titleKey: 'confirmationText',
+    helpKeys: <String>['confirmationTextHelp'],
+  ),
+  (
+    buttonKey: 'settings-info-theme',
+    titleKey: 'theme',
+    helpKeys: <String>['systemThemeHelp', 'lightThemeHelp', 'darkThemeHelp'],
+  ),
+  (
+    buttonKey: 'settings-info-language',
+    titleKey: 'language',
+    helpKeys: <String>['languageHelp'],
+  ),
 ];
 
 const List<String> _formerlyInlineHelpKeys = <String>[
@@ -80,6 +144,13 @@ void main() {
       find.widgetWithText(SwitchListTile, s.t('softReminder')),
       findsOneWidget,
     );
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byIcon(Icons.info_outline_rounded),
+      ),
+      findsNothing,
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -105,54 +176,108 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final Finder infoButton = find.byKey(
-          const ValueKey<String>('settings-info-button'),
-        );
-        final Size touchSize = tester.getSize(infoButton);
-        expect(touchSize.width, greaterThanOrEqualTo(48));
-        expect(touchSize.height, greaterThanOrEqualTo(48));
-        await tester.tap(infoButton);
-        await tester.pumpAndSettle();
-
         final AppStrings s = AppStrings(locale);
-        expect(find.text(s.t('settingsInfoTitle')), findsOneWidget);
-        expect(find.byType(SingleChildScrollView), findsOneWidget);
-        for (final String key in _settingsHelpKeys) {
-          expect(find.text(s.t(key)), findsWidgets, reason: key);
-        }
         final TextDirection expectedDirection =
             <String>{'ar', 'ps', 'ur'}.contains(locale.languageCode)
             ? TextDirection.rtl
             : TextDirection.ltr;
         expect(
-          Directionality.of(tester.element(find.byType(AlertDialog))),
-          expectedDirection,
+          find.descendant(
+            of: find.byType(AppBar),
+            matching: find.byIcon(Icons.info_outline_rounded),
+          ),
+          findsNothing,
         );
-        final Finder close = find.text(s.t('close')).hitTestable();
-        expect(close, findsOneWidget);
-        await tester.tap(close);
-        await tester.pumpAndSettle();
+
+        for (final _HelpCategory category in _helpCategories) {
+          final Finder infoButton = find.byKey(
+            ValueKey<String>(category.buttonKey),
+          );
+          await tester.scrollUntilVisible(infoButton, 250);
+          await tester.pumpAndSettle();
+          final Size touchSize = tester.getSize(infoButton);
+          expect(touchSize.width, greaterThanOrEqualTo(48));
+          expect(touchSize.height, greaterThanOrEqualTo(48));
+          await tester.tap(infoButton);
+          await tester.pumpAndSettle();
+
+          final Finder dialog = find.byType(AlertDialog);
+          expect(dialog, findsOneWidget);
+          expect(
+            find.descendant(
+              of: dialog,
+              matching: find.text(s.t(category.titleKey)),
+            ),
+            findsOneWidget,
+          );
+          expect(
+            find.descendant(
+              of: dialog,
+              matching: find.byType(SingleChildScrollView),
+            ),
+            findsOneWidget,
+          );
+          for (final String key in category.helpKeys) {
+            expect(
+              find.descendant(of: dialog, matching: find.text(s.t(key))),
+              findsOneWidget,
+              reason: '${category.buttonKey}/$key',
+            );
+          }
+          for (final String key in _allCategoryHelpKeys) {
+            if (category.helpKeys.contains(key)) continue;
+            expect(
+              find.descendant(of: dialog, matching: find.text(s.t(key))),
+              findsNothing,
+              reason: '${category.buttonKey} must not include $key',
+            );
+          }
+          expect(Directionality.of(tester.element(dialog)), expectedDirection);
+          final Finder close = find
+              .descendant(of: dialog, matching: find.text(s.t('close')))
+              .hitTestable();
+          expect(close, findsOneWidget);
+          await tester.tap(close);
+          await tester.pumpAndSettle();
+        }
         expect(tester.takeException(), isNull);
       },
     );
   }
 
-  testWidgets('settings help includes full-screen permission when it appears', (
-    WidgetTester tester,
-  ) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.android;
-    addTearDown(() => debugDefaultTargetPlatformOverride = null);
-    await tester.pumpWidget(const _AndroidSettingsHelpApp());
-    await tester.pumpAndSettle();
-    await tester.tap(
-      find.byKey(const ValueKey<String>('settings-info-button')),
-    );
-    await tester.pumpAndSettle();
-    final AppStrings s = AppStrings(const Locale('en'));
-    expect(find.text(s.t('fullScreenAlarmPermissionHelp')), findsWidgets);
-    expect(tester.takeException(), isNull);
-    debugDefaultTargetPlatformOverride = null;
-  });
+  testWidgets(
+    'permission category help includes full-screen permission when it appears',
+    (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      await tester.pumpWidget(const _AndroidSettingsHelpApp());
+      await tester.pumpAndSettle();
+      final Finder permissionInfo = find.byKey(
+        const ValueKey<String>('settings-info-permissions'),
+      );
+      await tester.ensureVisible(permissionInfo);
+      await tester.tap(permissionInfo);
+      await tester.pumpAndSettle();
+      final AppStrings s = AppStrings(const Locale('en'));
+      final Finder dialog = find.byType(AlertDialog);
+      expect(
+        find.descendant(
+          of: dialog,
+          matching: find.text(s.t('fullScreenAlarmPermissionHelp')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: dialog,
+          matching: find.text(s.t('gracePeriodHelp')),
+        ),
+        findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+      debugDefaultTargetPlatformOverride = null;
+    },
+  );
 }
 
 class _AndroidSettingsHelpApp extends StatelessWidget {

@@ -84,6 +84,10 @@ void main() {
           'maxSnoozesHelp',
           'softReminderHelp',
           'confirmationTextHelp',
+          'systemThemeHelp',
+          'lightThemeHelp',
+          'darkThemeHelp',
+          'languageHelp',
         ]) {
           expect(translations[key]?.trim(), isNotEmpty, reason: key);
         }

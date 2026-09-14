@@ -29,23 +29,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final prefs = ref.watch(settingsControllerProvider);
     final PrayerSettings settings = prefs.prayerSettings;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(s.t('settings')),
-        actions: <Widget>[
-          IconButton(
-            key: const ValueKey<String>('settings-info-button'),
-            tooltip: s.t('settingsInfo'),
-            onPressed: _showSettingsInfo,
-            icon: const Icon(Icons.info_outline_rounded),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(s.t('settings'))),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: <Widget>[
           _SectionTitle(
             title: s.t('prayerTimes'),
             icon: Icons.schedule_rounded,
+            infoKey: 'settings-info-prayer-times',
+            infoTooltip: s.t('settingsInfo'),
+            onInfo: () => _showCategoryInfo(
+              title: s.t('prayerTimes'),
+              items: _prayerTimesHelpItems(s),
+            ),
           ),
           Card(
             child: Column(
@@ -116,6 +112,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _SectionTitle(
             title: s.t('permissions'),
             icon: Icons.notifications_active_outlined,
+            infoKey: 'settings-info-permissions',
+            infoTooltip: s.t('settingsInfo'),
+            onInfo: () => _showCategoryInfo(
+              title: s.t('permissions'),
+              items: _permissionsHelpItems(s),
+            ),
           ),
           Card(
             child: Column(
@@ -144,7 +146,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     onTap: _working ? null : _requestFullScreenAlarms,
                   ),
                 ],
-                const Divider(height: 1),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+          _SectionTitle(
+            title: s.t('prayerReminders'),
+            icon: Icons.notifications_active_outlined,
+            infoKey: 'settings-info-reminders',
+            infoTooltip: s.t('settingsInfo'),
+            onInfo: () => _showCategoryInfo(
+              title: s.t('prayerReminders'),
+              items: _reminderHelpItems(s),
+            ),
+          ),
+          Card(
+            child: Column(
+              children: <Widget>[
                 _SliderTile(
                   title: s.t('gracePeriod'),
                   valueLabel: s.minutes(settings.gracePeriodMinutes),
@@ -193,6 +211,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _SectionTitle(
             title: s.t('confirmationText'),
             icon: Icons.check_circle_outline_rounded,
+            infoKey: 'settings-info-confirmation',
+            infoTooltip: s.t('settingsInfo'),
+            onInfo: () => _showCategoryInfo(
+              title: s.t('confirmationText'),
+              items: <Widget>[
+                _SettingsHelpParagraph(text: s.t('confirmationTextHelp')),
+              ],
+            ),
           ),
           Card(
             child: ListTile(
@@ -203,7 +229,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 18),
-          _SectionTitle(title: s.t('theme'), icon: Icons.palette_outlined),
+          _SectionTitle(
+            title: s.t('theme'),
+            icon: Icons.palette_outlined,
+            infoKey: 'settings-info-theme',
+            infoTooltip: s.t('settingsInfo'),
+            onInfo: () => _showCategoryInfo(
+              title: s.t('theme'),
+              items: _themeHelpItems(s),
+            ),
+          ),
           Card(
             child: Column(
               children: <Widget>[
@@ -232,7 +267,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 18),
-          _SectionTitle(title: s.t('language'), icon: Icons.language_rounded),
+          _SectionTitle(
+            title: s.t('language'),
+            icon: Icons.language_rounded,
+            infoKey: 'settings-info-language',
+            infoTooltip: s.t('settingsInfo'),
+            onInfo: () => _showCategoryInfo(
+              title: s.t('language'),
+              items: <_SettingsHelpItem>[
+                _SettingsHelpItem(
+                  title: s.t('languageSelect'),
+                  description: s.t('languageHelp'),
+                ),
+              ],
+            ),
+          ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.language_rounded),
@@ -253,114 +302,116 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Future<void> _showSettingsInfo() => showDialog<void>(
+  List<_SettingsHelpItem> _prayerTimesHelpItems(AppStrings s) {
+    final String language = s.locale.languageCode;
+    return <_SettingsHelpItem>[
+      _SettingsHelpItem(
+        title: s.t('location'),
+        description: s.t('locationHelp'),
+      ),
+      _SettingsHelpItem(
+        title: s.t('calculationMethod'),
+        description: s.t('calculationMethodHelp'),
+      ),
+      _SettingsHelpItem(
+        title: s.t('madhhab'),
+        description: s.t('asrCalculationHelp'),
+      ),
+      _SettingsHelpItem(
+        title: s.t('standard'),
+        description: s.t('standardAsrHelp'),
+      ),
+      _SettingsHelpItem(
+        title: s.t('hanafi'),
+        description: s.t('hanafiAsrHelp'),
+      ),
+      _SettingsHelpItem(
+        title: s.t('highLatitude'),
+        description: s.t('highLatitudeHelp'),
+      ),
+      for (final HighLatitudeRule rule in HighLatitudeRule.values)
+        _SettingsHelpItem(
+          title: _localizedHighLatitudeName(rule, language),
+          description: s.t(
+            'highLatitude${rule.name[0].toUpperCase()}${rule.name.substring(1)}Help',
+          ),
+        ),
+      _SettingsHelpItem(
+        title: s.t('manualAdjustments'),
+        description: s.t('minuteAdjustmentsHelp'),
+      ),
+    ];
+  }
+
+  List<_SettingsHelpItem> _permissionsHelpItems(AppStrings s) =>
+      <_SettingsHelpItem>[
+        _SettingsHelpItem(
+          title: s.t('notificationPermission'),
+          description: s.t('notificationPermissionHelp'),
+        ),
+        _SettingsHelpItem(
+          title: s.t('exactAlarmPermission'),
+          description: s.t('exactAlarmPermissionHelp'),
+        ),
+        if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
+          _SettingsHelpItem(
+            title: s.t('fullScreenAlarmPermission'),
+            description: s.t('fullScreenAlarmPermissionHelp'),
+          ),
+      ];
+
+  List<_SettingsHelpItem> _reminderHelpItems(AppStrings s) =>
+      <_SettingsHelpItem>[
+        _SettingsHelpItem(
+          title: s.t('gracePeriod'),
+          description: s.t('gracePeriodHelp'),
+        ),
+        _SettingsHelpItem(
+          title: s.t('snoozeDuration'),
+          description: s.t('snoozeDurationHelp'),
+        ),
+        _SettingsHelpItem(
+          title: s.t('maxSnoozes'),
+          description: s.t('maxSnoozesHelp'),
+        ),
+        _SettingsHelpItem(
+          title: s.t('softReminder'),
+          description: s.t('softReminderHelp'),
+        ),
+      ];
+
+  List<_SettingsHelpItem> _themeHelpItems(AppStrings s) => <_SettingsHelpItem>[
+    _SettingsHelpItem(
+      title: s.t('system'),
+      description: s.t('systemThemeHelp'),
+    ),
+    _SettingsHelpItem(title: s.t('light'), description: s.t('lightThemeHelp')),
+    _SettingsHelpItem(title: s.t('dark'), description: s.t('darkThemeHelp')),
+  ];
+
+  Future<void> _showCategoryInfo({
+    required String title,
+    required List<Widget> items,
+  }) => showDialog<void>(
     context: context,
     builder: (BuildContext dialogContext) {
-      final AppStrings s = AppStrings.of(dialogContext);
-      final String language = s.locale.languageCode;
-      final bool showsFullScreenPermission =
-          !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+      final AppStrings dialogStrings = AppStrings.of(dialogContext);
       return AlertDialog(
-        title: Text(s.t('settingsInfoTitle')),
+        title: Text(title),
         content: SizedBox(
-          width: 520,
+          width: 480,
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _SettingsHelpGroup(
-                  title: s.t('prayerTimes'),
-                  items: <_SettingsHelpItem>[
-                    _SettingsHelpItem(
-                      title: s.t('location'),
-                      description: s.t('locationHelp'),
-                    ),
-                    _SettingsHelpItem(
-                      title: s.t('calculationMethod'),
-                      description: s.t('calculationMethodHelp'),
-                    ),
-                    _SettingsHelpItem(
-                      title: s.t('madhhab'),
-                      description: s.t('asrCalculationHelp'),
-                    ),
-                    _SettingsHelpItem(
-                      title: s.t('standard'),
-                      description: s.t('standardAsrHelp'),
-                    ),
-                    _SettingsHelpItem(
-                      title: s.t('hanafi'),
-                      description: s.t('hanafiAsrHelp'),
-                    ),
-                    _SettingsHelpItem(
-                      title: s.t('highLatitude'),
-                      description: s.t('highLatitudeHelp'),
-                    ),
-                    for (final HighLatitudeRule rule in HighLatitudeRule.values)
-                      _SettingsHelpItem(
-                        title: _localizedHighLatitudeName(rule, language),
-                        description: s.t(
-                          'highLatitude${rule.name[0].toUpperCase()}${rule.name.substring(1)}Help',
-                        ),
-                      ),
-                    _SettingsHelpItem(
-                      title: s.t('manualAdjustments'),
-                      description: s.t('minuteAdjustmentsHelp'),
-                    ),
-                  ],
-                ),
-                _SettingsHelpGroup(
-                  title: s.t('prayerReminders'),
-                  items: <_SettingsHelpItem>[
-                    _SettingsHelpItem(
-                      title: s.t('gracePeriod'),
-                      description: s.t('gracePeriodHelp'),
-                    ),
-                    _SettingsHelpItem(
-                      title: s.t('snoozeDuration'),
-                      description: s.t('snoozeDurationHelp'),
-                    ),
-                    _SettingsHelpItem(
-                      title: s.t('maxSnoozes'),
-                      description: s.t('maxSnoozesHelp'),
-                    ),
-                    _SettingsHelpItem(
-                      title: s.t('softReminder'),
-                      description: s.t('softReminderHelp'),
-                    ),
-                    _SettingsHelpItem(
-                      title: s.t('confirmationText'),
-                      description: s.t('confirmationTextHelp'),
-                    ),
-                  ],
-                ),
-                _SettingsHelpGroup(
-                  title: s.t('permissions'),
-                  bottomPadding: 0,
-                  items: <_SettingsHelpItem>[
-                    _SettingsHelpItem(
-                      title: s.t('notificationPermission'),
-                      description: s.t('notificationPermissionHelp'),
-                    ),
-                    _SettingsHelpItem(
-                      title: s.t('exactAlarmPermission'),
-                      description: s.t('exactAlarmPermissionHelp'),
-                    ),
-                    if (showsFullScreenPermission)
-                      _SettingsHelpItem(
-                        title: s.t('fullScreenAlarmPermission'),
-                        description: s.t('fullScreenAlarmPermissionHelp'),
-                      ),
-                  ],
-                ),
-              ],
+              children: items,
             ),
           ),
         ),
         actions: <Widget>[
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(s.t('close')),
+            child: Text(dialogStrings.t('close')),
           ),
         ],
       );
@@ -929,9 +980,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title, required this.icon});
+  const _SectionTitle({
+    required this.title,
+    required this.icon,
+    required this.infoKey,
+    required this.infoTooltip,
+    required this.onInfo,
+  });
+
   final String title;
   final IconData icon;
+  final String infoKey;
+  final String infoTooltip;
+  final VoidCallback onInfo;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -940,44 +1001,20 @@ class _SectionTitle extends StatelessWidget {
       children: <Widget>[
         Icon(icon, size: 20),
         const SizedBox(width: 8),
-        Expanded(
+        Flexible(
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleMedium
                 ?.copyWith(fontWeight: FontWeight.w900),
           ),
         ),
-      ],
-    ),
-  );
-}
-
-class _SettingsHelpGroup extends StatelessWidget {
-  const _SettingsHelpGroup({
-    required this.title,
-    required this.items,
-    this.bottomPadding = 24,
-  });
-
-  final String title;
-  final List<_SettingsHelpItem> items;
-  final double bottomPadding;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: EdgeInsets.only(bottom: bottomPadding),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Theme.of(context).colorScheme.primary,
-            fontWeight: FontWeight.w900,
-          ),
+        const SizedBox(width: 2),
+        IconButton(
+          key: ValueKey<String>(infoKey),
+          tooltip: infoTooltip,
+          onPressed: onInfo,
+          icon: const Icon(Icons.info_outline_rounded),
         ),
-        const SizedBox(height: 14),
-        for (final _SettingsHelpItem item in items) item,
       ],
     ),
   );
@@ -1008,6 +1045,21 @@ class _SettingsHelpItem extends StatelessWidget {
           ),
         ),
       ],
+    ),
+  );
+}
+
+class _SettingsHelpParagraph extends StatelessWidget {
+  const _SettingsHelpParagraph({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 16),
+    child: Text(
+      text,
+      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
     ),
   );
 }
