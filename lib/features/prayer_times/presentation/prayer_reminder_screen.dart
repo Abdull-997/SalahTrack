@@ -188,10 +188,13 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
   Widget build(BuildContext context) {
     ref.watch(settingsControllerProvider);
     ref.listen(settingsControllerProvider, (_, _) => _updateAlarmAndDeadline());
+    final bool completed =
+        _prayer != null &&
+        (_confirmed || _prayer!.status == PrayerStatus.prayed);
     return PopScope<void>(
       canPop: !_mustChoose && !_working,
       child: Scaffold(
-        appBar: AppBar(automaticallyImplyLeading: false),
+        appBar: completed ? null : AppBar(automaticallyImplyLeading: false),
         body: !_loaded
             ? const Center(child: CircularProgressIndicator())
             : _loadError != null
@@ -215,6 +218,13 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
     final AppStrings s = AppStrings.of(context);
     final String language = Localizations.localeOf(context).languageCode;
     final bool completed = _confirmed || prayer.status == PrayerStatus.prayed;
+    final String prayerName = prayer.type.localizedName(language);
+    if (completed) {
+      return PrayerConfirmationSuccess(
+        prayerName: prayerName,
+        onHome: _working ? null : _close,
+      );
+    }
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(28),
@@ -224,70 +234,57 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Icon(
-                completed
-                    ? Icons.check_circle_rounded
-                    : Icons.notifications_active_rounded,
+                Icons.notifications_active_rounded,
                 size: 76,
                 color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(height: 20),
               Text(
-                prayer.type.localizedName(language),
+                prayerName,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium
                     ?.copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 10),
-              if (completed) ...<Widget>[
-                Text(
-                  s.t('alhamdulillah'),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall,
+              Text(
+                s.t(
+                  _alreadySnoozed
+                      ? 'snoozed'
+                      : prayer.status.isFinal
+                      ? prayer.status.name
+                      : 'reminderBody',
                 ),
-                const SizedBox(height: 10),
-                Text(s.t('accepted'), textAlign: TextAlign.center),
-              ] else
-                Text(
-                  s.t(
-                    _alreadySnoozed
-                        ? 'snoozed'
-                        : prayer.status.isFinal
-                        ? prayer.status.name
-                        : 'reminderBody',
-                  ),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
               const SizedBox(height: 30),
-              if (!completed) ...<Widget>[
-                FilledButton.icon(
-                  onPressed: _working ? null : _confirm,
-                  icon: const Icon(Icons.check_rounded),
-                  label: Text(s.t('markAsPrayed')),
-                ),
-                if (!prayer.status.isFinal && !_alreadySnoozed) ...<Widget>[
-                  const SizedBox(height: 10),
-                  FilledButton.tonalIcon(
-                    onPressed: _working || !_canSnooze ? null : _snooze,
-                    icon: const Icon(Icons.snooze_rounded),
-                    label: Text(
-                      s.t(
-                        'snoozeIn',
-                        params: <String, String>{
-                          'minutes': s.number(
-                            ref
-                                .read(settingsControllerProvider)
-                                .prayerSettings
-                                .snoozeMinutes,
-                          ),
-                        },
-                      ),
+              FilledButton.icon(
+                onPressed: _working ? null : _confirm,
+                icon: const Icon(Icons.check_rounded),
+                label: Text(s.t('markAsPrayed')),
+              ),
+              if (!prayer.status.isFinal && !_alreadySnoozed) ...<Widget>[
+                const SizedBox(height: 10),
+                FilledButton.tonalIcon(
+                  onPressed: _working || !_canSnooze ? null : _snooze,
+                  icon: const Icon(Icons.snooze_rounded),
+                  label: Text(
+                    s.t(
+                      'snoozeIn',
+                      params: <String, String>{
+                        'minutes': s.number(
+                          ref
+                              .read(settingsControllerProvider)
+                              .prayerSettings
+                              .snoozeMinutes,
+                        ),
+                      },
                     ),
                   ),
-                  if (!_canSnooze) ...<Widget>[
-                    const SizedBox(height: 12),
-                    Text(s.t('snoozeUnavailable'), textAlign: TextAlign.center),
-                  ],
+                ),
+                if (!_canSnooze) ...<Widget>[
+                  const SizedBox(height: 12),
+                  Text(s.t('snoozeUnavailable'), textAlign: TextAlign.center),
                 ],
               ],
               if (_actionError != null) ...<Widget>[
@@ -381,6 +378,122 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
         _updateAlarmAndDeadline();
       }
     }
+  }
+}
+
+/// The reusable completed state for any prayer display name.
+///
+/// Friday Prayer remains reminder-only today, but this component accepts its
+/// localized name if a separate confirmation feature is added in the future.
+class PrayerConfirmationSuccess extends StatelessWidget {
+  const PrayerConfirmationSuccess({
+    required this.prayerName,
+    required this.onHome,
+    super.key,
+  });
+
+  final String prayerName;
+  final VoidCallback? onHome;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme scheme = theme.colorScheme;
+    final AppStrings s = AppStrings.of(context);
+    return SafeArea(
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          const EdgeInsetsDirectional padding = EdgeInsetsDirectional.fromSTEB(
+            24,
+            24,
+            24,
+            32,
+          );
+          final double minimumHeight = constraints.maxHeight > 56
+              ? constraints.maxHeight - 56
+              : 0;
+          return SingleChildScrollView(
+            padding: padding,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: minimumHeight),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 440),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Semantics(
+                        image: true,
+                        label: s.t('prayed'),
+                        child: Container(
+                          width: 108,
+                          height: 108,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: scheme.primaryContainer,
+                            border: Border.all(
+                              color: scheme.primary.withValues(alpha: 0.45),
+                              width: 2,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.check_rounded,
+                            size: 64,
+                            color: scheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      Semantics(
+                        header: true,
+                        child: Text(
+                          prayerName,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            color: scheme.onSurface,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        s.t('alhamdulillah'),
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          color: scheme.primary,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        s.t(
+                          'prayerPrayedAndRecorded',
+                          params: <String, String>{'prayer': prayerName},
+                        ),
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 36),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: onHome,
+                          icon: const Icon(Icons.home_rounded),
+                          label: Text(s.t('home')),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 }
 

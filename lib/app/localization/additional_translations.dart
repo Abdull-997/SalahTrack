@@ -13,6 +13,7 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'markAsPrayed': 'Kılındı olarak işaretle',
     'snoozeAction': 'Ertele',
     'alhamdulillah': 'Elhamdülillah',
+    'prayerPrayedAndRecorded': '{prayer} namazı kılındı ve kaydedildi.',
     'fullScreenAlarmPermission': 'Tam ekran hatırlatmalara izin ver',
     'fullScreenAlarmsEnabled': 'Tam ekran hatırlatmalar açık',
     'fullScreenAlarmsDisabled': 'Tam ekran hatırlatmalar kapalı',
@@ -194,6 +195,8 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'markAsPrayed': 'Marquer comme accomplie',
     'snoozeAction': 'Reporter',
     'alhamdulillah': 'Alhamdoulillah',
+    'prayerPrayedAndRecorded':
+        'La prière de {prayer} a été accomplie et enregistrée.',
     'fullScreenAlarmPermission': 'Autoriser les rappels en plein écran',
     'fullScreenAlarmsEnabled': 'Les rappels en plein écran sont activés',
     'fullScreenAlarmsDisabled': 'Les rappels en plein écran sont désactivés',
@@ -369,6 +372,8 @@ const Map<String, Map<String, String>> additionalTranslations = {
     'markAsPrayed': 'Marcar como realizada',
     'snoozeAction': 'Posponer',
     'alhamdulillah': 'Alhamdulillah',
+    'prayerPrayedAndRecorded':
+        'La oración de {prayer} se ha realizado y ha quedado registrada.',
     'fullScreenAlarmPermission': 'Permitir recordatorios a pantalla completa',
     'fullScreenAlarmsEnabled':
         'Los recordatorios a pantalla completa están activados',

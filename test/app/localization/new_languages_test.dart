@@ -87,6 +87,7 @@ void main() {
           'fridayPrayerInOneHour',
           'oneHourRemainingTitle',
           'oneHourRemainingBody',
+          'prayerPrayedAndRecorded',
           'gracePeriodHelp',
           'snoozeDurationHelp',
           'maxSnoozesHelp',
@@ -115,6 +116,21 @@ void main() {
             params: <String, String>{'nextPrayer': asr},
           ),
           allOf(contains(asr), isNot(contains(RegExp(r'\{\w+\}')))),
+        );
+        expect(
+          strings.t(
+            'prayerPrayedAndRecorded',
+            params: <String, String>{'prayer': dhuhr},
+          ),
+          allOf(contains(dhuhr), isNot(contains(RegExp(r'\{\w+\}')))),
+        );
+        final fridayPrayer = strings.t('fridayPrayer');
+        expect(
+          strings.t(
+            'prayerPrayedAndRecorded',
+            params: <String, String>{'prayer': fridayPrayer},
+          ),
+          allOf(contains(fridayPrayer), isNot(contains(RegExp(r'\{\w+\}')))),
         );
         expect(
           AppStrings.translations['en']!.keys.toSet().difference(

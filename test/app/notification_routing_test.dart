@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:salah_focus/app/app.dart';
 import 'package:salah_focus/app/app_providers.dart';
+import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/app/router/app_router.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/core/notifications/prayer_notification_payload.dart';
@@ -108,15 +109,17 @@ String _payload({
 Future<ProviderContainer> _mount(
   WidgetTester tester,
   _Notifications notifications,
-  _Coordinator coordinator,
-) async {
+  _Coordinator coordinator, {
+  String localeCode = 'en',
+  String themeMode = 'light',
+}) async {
   final container = ProviderContainer(
     overrides: [
       initialPreferencesProvider.overrideWithValue(
-        const AppPreferences(
-          prayerSettings: PrayerSettings(),
-          localeCode: 'en',
-          themeMode: 'light',
+        AppPreferences(
+          prayerSettings: const PrayerSettings(),
+          localeCode: localeCode,
+          themeMode: themeMode,
           onboardingComplete: true,
         ),
       ),
@@ -198,7 +201,12 @@ void main() {
     await tester.tap(find.text('Mark as Prayed'));
     await tester.pumpAndSettle();
     expect(coordinator.confirms, 1);
+    expect(find.byType(PrayerConfirmationSuccess), findsOneWidget);
     expect(find.text('Alhamdulillah'), findsOneWidget);
+    expect(
+      find.text('The Isha prayer has been prayed and recorded.'),
+      findsOneWidget,
+    );
     expect(find.text('Home'), findsOneWidget);
     expect(
       tester.widget<PopScope<void>>(find.byType(PopScope<void>)).canPop,
@@ -207,6 +215,93 @@ void main() {
     expect(alarmStates.last, isFalse);
     await tester.pump(const Duration(seconds: 10));
     expect(find.text('Alhamdulillah'), findsOneWidget);
+    await tester.tap(find.text('Home'));
+    await tester.pumpAndSettle();
+    expect(
+      container.read(goRouterProvider).routeInformationProvider.value.uri.path,
+      '/home',
+    );
+  });
+
+  for (final prayer in PrayerType.values.where(
+    (type) => type != PrayerType.isha,
+  )) {
+    testRouting('${prayer.name} success copy uses its dynamic prayer name', (
+      tester,
+    ) async {
+      final notifications = _Notifications()
+        ..initial = Future.value(_payload(prayer: prayer));
+      final entry = _entry(type: prayer);
+      final coordinator = _Coordinator()..entries[entry.id] = entry;
+      await _mount(tester, notifications, coordinator);
+
+      await tester.tap(find.text('Mark as Prayed'));
+      await tester.pumpAndSettle();
+
+      final name = prayer.localizedName('en');
+      expect(find.text(name), findsOneWidget);
+      expect(
+        find.text('The $name prayer has been prayed and recorded.'),
+        findsOneWidget,
+      );
+    });
+  }
+
+  testRouting('success state fits a small dark RTL screen with large text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 480);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.4;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      tester.platformDispatcher.clearTextScaleFactorTestValue();
+    });
+    final notifications = _Notifications()
+      ..initial = Future.value(_payload(prayer: PrayerType.asr));
+    final entry = _entry(type: PrayerType.asr);
+    final coordinator = _Coordinator()..entries[entry.id] = entry;
+    final container = await _mount(
+      tester,
+      notifications,
+      coordinator,
+      localeCode: 'ar',
+      themeMode: 'dark',
+    );
+
+    final confirm = find.byIcon(Icons.check_rounded);
+    await tester.ensureVisible(confirm);
+    await tester.tap(confirm);
+    await tester.pumpAndSettle();
+
+    final success = find.byType(PrayerConfirmationSuccess);
+    final context = tester.element(success);
+    final strings = AppStrings(const Locale('ar'));
+    final prayerName = PrayerType.asr.localizedName('ar');
+    expect(success, findsOneWidget);
+    expect(Theme.of(context).brightness, Brightness.dark);
+    expect(Directionality.of(context), TextDirection.rtl);
+    expect(find.text(strings.t('alhamdulillah')), findsOneWidget);
+    expect(
+      find.text(
+        strings.t(
+          'prayerPrayedAndRecorded',
+          params: <String, String>{'prayer': prayerName},
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+
+    final home = find.byIcon(Icons.home_rounded);
+    await tester.ensureVisible(home);
+    await tester.tap(home);
+    await tester.pumpAndSettle();
+    expect(
+      container.read(goRouterProvider).routeInformationProvider.value.uri.path,
+      '/home',
+    );
   });
 
   testRouting(
