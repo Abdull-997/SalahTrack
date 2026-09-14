@@ -683,6 +683,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         horizontal: 12,
                         vertical: 24,
                       ),
+                      contentPadding: const EdgeInsets.fromLTRB(12, 20, 12, 24),
                       title: Text(strings.t('manualAdjustments')),
                       content: SizedBox(
                         width: 420,
@@ -1135,49 +1136,67 @@ class _AdjustmentPrayerRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     key: ValueKey<String>('adjustment-row-${type.name}'),
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    padding: const EdgeInsets.only(bottom: 4),
+    child: Row(
       children: <Widget>[
-        Text(
-          type.localizedName(Localizations.localeOf(context).languageCode),
-          style: Theme.of(context).textTheme.titleSmall
-              ?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: Text(
-                time,
-                key: ValueKey<String>('adjustment-time-${type.name}'),
-                style: Theme.of(context).textTheme.titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w900),
-              ),
-            ),
-            IconButton(
-              key: ValueKey<String>('adjustment-minus-${type.name}'),
-              onPressed: onDecrease,
-              icon: const Icon(Icons.remove_rounded),
-            ),
-            SizedBox(
-              width: 72,
-              child: Text(
-                adjustment,
-                key: ValueKey<String>('adjustment-value-${type.name}'),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w800,
+        Expanded(
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  type.localizedName(
+                    Localizations.localeOf(context).languageCode,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 48,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    time,
+                    key: ValueKey<String>('adjustment-time-${type.name}'),
+                    maxLines: 1,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        IconButton(
+          key: ValueKey<String>('adjustment-minus-${type.name}'),
+          onPressed: onDecrease,
+          icon: const Icon(Icons.remove_rounded),
+        ),
+        SizedBox(
+          width: 56,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              adjustment,
+              key: ValueKey<String>('adjustment-value-${type.name}'),
+              maxLines: 1,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-            IconButton(
-              key: ValueKey<String>('adjustment-plus-${type.name}'),
-              onPressed: onIncrease,
-              icon: const Icon(Icons.add_rounded),
-            ),
-          ],
+          ),
+        ),
+        IconButton(
+          key: ValueKey<String>('adjustment-plus-${type.name}'),
+          onPressed: onIncrease,
+          icon: const Icon(Icons.add_rounded),
         ),
       ],
     ),
