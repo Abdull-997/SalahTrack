@@ -60,17 +60,7 @@ class TrackerScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(s.t('tracker')),
-        actions: <Widget>[
-          IconButton(
-            key: const ValueKey<String>('tracker-info-button'),
-            tooltip: s.t('trackerInfo'),
-            onPressed: () => _showTrackerInfo(context),
-            icon: const Icon(Icons.info_outline_rounded),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(s.t('tracker'))),
       body: tracker.when(
         skipLoadingOnReload: true,
         data: (TrackerData data) => _TrackerContent(
@@ -232,10 +222,24 @@ class _TrackerContent extends StatelessWidget {
           const SizedBox(height: 10),
           _StatsCard(prayed: prayed, ratio: ratio),
           const SizedBox(height: 24),
-          Text(
-            s.t('week'),
-            style: Theme.of(context).textTheme.titleLarge
-                ?.copyWith(fontWeight: FontWeight.w800),
+          Row(
+            key: const ValueKey<String>('tracker-week-heading'),
+            children: <Widget>[
+              Flexible(
+                child: Text(
+                  s.t('week'),
+                  style: Theme.of(context).textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.w800),
+                ),
+              ),
+              const SizedBox(width: 2),
+              IconButton(
+                key: const ValueKey<String>('tracker-info-button'),
+                tooltip: s.t('trackerInfo'),
+                onPressed: () => _showTrackerInfo(context),
+                icon: const Icon(Icons.info_outline_rounded),
+              ),
+            ],
           ),
           const SizedBox(height: 10),
           for (int i = 0; i < 3; i++)

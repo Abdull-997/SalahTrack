@@ -7,6 +7,39 @@ import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/theme/app_theme.dart';
 import 'package:salah_focus/features/settings/presentation/settings_screen.dart';
 
+const List<String> _settingsHelpKeys = <String>[
+  'locationHelp',
+  'calculationMethodHelp',
+  'asrCalculationHelp',
+  'standardAsrHelp',
+  'hanafiAsrHelp',
+  'highLatitudeHelp',
+  'highLatitudeMiddleOfNightHelp',
+  'highLatitudeOneSeventhHelp',
+  'highLatitudeAngleBasedHelp',
+  'minuteAdjustmentsHelp',
+  'gracePeriodHelp',
+  'snoozeDurationHelp',
+  'maxSnoozesHelp',
+  'softReminderHelp',
+  'confirmationTextHelp',
+  'notificationPermissionHelp',
+  'exactAlarmPermissionHelp',
+];
+
+const List<String> _formerlyInlineHelpKeys = <String>[
+  'locationHelp',
+  'calculationMethodHelp',
+  'asrCalculationHelp',
+  'highLatitudeHelp',
+  'minuteAdjustmentsHelp',
+  'gracePeriodHelp',
+  'snoozeDurationHelp',
+  'maxSnoozesHelp',
+  'softReminderHelp',
+  'confirmationTextHelp',
+];
+
 Widget _app(Locale locale, {ThemeData? theme}) => ProviderScope(
   child: MaterialApp(
     theme: theme ?? AppTheme.light(),
@@ -24,6 +57,32 @@ Widget _app(Locale locale, {ThemeData? theme}) => ProviderScope(
 );
 
 void main() {
+  testWidgets('settings list shows values without permanent explanations', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(_app(const Locale('en')));
+    await tester.pumpAndSettle();
+
+    final AppStrings s = AppStrings(const Locale('en'));
+    for (final String key in _formerlyInlineHelpKeys) {
+      expect(find.text(s.t(key)), findsNothing, reason: key);
+    }
+    expect(find.text(s.t('needLocation')), findsOneWidget);
+    expect(find.text('Muslim World League'), findsOneWidget);
+    expect(find.text(s.t('standard')), findsOneWidget);
+    expect(find.text('Angle Based'), findsOneWidget);
+    expect(find.text('Ich habe gebetet'), findsOneWidget);
+    expect(
+      find.widgetWithText(SwitchListTile, s.t('softReminder')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   for (final Locale locale in AppStrings.supportedLocales) {
     testWidgets(
       '${locale.languageCode} settings help is complete, scrollable, and fits a small screen',
@@ -58,25 +117,7 @@ void main() {
         final AppStrings s = AppStrings(locale);
         expect(find.text(s.t('settingsInfoTitle')), findsOneWidget);
         expect(find.byType(SingleChildScrollView), findsOneWidget);
-        for (final String key in <String>[
-          'locationHelp',
-          'calculationMethodHelp',
-          'asrCalculationHelp',
-          'standardAsrHelp',
-          'hanafiAsrHelp',
-          'highLatitudeHelp',
-          'highLatitudeMiddleOfNightHelp',
-          'highLatitudeOneSeventhHelp',
-          'highLatitudeAngleBasedHelp',
-          'minuteAdjustmentsHelp',
-          'gracePeriodHelp',
-          'snoozeDurationHelp',
-          'maxSnoozesHelp',
-          'softReminderHelp',
-          'confirmationTextHelp',
-          'notificationPermissionHelp',
-          'exactAlarmPermissionHelp',
-        ]) {
+        for (final String key in _settingsHelpKeys) {
           expect(find.text(s.t(key)), findsWidgets, reason: key);
         }
         final TextDirection expectedDirection =

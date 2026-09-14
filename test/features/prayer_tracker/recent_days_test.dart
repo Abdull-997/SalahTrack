@@ -138,7 +138,22 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.refresh_rounded), findsNothing);
-    await tester.tap(find.byKey(const ValueKey<String>('tracker-info-button')));
+    final Finder trackerInfo = find.byKey(
+      const ValueKey<String>('tracker-info-button'),
+    );
+    expect(
+      find.descendant(of: find.byType(AppBar), matching: trackerInfo),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey<String>('tracker-week-heading')),
+        matching: trackerInfo,
+      ),
+      findsOneWidget,
+    );
+    await tester.scrollUntilVisible(trackerInfo, 200);
+    await tester.tap(trackerInfo);
     await tester.pumpAndSettle();
 
     final AppStrings s = AppStrings(const Locale('de'));
@@ -265,6 +280,8 @@ void main() {
         final Finder trackerInfo = find.byKey(
           const ValueKey<String>('tracker-info-button'),
         );
+        await tester.scrollUntilVisible(trackerInfo, 200);
+        await tester.pumpAndSettle();
         final Size trackerTouchSize = tester.getSize(trackerInfo);
         expect(trackerTouchSize.width, greaterThanOrEqualTo(48));
         expect(trackerTouchSize.height, greaterThanOrEqualTo(48));

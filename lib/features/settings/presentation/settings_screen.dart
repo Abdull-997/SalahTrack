@@ -53,15 +53,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.location_on_outlined),
                   title: Text(s.t('location')),
-                  subtitle: _SettingExplanation(
-                    value: prefs.location == null
+                  subtitle: Text(
+                    prefs.location == null
                         ? s.t('needLocation')
                         : prefs.location!.label.isEmpty
                         ? s.t('currentLocation')
                         : prefs.location!.label,
-                    explanation: s.t('locationHelp'),
                   ),
-                  isThreeLine: true,
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: _working ? null : _changeLocation,
                 ),
@@ -69,14 +67,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.calculate_outlined),
                   title: Text(s.t('calculationMethod')),
-                  subtitle: _SettingExplanation(
-                    value: _localizedCalculationMethodName(
+                  subtitle: Text(
+                    _localizedCalculationMethodName(
                       settings.calculationMethodId,
                       s.locale.languageCode,
                     ),
-                    explanation: s.t('calculationMethodHelp'),
                   ),
-                  isThreeLine: true,
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _chooseCalculationMethod(settings),
                 ),
@@ -84,13 +80,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.balance_rounded),
                   title: Text(s.t('madhhab')),
-                  subtitle: _SettingExplanation(
-                    value: settings.madhhab == AsrMadhhab.hanafi
+                  subtitle: Text(
+                    settings.madhhab == AsrMadhhab.hanafi
                         ? s.t('hanafi')
                         : s.t('standard'),
-                    explanation: s.t('asrCalculationHelp'),
                   ),
-                  isThreeLine: true,
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _chooseMadhhab(settings),
                 ),
@@ -98,14 +92,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.public_rounded),
                   title: Text(s.t('highLatitude')),
-                  subtitle: _SettingExplanation(
-                    value: _localizedHighLatitudeName(
+                  subtitle: Text(
+                    _localizedHighLatitudeName(
                       settings.highLatitudeRule,
                       s.locale.languageCode,
                     ),
-                    explanation: s.t('highLatitudeHelp'),
                   ),
-                  isThreeLine: true,
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _chooseHighLatitude(settings),
                 ),
@@ -113,11 +105,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.tune_rounded),
                   title: Text(s.t('manualAdjustments')),
-                  subtitle: _SettingExplanation(
-                    value: _localizedAdjustmentsSummary(settings, s),
-                    explanation: s.t('minuteAdjustmentsHelp'),
-                  ),
-                  isThreeLine: true,
+                  subtitle: Text(_localizedAdjustmentsSummary(settings, s)),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _editAdjustments(settings),
                 ),
@@ -159,7 +147,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(height: 1),
                 _SliderTile(
                   title: s.t('gracePeriod'),
-                  description: s.t('gracePeriodHelp'),
                   valueLabel: s.minutes(settings.gracePeriodMinutes),
                   value: settings.gracePeriodMinutes.toDouble(),
                   min: 0,
@@ -172,7 +159,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(height: 1),
                 _SliderTile(
                   title: s.t('snoozeDuration'),
-                  description: s.t('snoozeDurationHelp'),
                   valueLabel: s.minutes(settings.snoozeMinutes),
                   value: settings.snoozeMinutes.toDouble(),
                   min: 5,
@@ -185,19 +171,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(height: 1),
                 ListTile(
                   title: Text(s.t('maxSnoozes')),
-                  subtitle: _SettingExplanation(
-                    value: settings.maxSnoozes == null
+                  subtitle: Text(
+                    settings.maxSnoozes == null
                         ? s.t('unlimited')
                         : s.number(settings.maxSnoozes!),
-                    explanation: s.t('maxSnoozesHelp'),
                   ),
-                  isThreeLine: true,
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _chooseMaxSnoozes(settings),
                 ),
                 SwitchListTile(
                   title: Text(s.t('softReminder')),
-                  subtitle: Text(s.t('softReminderHelp')),
                   value: settings.softReminderAfterSkip,
                   onChanged: (bool value) => _savePrayerSettings(
                     settings.copyWith(softReminderAfterSkip: value),
@@ -214,11 +197,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Card(
             child: ListTile(
               title: Text(s.t('confirmationText')),
-              subtitle: _SettingExplanation(
-                value: settings.confirmationText,
-                explanation: s.t('confirmationTextHelp'),
-              ),
-              isThreeLine: true,
+              subtitle: Text(settings.confirmationText),
               trailing: const Icon(Icons.edit_outlined),
               onTap: () => _editConfirmationText(settings),
             ),
@@ -1033,23 +1012,6 @@ class _SettingsHelpItem extends StatelessWidget {
   );
 }
 
-class _SettingExplanation extends StatelessWidget {
-  const _SettingExplanation({required this.value, required this.explanation});
-
-  final String value;
-  final String explanation;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: <Widget>[
-      Text(value),
-      const SizedBox(height: 4),
-      Text(explanation),
-    ],
-  );
-}
-
 class _DialogExplanation extends StatelessWidget {
   const _DialogExplanation({required this.text});
 
@@ -1103,7 +1065,6 @@ class _DialogChoice extends StatelessWidget {
 class _SliderTile extends StatelessWidget {
   const _SliderTile({
     required this.title,
-    required this.description,
     required this.valueLabel,
     required this.value,
     required this.min,
@@ -1112,7 +1073,6 @@ class _SliderTile extends StatelessWidget {
     required this.onChanged,
   });
   final String title;
-  final String description;
   final String valueLabel;
   final double value;
   final double min;
@@ -1134,12 +1094,6 @@ class _SliderTile extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w800),
             ),
           ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          description,
-          style: Theme.of(context).textTheme.bodySmall
-              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         Slider(
           value: value.clamp(min, max).toDouble(),
