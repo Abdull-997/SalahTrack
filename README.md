@@ -34,7 +34,7 @@ The app is intentionally **not** a religious authority and does not shame or jud
 - German, English and Arabic/RTL UI architecture
 - notification deep links into Prayer Focus
 - Android safe Basic Prayer Focus fallback
-- native iOS Screen Time bridge using FamilyControls / ManagedSettings / DeviceActivity
+- iOS Time Sensitive local notifications
 - unit and integration tests
 
 Features explicitly described as later phases in the product specification (Quran, Adhkar library, mosque search, accounts/cloud sync, Watch/Wear OS, family mode and native Home Screen widgets) are not bundled into this first release branch.
@@ -169,58 +169,22 @@ The Kotlin platform bridge explicitly reports system-level app shielding as unav
 
 ## iOS setup
 
-The main iOS platform-channel implementation is in:
+The current iOS app delegate is in:
 
 ```text
 native/ios/AppDelegate.swift
 ```
 
-It uses:
+The release target currently uses local notifications, including Apple's Time
+Sensitive notification entitlement. It does **not** include FamilyControls,
+ManagedSettings, DeviceActivity, an App Group, a Device Activity extension, or
+the Family Controls entitlement. Accordingly, the current release does not
+inspect Screen Time selections or usage data and provides only the in-app Basic
+Prayer Focus behavior.
 
-- `FamilyControls`
-- `ManagedSettings`
-- `DeviceActivity`
-- `FamilyActivityPicker`
-
-The selection is stored in the App Group:
-
-```text
-group.com.salahfocus.app
-```
-
-### Important: Apple Family Controls entitlement
-
-Apple controls distribution of the Family Controls entitlement. No repository can include an approval for your Apple Developer account.
-
-To enable real iOS app shielding:
-
-1. Create/register the Runner App ID in your Apple Developer account.
-2. Request/enable **Family Controls** for the app.
-3. Add the **Family Controls** capability in Xcode.
-4. Add the **App Groups** capability and group `group.com.salahfocus.app`.
-5. Use the template `native/ios/entitlements/Runner.entitlements` as the Runner entitlement configuration.
-6. Add a **Device Activity Monitor Extension** target in Xcode.
-7. Add `native/ios/PrayerDeviceActivityMonitor/PrayerDeviceActivityMonitor.swift` to that extension target.
-8. Use `native/ios/PrayerDeviceActivityMonitor/Info.plist` for the monitor extension configuration.
-9. Add Family Controls + the same App Group to the extension target.
-10. Apply `native/ios/entitlements/PrayerDeviceActivityMonitor.entitlements` to the extension.
-11. Request the distribution entitlement for every Screen Time target before App Store submission.
-
-Without Apple authorization, all prayer-time, tracker, Qibla, notification and Basic Prayer Focus features still work; native shielding simply fails open.
-
-### iOS fail-safe design
-
-- selected apps only are shielded
-- category-wide shielding is disabled; only explicit app selections are applied
-- the picker uses privacy-preserving app tokens, so SalahFocus does not try to inspect app identities; the UI tells the user to leave SalahFocus and essential apps unselected
-- direct `stopFocus()` always clears the named ManagedSettings store
-- disabling Prayer Focus immediately cancels every SalahFocus `DeviceActivity` schedule and clears active shields
-- a native shield has a hard safety cap of **90 minutes after the configured grace period ends**, or earlier when the prayer tracking window ends
-- background iOS shields are scheduled on a rolling **48-hour** window to avoid excessive DeviceActivity monitoring; prayer notifications remain planned farther ahead
-- scheduled DeviceActivity intervals have an end time
-- the monitor extension clears shields at interval end
-- Emergency Unlock clears the current session and creates a temporary bypass
-- no code attempts to lock the entire iPhone
+Family Controls must be treated as a future feature: it requires new source and
+extension targets, Apple entitlement approval, an updated privacy audit and
+policy, and physical-device release testing before it can be enabled.
 
 ## Prayer-time API
 
@@ -370,11 +334,11 @@ Before publishing:
 - test denied location and notification permissions
 - test Android exact-alarm denied/allowed states
 - test Android reboot rescheduling
-- test iOS Family Controls authorization revoked while Focus is enabled
+- verify iOS Basic Prayer Focus fails open and does not request Screen Time access
 - test Emergency Unlock repeatedly
 - test Arabic RTL and large text / VoiceOver / TalkBack
 - configure Android release signing
-- configure Apple signing and Family Controls distribution entitlement
+- configure Apple signing and verify only the intended Time Sensitive entitlement
 - prepare App Store privacy details and Google Play Data Safety declaration
 - replace default Flutter app icons with final licensed brand assets
 - only add licensed Adhan audio if audio is enabled in a later release

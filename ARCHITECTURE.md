@@ -8,7 +8,7 @@ The two most important platform abstractions are:
 
 ```text
 PrayerTimesProvider                 PrayerFocusService
-├── AlAdhanPrayerTimesProvider      ├── iOS native Screen Time bridge
+├── AlAdhanPrayerTimesProvider      ├── iOS safe in-app fallback
 └── future provider                 └── Android safe basic fallback
 ```
 

@@ -1,29 +1,23 @@
-# SalahFocus Privacy Summary
+# SalahFocus privacy documents
 
-SalahFocus is designed as a local-first prayer companion.
+The canonical, localized privacy policy and legal notice are defined in:
 
-## Stored on the device
+```text
+lib/app/legal/legal_documents.dart
+```
 
-The app stores prayer history, cached prayer times, focus state, settings, selected location, optional Ramadan fasting/Tarawih/Qiyam records, Ramadan goals and user preferences locally on the device.
+The app renders that structured source directly. The same source generates the
+public HTTPS version through `tool/export_legal_documents.dart`, preventing a
+separate website copy from drifting away from the in-app policy.
 
-## Network use
+For the technical data-flow, permission, SDK and store-declaration audit, see:
 
-Network access is used to retrieve prayer calendars from the configured prayer-time provider. The provider receives the selected latitude/longitude and calculation options needed to return prayer times. When the user manually searches for a city, the operating system's geocoding service may also use network access.
+```text
+docs/STORE_PRIVACY_AUDIT.md
+```
 
-The current MVP does not operate a SalahFocus account server and does not upload prayer history to a SalahFocus backend.
+For hosting and release configuration, see:
 
-## Analytics and advertising
-
-The MVP contains no advertising SDK and no prayer-behavior analytics SDK.
-
-## Location
-
-Location access is requested only after the user chooses automatic location. Permanent background location is not requested. The user can instead choose a city manually.
-
-## Religious data
-
-Prayer confirmations, prayer history and optional Ramadan records are treated as private local data. They are not sold and are not used for advertising.
-
-## Future cloud features
-
-Any future account, backup or synchronization feature must be opt-in and documented separately before release.
+```text
+docs/PRIVACY_HOSTING.md
+```

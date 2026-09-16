@@ -77,7 +77,7 @@ const Map<String, Map<String, String>> newLanguageTranslations = {
     'noPrayLater': 'Tidak, saya akan salat',
     'yesEnd': 'Ya, akhiri pengingat',
     'reminderBody': 'Anda ingin menyediakan waktu untuk salat. Letakkan ponsel selama beberapa menit dan salatlah.',
-    'accepted': 'Alhamdulillah 🤍',
+    'accepted': 'Alhamdulillah 💛',
     'week': 'Minggu ini',
     'month': 'Bulan',
     'confirmedPrayers': 'Salat yang dikonfirmasi',

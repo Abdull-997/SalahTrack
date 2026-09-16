@@ -62,9 +62,13 @@ flutter build appbundle --release
 flutter build ipa --release
 ```
 
-## iOS release prerequisite
+## iOS Prayer Focus scope
 
-Native iOS app shielding depends on Apple's Family Controls entitlement and a Device Activity Monitor Extension target. The source and entitlement templates are included under `native/ios/`, but Apple Developer approval, signing and attaching the extension target must be done in Xcode with the developer account that will publish the app.
+The current iOS target has no Family Controls entitlement, App Group, Device
+Activity extension, or FamilyControls/ManagedSettings/DeviceActivity source.
+It ships the safe in-app Prayer Focus fallback. Any future native shielding must
+be implemented and privacy-audited as a separate release and requires Apple's
+approval before distribution.
 
 ## Android Prayer Focus
 

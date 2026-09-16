@@ -12,9 +12,7 @@ Implemented MVP areas:
 - safe Android exact/inexact alarm fallback
 - Prayer Focus confirmation/snooze/skip/emergency unlock
 - Android safe in-app Focus fallback (no Accessibility/overlay hacks)
-- iOS FamilyControls/ManagedSettings/DeviceActivity bridge source
-- iOS Device Activity Monitor extension source + entitlement/plist templates
-- 90-minute native shield hard cap + rolling 48-hour iOS schedule
+- iOS safe in-app Prayer Focus fallback; no Screen Time access in this release
 - today/week/month tracker
 - automatic Ramadan-only dashboard and tracker visibility
 - Suhur/Fajr and Iftar/Maghrib countdowns and optional reminders
@@ -32,5 +30,5 @@ Required before store submission:
 2. Resolve any compiler/plugin issues found by flutter analyze/test on that workstation.
 3. Test real Android/iPhone devices.
 4. Configure release signing.
-5. For iOS app shielding, add/sign the Device Activity Monitor extension and obtain Apple Family Controls distribution entitlements.
+5. Treat iOS Family Controls as a separately designed, implemented, approved and privacy-audited future feature.
 6. Replace default Flutter launcher branding with final licensed app icons before release.

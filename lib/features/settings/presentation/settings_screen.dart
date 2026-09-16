@@ -16,6 +16,7 @@ import 'package:salah_focus/features/ramadan/domain/ramadan_settings.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
 import 'package:salah_focus/features/settings/presentation/language_selection_screen.dart';
 import 'package:salah_focus/features/settings/presentation/notification_settings_screen.dart';
+import 'package:salah_focus/features/settings/presentation/privacy_legal_screen.dart';
 import 'package:salah_focus/shared/errors/user_error_message.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -489,6 +490,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         builder: (_) => const LanguageSelectionScreen(),
                       ),
                     ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          _SectionTitle(
+            title: s.t('privacyLegal'),
+            icon: Icons.shield_outlined,
+            infoKey: 'settings-info-privacy-legal',
+            infoTooltip: s.t('settingsInfo'),
+            onInfo: () => _showCategoryInfo(
+              title: s.t('privacyLegal'),
+              items: <Widget>[
+                _SettingsHelpParagraph(text: s.t('privacyLegalHelp')),
+              ],
+            ),
+          ),
+          Card(
+            child: ListTile(
+              key: const ValueKey<String>('privacy-legal-settings-tile'),
+              leading: const Icon(Icons.policy_outlined),
+              title: Text(s.t('privacyLegal')),
+              subtitle: Text(s.t('privacyLegalHelp')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const PrivacyLegalScreen(),
+                ),
+              ),
             ),
           ),
         ],

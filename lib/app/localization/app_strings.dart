@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/additional_translations.dart';
 import 'package:salah_focus/app/localization/new_language_translations.dart';
+import 'package:salah_focus/app/localization/privacy_legal_translations.dart';
 import 'package:salah_focus/app/localization/ramadan_translations.dart';
 
 class AppStrings {
@@ -103,7 +104,7 @@ class AppStrings {
       'noPrayLater': 'Nein, ich bete noch',
       'yesEnd': 'Ja, Erinnerung beenden',
       'reminderBody': 'Du wolltest dir Zeit für dein Gebet nehmen. Lege dein Handy für ein paar Minuten weg und bete.',
-      'accepted': 'Alhamdulillah 🤍',
+      'accepted': 'Alhamdulillah 💛',
       'week': 'Diese Woche',
       'month': 'Monat',
       'confirmedPrayers': 'Bestätigte Gebete',
@@ -917,6 +918,10 @@ class AppStrings {
   @visibleForTesting
   static Map<String, Map<String, String>> get translations => _values;
 
+  @visibleForTesting
+  static Map<String, Map<String, String>> get privacyLegalTranslations =>
+      privacyLegalUiTranslations;
+
   String t(
     String key, {
     Map<String, String> params = const <String, String>{},
@@ -947,7 +952,11 @@ class AppStrings {
           'My Prayer';
     }
     String value =
-        _values[locale.languageCode]?[key] ?? _values['en']?[key] ?? key;
+        privacyLegalUiTranslations[locale.languageCode]?[key] ??
+        privacyLegalUiTranslations['en']?[key] ??
+        _values[locale.languageCode]?[key] ??
+        _values['en']?[key] ??
+        key;
     for (final MapEntry<String, String> entry in params.entries) {
       value = value.replaceAll('{${entry.key}}', entry.value);
     }
