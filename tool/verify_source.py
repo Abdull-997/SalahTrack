@@ -77,8 +77,9 @@ def check_localizations() -> None:
     # so the following language and date-formatting maps are not included.
     blocks: dict[str, str] = {}
     block_re = re.compile(r"^([ ]{2,4})'([a-z]{2})': \{\n(.*?)^\1\},", re.MULTILINE | re.DOTALL)
-    for name in ("app_strings.dart", "additional_translations.dart"):
-        text = (ROOT / "lib/app/localization" / name).read_text(encoding="utf-8")
+    localization_root = ROOT / "lib/app/localization"
+    for file in localization_root.glob("*.dart"):
+        text = file.read_text(encoding="utf-8")
         for match in block_re.finditer(text):
             blocks[match.group(2)] = match.group(3)
     languages = (ROOT / "lib/app/localization/app_language.dart").read_text(encoding="utf-8")

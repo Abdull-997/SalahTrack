@@ -326,14 +326,17 @@ class _LanguagePage extends StatelessWidget {
       child: Column(
         children: <Widget>[
           for (final AppLanguage language in appLanguages)
-            ListTile(
-              title: Text(language.name),
-              leading: Icon(
-                language.code == selectedLanguage
-                    ? Icons.radio_button_checked_rounded
-                    : Icons.radio_button_unchecked_rounded,
+            Directionality(
+              textDirection: language.textDirection,
+              child: ListTile(
+                title: Text(language.name),
+                leading: Icon(
+                  language.code == selectedLanguage
+                      ? Icons.radio_button_checked_rounded
+                      : Icons.radio_button_unchecked_rounded,
+                ),
+                onTap: () => onSelected(language.code),
               ),
-              onTap: () => onSelected(language.code),
             ),
           const SizedBox(height: 12),
           FilledButton(onPressed: onContinue, child: Text(s.t('continue'))),

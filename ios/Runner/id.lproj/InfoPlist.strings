@@ -1,0 +1,3 @@
+CFBundleDisplayName = "Salatku";
+CFBundleName = "Salatku";
+NSLocationWhenInUseUsageDescription = "Salatku menggunakan lokasi Anda untuk menghitung waktu salat setempat dan arah Kiblat.";

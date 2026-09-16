@@ -123,6 +123,11 @@ def localize_ios_project(project: str) -> str:
         'ar': 'B71900100000000000000008',
         'ps': 'B71900100000000000000009',
         'ur': 'B7190010000000000000000A',
+        'id': 'B7190010000000000000000B',
+        'bn': 'B7190010000000000000000C',
+        'pa': 'B7190010000000000000000D',
+        'fa': 'B7190010000000000000000E',
+        'ms': 'B7190010000000000000000F',
     }
 
     def upsert(section: str, identifier: str, entry: str) -> None:
@@ -224,9 +229,11 @@ def patch_ios() -> None:
         info = plistlib.load(handle)
     info["CFBundleDisplayName"] = "My Prayer"
     info["CFBundleName"] = "My Prayer"
-    info["CFBundleLocalizations"] = ['ar', 'de', 'en', 'es', 'fr', 'ps', 'tr', 'ur']
+    info["CFBundleLocalizations"] = [
+        'ar', 'bn', 'de', 'en', 'es', 'fa', 'fr', 'id', 'ms', 'pa', 'ps', 'tr', 'ur'
+    ]
     info["NSLocationWhenInUseUsageDescription"] = (
-        "Salaty uses your location to calculate local prayer times and Qibla direction."
+        "SalahFocus uses your location to calculate local prayer times and Qibla direction."
     )
     with info_path.open("wb") as handle:
         plistlib.dump(info, handle, sort_keys=False)

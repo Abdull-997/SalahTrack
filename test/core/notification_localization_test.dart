@@ -87,7 +87,16 @@ class _Plugin implements FlutterLocalNotificationsPlugin {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  for (final String code in ['tr', 'fr', 'es']) {
+  for (final String code in <String>[
+    'tr',
+    'fr',
+    'es',
+    'id',
+    'bn',
+    'pa',
+    'fa',
+    'ms',
+  ]) {
     test(
       '$code localizes every scheduled reminder and Android channel',
       () async {
@@ -129,18 +138,53 @@ void main() {
             'Icha – rappel',
             'Un petit rappel 🤍',
           ],
-          _ => [
+          'es' => [
             '🕌 Es la hora de Isha',
             'Hora de Isha',
             'Isha – recordatorio',
             'Un pequeño recordatorio 🤍',
+          ],
+          'id' => [
+            '🕌 Waktu Isya telah tiba',
+            'Waktu Isya',
+            'Isya – pengingat',
+            'Pengingat lembut 🤍',
+          ],
+          'bn' => [
+            '🕌 ইশা-এর সময় হয়েছে',
+            'ইশা-এর সময়',
+            'ইশা – স্মরণিকা',
+            'একটি কোমল স্মরণিকা 🤍',
+          ],
+          'pa' => [
+            '🕌 عشاء دا ویلا ہو گیا',
+            'عشاء دا ویلا',
+            'عشاء – یاددہانی',
+            'اک ہولی یاددہانی 🤍',
+          ],
+          'fa' => [
+            '🕌 وقت عشا فرا رسیده است',
+            'وقت عشا',
+            'عشا – یادآوری',
+            'یک یادآوری ملایم 🤍',
+          ],
+          _ => [
+            '🕌 Waktu Isyak telah tiba',
+            'Waktu Isyak',
+            'Isyak – peringatan',
+            'Peringatan lembut 🤍',
           ],
         };
         expect(plugin.scheduled.map((item) => item.title), titles);
         final String channelName = switch (code) {
           'tr' => 'Namaz hatırlatmaları',
           'fr' => 'Rappels de prière',
-          _ => 'Recordatorios de oración',
+          'es' => 'Recordatorios de oración',
+          'id' => 'Pengingat salat',
+          'bn' => 'নামাজের স্মরণিকা',
+          'pa' => 'نماز دیاں یاددہانیاں',
+          'fa' => 'یادآوری‌های نماز',
+          _ => 'Peringatan solat',
         };
         expect(plugin.scheduled[1].details.android!.channelName, channelName);
         expect(

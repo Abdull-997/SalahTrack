@@ -92,7 +92,9 @@ TESTS /* Tests */ = {
     assert info['CFBundleName']=='My Prayer'
     names = {'en': 'My Prayer', 'de': 'Mein Gebet', 'ar': 'صلاتي',
              'es': 'Mi oración', 'fr': 'Ma prière', 'tr': 'Namazım',
-             'ps': 'زما لمونځ', 'ur': 'میری نماز'}
+             'ps': 'زما لمونځ', 'ur': 'میری نماز', 'id': 'Salatku',
+             'bn': 'আমার নামাজ', 'pa': 'میری نماز', 'fa': 'نماز من',
+             'ms': 'Solatku'}
     project_path = r/'ios/Runner.xcodeproj/project.pbxproj'
     project_text = project_path.read_text()
     assert project_text.count('CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;') == 3

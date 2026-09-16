@@ -1,0 +1,3 @@
+CFBundleDisplayName = "نماز من";
+CFBundleName = "نماز من";
+NSLocationWhenInUseUsageDescription = "نماز من از مکان شما برای محاسبهٔ اوقات نماز محلی و جهت قبله استفاده می‌کند.";

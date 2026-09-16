@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/additional_translations.dart';
+import 'package:salah_focus/app/localization/new_language_translations.dart';
 import 'package:salah_focus/app/localization/ramadan_translations.dart';
 
 class AppStrings {
@@ -25,6 +26,7 @@ class AppStrings {
 
   static const Map<String, Map<String, String>> _values = {
     ...additionalTranslations,
+    ...newLanguageTranslations,
     'de': {
       ...ramadanDeTranslations,
       'fridayPrayer': 'Freitagsgebet',
@@ -933,6 +935,7 @@ class AppStrings {
             'ms': 'Solatku',
             'nl': 'Mijn gebed',
             'ps': 'زما لمونځ',
+            'pa': 'میری نماز',
             'ru': 'Моя молитва',
             'so': 'Salaaddayda',
             'sw': 'Swala yangu',
@@ -953,8 +956,8 @@ class AppStrings {
 
   /// Formats every user-visible number using the active app language.
   ///
-  /// `intl` localizes punctuation, while Arabic, Urdu and Pashto also use
-  /// their familiar digit shapes so no Latin digits leak into the interface.
+  /// `intl` localizes punctuation, while languages with their own familiar
+  /// digit shapes use them consistently throughout the interface.
   String number(num value) {
     final String formatted = NumberFormat.decimalPattern(locale.languageCode)
         .format(value);
@@ -982,9 +985,22 @@ class AppStrings {
       '8': '۸',
       '9': '۹',
     };
+    const Map<String, String> bengali = <String, String>{
+      '0': '০',
+      '1': '১',
+      '2': '২',
+      '3': '৩',
+      '4': '৪',
+      '5': '৫',
+      '6': '৬',
+      '7': '৭',
+      '8': '৮',
+      '9': '৯',
+    };
     final Map<String, String>? digits = switch (locale.languageCode) {
       'ar' => western,
-      'ur' || 'ps' => eastern,
+      'bn' => bengali,
+      'fa' || 'pa' || 'ur' || 'ps' => eastern,
       _ => null,
     };
     if (digits == null) return formatted;
@@ -998,19 +1014,24 @@ class AppStrings {
       t('minutesValue', params: <String, String>{'value': number(value)});
 
   String date(DateTime value, {required String pattern}) {
-    final String formatted = DateFormat(
-      pattern,
-      locale.languageCode,
-    ).format(value);
+    final String formatted = DateFormat(pattern, _intlLocaleName).format(value);
     return _localizeDigits(_localizeGregorianDateWords(formatted));
   }
 
   String time(DateTime value) =>
-      _localizeDigits(DateFormat.Hm(locale.languageCode).format(value));
+      _localizeDigits(DateFormat.Hm(_intlLocaleName).format(value));
+
+  String get _intlLocaleName =>
+      locale.languageCode == 'pa' ? 'en' : locale.languageCode;
 
   String hijriDate(String value) {
     if (!const <String>{
       'ar',
+      'bn',
+      'fa',
+      'id',
+      'ms',
+      'pa',
       'ur',
       'ps',
       'tr',
@@ -1097,6 +1118,76 @@ class AppStrings {
         'Dhu al-qada',
         'Dhu al-hiyya',
       ],
+      'id': [
+        'Muharam',
+        'Safar',
+        'Rabiulawal',
+        'Rabiulakhir',
+        'Jumadilawal',
+        'Jumadilakhir',
+        'Rajab',
+        'Syakban',
+        'Ramadan',
+        'Syawal',
+        'Zulkaidah',
+        'Zulhijah',
+      ],
+      'bn': [
+        'মুহাররম',
+        'সফর',
+        'রবিউল আউয়াল',
+        'রবিউস সানি',
+        'জমাদিউল আউয়াল',
+        'জমাদিউস সানি',
+        'রজব',
+        'শাবান',
+        'রমজান',
+        'শাওয়াল',
+        'জিলকদ',
+        'জিলহজ',
+      ],
+      'pa': [
+        'محرم',
+        'صفر',
+        'ربیع الاول',
+        'ربیع الثانی',
+        'جمادی الاول',
+        'جمادی الثانی',
+        'رجب',
+        'شعبان',
+        'رمضان',
+        'شوال',
+        'ذوالقعدہ',
+        'ذوالحجہ',
+      ],
+      'fa': [
+        'محرم',
+        'صفر',
+        'ربیع‌الاول',
+        'ربیع‌الثانی',
+        'جمادی‌الاول',
+        'جمادی‌الثانی',
+        'رجب',
+        'شعبان',
+        'رمضان',
+        'شوال',
+        'ذی‌القعده',
+        'ذی‌الحجه',
+      ],
+      'ms': [
+        'Muharam',
+        'Safar',
+        'Rabiulawal',
+        'Rabiulakhir',
+        'Jamadilawal',
+        'Jamadilakhir',
+        'Rejab',
+        'Syaaban',
+        'Ramadan',
+        'Syawal',
+        'Zulkaedah',
+        'Zulhijah',
+      ],
     };
     final List<String> sourceMonths = arabicMonths.values.toSet().toList();
     final List<String>? targetMonths = monthNames[locale.languageCode];
@@ -1118,6 +1209,11 @@ class AppStrings {
       'tr': ['K', 'G', 'B', 'D'],
       'fr': ['N', 'S', 'O', 'E'],
       'es': ['N', 'S', 'O', 'E'],
+      'id': ['U', 'S', 'B', 'T'],
+      'bn': ['উ', 'দ', 'প', 'পূ'],
+      'pa': ['ش', 'ج', 'م', 'پ'],
+      'fa': ['شم', 'جن', 'غر', 'شر'],
+      'ms': ['U', 'S', 'B', 'T'],
       'ar': ['ش', 'ج', 'غ', 'ق'],
       'ur': ['ش', 'ج', 'مغ', 'مش'],
       'ps': ['ش', 'ج', 'ل', 'خ'],
@@ -1141,6 +1237,34 @@ class AppStrings {
   /// Keeps Gregorian day and month names in the selected app language even
   /// when a platform's date-symbol fallback returns English names.
   String _localizeGregorianDateWords(String value) {
+    if (locale.languageCode == 'pa') {
+      const Map<String, String> punjabiWords = <String, String>{
+        'Monday': 'سوموار',
+        'Tuesday': 'منگل',
+        'Wednesday': 'بدھ',
+        'Thursday': 'جمعرات',
+        'Friday': 'جمعہ',
+        'Saturday': 'ہفتہ',
+        'Sunday': 'اتوار',
+        'January': 'جنوری',
+        'February': 'فروری',
+        'March': 'مارچ',
+        'April': 'اپریل',
+        'May': 'مئی',
+        'June': 'جون',
+        'July': 'جولائی',
+        'August': 'اگست',
+        'September': 'ستمبر',
+        'October': 'اکتوبر',
+        'November': 'نومبر',
+        'December': 'دسمبر',
+      };
+      String localized = value;
+      for (final MapEntry<String, String> entry in punjabiWords.entries) {
+        localized = localized.replaceAll(entry.key, entry.value);
+      }
+      return localized;
+    }
     if (locale.languageCode != 'ar') return value;
 
     const Map<String, String> arabicWords = <String, String>{

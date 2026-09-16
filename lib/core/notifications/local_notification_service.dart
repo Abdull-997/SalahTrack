@@ -684,6 +684,61 @@ class LocalNotificationService implements NotificationService {
   static String _text(String languageCode, String key, String prayerName) {
     const Map<String, Map<String, String>>
     values = <String, Map<String, String>>{
+      'id': <String, String>{
+        'prayerTitle': '🕌 Waktu {prayer} telah tiba',
+        'prayerBody': 'Sudah waktunya menunaikan salat.',
+        'graceTitle': 'Waktu {prayer}',
+        'graceBody':
+            'Anda ingin menyediakan beberapa menit untuk salat sekarang.',
+        'snoozeTitle': '{prayer} – pengingat',
+        'snoozeBody': 'Waktu penundaan telah berakhir. Luangkan beberapa menit jika Anda bisa.',
+        'softTitle': 'Pengingat lembut 🤍',
+        'softBody': 'Luangkan beberapa menit untuk {prayer}, jika Anda bisa.',
+      },
+      'bn': <String, String>{
+        'prayerTitle': '🕌 {prayer}-এর সময় হয়েছে',
+        'prayerBody': 'আপনার নামাজের সময় হয়েছে।',
+        'graceTitle': '{prayer}-এর সময়',
+        'graceBody': 'আপনি এখন নামাজের জন্য কয়েক মিনিট রাখতে চেয়েছিলেন।',
+        'snoozeTitle': '{prayer} – স্মরণিকা',
+        'snoozeBody':
+            'পরে মনে করানোর সময় শেষ হয়েছে। সম্ভব হলে কয়েক মিনিট সময় নিন।',
+        'softTitle': 'একটি কোমল স্মরণিকা 🤍',
+        'softBody': 'সম্ভব হলে {prayer}-এর জন্য কয়েক মিনিট সময় নিন।',
+      },
+      'pa': <String, String>{
+        'prayerTitle': '🕌 {prayer} دا ویلا ہو گیا',
+        'prayerBody': 'تہاڈی نماز دا ویلا ہو گیا اے۔',
+        'graceTitle': '{prayer} دا ویلا',
+        'graceBody': 'تسی ہن نماز لئی کجھ منٹ کڈھنا چاہیا سی۔',
+        'snoozeTitle': '{prayer} – یاددہانی',
+        'snoozeBody':
+            'بعد وچ یاد کراؤن دا ویلا مک گیا اے۔ جے ہو سکے تے کجھ منٹ کڈھو۔',
+        'softTitle': 'اک ہولی یاددہانی 🤍',
+        'softBody': 'جے ہو سکے تے {prayer} لئی کجھ منٹ کڈھو۔',
+      },
+      'fa': <String, String>{
+        'prayerTitle': '🕌 وقت {prayer} فرا رسیده است',
+        'prayerBody': 'وقت نماز شماست.',
+        'graceTitle': 'وقت {prayer}',
+        'graceBody': 'می‌خواستید اکنون چند دقیقه برای نماز وقت بگذارید.',
+        'snoozeTitle': '{prayer} – یادآوری',
+        'snoozeBody':
+            'زمان تعویق پایان یافته است. اگر می‌توانید چند دقیقه وقت بگذارید.',
+        'softTitle': 'یک یادآوری ملایم 🤍',
+        'softBody': 'اگر می‌توانید چند دقیقه برای {prayer} وقت بگذارید.',
+      },
+      'ms': <String, String>{
+        'prayerTitle': '🕌 Waktu {prayer} telah tiba',
+        'prayerBody': 'Sudah tiba waktu untuk solat.',
+        'graceTitle': 'Waktu {prayer}',
+        'graceBody':
+            'Anda mahu meluangkan beberapa minit untuk solat sekarang.',
+        'snoozeTitle': '{prayer} – peringatan',
+        'snoozeBody': 'Tempoh penangguhan telah tamat. Luangkan beberapa minit jika anda mampu.',
+        'softTitle': 'Peringatan lembut 🤍',
+        'softBody': 'Luangkan beberapa minit untuk {prayer}, jika anda mampu.',
+      },
       'fr': <String, String>{
         'prayerTitle': '🕌 C’est l’heure de {prayer}',
         'prayerBody': 'C’est l’heure de votre prière.',

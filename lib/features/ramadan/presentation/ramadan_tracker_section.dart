@@ -362,7 +362,7 @@ class _RamadanGoalsCard extends ConsumerWidget {
     return Card(
       key: const ValueKey<String>('ramadan-goals-card'),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 12, 12),
+        padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 12, 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[

@@ -39,6 +39,7 @@ class PrayerSettings {
     'id': 'Saya telah salat',
     'jv': 'Aku wis shalat',
     'ms': 'Saya sudah solat',
+    'pa': 'میں نماز پڑھ لئی اے',
     'nl': 'Ik heb gebeden',
     'ru': 'Я помолился',
     'so': 'Waan tukaday',

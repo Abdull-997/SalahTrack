@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:salah_focus/app/app_providers.dart';
+import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/theme/app_theme.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
@@ -90,6 +91,10 @@ Widget _app({
       AppStrings.cupertinoFallbackDelegate,
       GlobalCupertinoLocalizations.delegate,
     ],
+    builder: (BuildContext context, Widget? child) => Directionality(
+      textDirection: textDirectionForLanguage(locale.languageCode),
+      child: child ?? const SizedBox.shrink(),
+    ),
     home: const SettingsScreen(),
   ),
 );
@@ -173,10 +178,9 @@ void main() {
             strings.minutes(1),
           );
         }
-        final TextDirection expectedDirection =
-            <String>{'ar', 'ps', 'ur'}.contains(locale.languageCode)
-            ? TextDirection.rtl
-            : TextDirection.ltr;
+        final TextDirection expectedDirection = textDirectionForLanguage(
+          locale.languageCode,
+        );
         expect(
           Directionality.of(tester.element(find.byType(AlertDialog))),
           expectedDirection,

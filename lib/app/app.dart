@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salah_focus/app/app_providers.dart';
+import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/app/router/app_router.dart';
 import 'package:salah_focus/core/notifications/prayer_notification_payload.dart';
@@ -101,7 +102,7 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: themeMode,
-      locale: Locale(preferences.localeCode),
+      locale: appLocaleFor(preferences.localeCode),
       supportedLocales: AppStrings.supportedLocales,
       localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
         AppStrings.delegate,
@@ -110,6 +111,10 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
         AppStrings.cupertinoFallbackDelegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      builder: (BuildContext context, Widget? child) => Directionality(
+        textDirection: textDirectionForLanguage(preferences.localeCode),
+        child: child ?? const SizedBox.shrink(),
+      ),
       routerConfig: router,
     );
   }

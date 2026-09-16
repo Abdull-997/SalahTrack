@@ -174,6 +174,7 @@ class LocationServiceImpl implements LocationService {
     'bn' => 'bn_BD',
     'ur' => 'ur_PK',
     'ps' => 'ps_AF',
+    'pa' => 'pa_PK',
     'de' => 'de_DE',
     'fa' => 'fa_IR',
     'fr' => 'fr_FR',

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/theme/app_theme.dart';
 import 'package:salah_focus/features/settings/presentation/settings_screen.dart';
@@ -142,6 +143,10 @@ Widget _app(Locale locale, {ThemeData? theme}) => ProviderScope(
       AppStrings.cupertinoFallbackDelegate,
       GlobalCupertinoLocalizations.delegate,
     ],
+    builder: (BuildContext context, Widget? child) => Directionality(
+      textDirection: textDirectionForLanguage(locale.languageCode),
+      child: child ?? const SizedBox.shrink(),
+    ),
     home: const SettingsScreen(),
   ),
 );
@@ -203,10 +208,9 @@ void main() {
         await tester.pumpAndSettle();
 
         final AppStrings s = AppStrings(locale);
-        final TextDirection expectedDirection =
-            <String>{'ar', 'ps', 'ur'}.contains(locale.languageCode)
-            ? TextDirection.rtl
-            : TextDirection.ltr;
+        final TextDirection expectedDirection = textDirectionForLanguage(
+          locale.languageCode,
+        );
         expect(
           find.descendant(
             of: find.byType(AppBar),

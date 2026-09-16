@@ -68,6 +68,11 @@
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B71900100000000000000009 /* ps */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ps; path = ps.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B7190010000000000000000A /* ur */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ur; path = ur.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B7190010000000000000000B /* id */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = id; path = id.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B7190010000000000000000C /* bn */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = bn; path = bn.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B7190010000000000000000D /* pa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pa; path = pa.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B7190010000000000000000E /* fa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fa; path = fa.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B7190010000000000000000F /* ms */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ms; path = ms.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -215,6 +220,11 @@
 				Base,
 				ps,
 				ur,
+				id,
+				bn,
+				pa,
+				fa,
+				ms,
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
 			packageReferences = (
@@ -327,6 +337,11 @@
 				B71900100000000000000008 /* ar */,
 				B71900100000000000000009 /* ps */,
 				B7190010000000000000000A /* ur */,
+				B7190010000000000000000B /* id */,
+				B7190010000000000000000C /* bn */,
+				B7190010000000000000000D /* pa */,
+				B7190010000000000000000E /* fa */,
+				B7190010000000000000000F /* ms */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";

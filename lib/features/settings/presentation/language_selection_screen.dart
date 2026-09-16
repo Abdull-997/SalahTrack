@@ -33,17 +33,20 @@ class _LanguageSelectionScreenState
         itemBuilder: (BuildContext context, int index) {
           final AppLanguage language = appLanguages[index];
           final bool selected = language.code == selectedCode;
-          return ListTile(
-            title: Text(language.name),
-            subtitle: Text(language.code),
-            trailing: Icon(
-              selected
-                  ? Icons.radio_button_checked_rounded
-                  : Icons.radio_button_unchecked_rounded,
-              color: selected ? Theme.of(context).colorScheme.primary : null,
+          return Directionality(
+            textDirection: language.textDirection,
+            child: ListTile(
+              title: Text(language.name),
+              subtitle: Text(language.code),
+              trailing: Icon(
+                selected
+                    ? Icons.radio_button_checked_rounded
+                    : Icons.radio_button_unchecked_rounded,
+                color: selected ? Theme.of(context).colorScheme.primary : null,
+              ),
+              enabled: !_saving,
+              onTap: selected ? null : () => _select(language.code),
             ),
-            enabled: !_saving,
-            onTap: selected ? null : () => _select(language.code),
           );
         },
       ),

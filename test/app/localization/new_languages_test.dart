@@ -34,6 +34,97 @@ void main() {
   setUpAll(initializeDateFormatting);
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
+  const List<String> addedLanguageCodes = <String>[
+    'id',
+    'bn',
+    'pa',
+    'fa',
+    'ms',
+  ];
+
+  test('offers all thirteen languages under their native names', () {
+    expect(appLanguages, hasLength(13));
+    expect(
+      appLanguages.map((AppLanguage language) => language.code).toSet(),
+      <String>{
+        'ar',
+        'bn',
+        'de',
+        'en',
+        'es',
+        'fa',
+        'fr',
+        'id',
+        'ms',
+        'pa',
+        'ps',
+        'tr',
+        'ur',
+      },
+    );
+    expect(languageName('id'), 'Bahasa Indonesia');
+    expect(languageName('bn'), 'বাংলা');
+    expect(languageName('pa'), 'پنجابی');
+    expect(languageName('fa'), 'فارسی');
+    expect(languageName('ms'), 'Bahasa Melayu');
+    for (final String code in <String>['ar', 'fa', 'pa', 'ps', 'ur']) {
+      expect(textDirectionForLanguage(code), TextDirection.rtl, reason: code);
+    }
+    for (final String code in <String>[
+      'bn',
+      'de',
+      'en',
+      'es',
+      'fr',
+      'id',
+      'ms',
+      'tr',
+    ]) {
+      expect(textDirectionForLanguage(code), TextDirection.ltr, reason: code);
+    }
+    expect(appLocaleFor('pa').languageCode, 'pa');
+    expect(appLocaleFor('pa').scriptCode, 'Arab');
+  });
+
+  for (final String code in addedLanguageCodes) {
+    test('$code has a complete catalog with matching parameters', () {
+      final Map<String, String> source = AppStrings.translations['en']!;
+      final Map<String, String> target = AppStrings.translations[code]!;
+      expect(source.keys.toSet().difference(target.keys.toSet()), isEmpty);
+      final RegExp parameter = RegExp(r'\{\w+\}');
+      for (final String key in source.keys) {
+        expect(target[key]?.trim(), isNotEmpty, reason: '$code/$key');
+        expect(
+          parameter.allMatches(target[key]!).map((m) => m.group(0)).toSet(),
+          parameter.allMatches(source[key]!).map((m) => m.group(0)).toSet(),
+          reason: '$code/$key',
+        );
+      }
+      final AppStrings strings = AppStrings(Locale(code));
+      expect(
+        strings.t('confirmPrayer'),
+        PrayerSettings.defaultConfirmationText(code),
+      );
+      expect(
+        PrayerType.fajr.localizedName(code),
+        isNot(PrayerType.fajr.localizedName('en')),
+      );
+      expect(
+        strings.hijriDate('7 Rabīʿ al-awwal 1448'),
+        isNot(contains('Rabīʿ')),
+      );
+      if (<String>{'bn', 'fa', 'pa'}.contains(code)) {
+        expect(strings.number(12), isNot('12'));
+      }
+    });
+
+    test('$code persists across a repository reload', () async {
+      final SettingsRepository repository = SettingsRepository();
+      await repository.saveLocale(code);
+      expect((await repository.load()).localeCode, code);
+    });
+  }
+
   for (final Locale locale in AppStrings.supportedLocales) {
     test(
       '${locale.languageCode} translates actions, permissions, and help text',
@@ -143,7 +234,7 @@ void main() {
     );
   }
 
-  for (final String code in ['tr', 'fr', 'es']) {
+  for (final String code in <String>['tr', 'fr', 'es', ...addedLanguageCodes]) {
     final AppStrings s = AppStrings(Locale(code));
     test('$code has every UI key and preserves interpolation parameters', () {
       final Map<String, String> source = AppStrings.translations['en']!;
@@ -188,7 +279,11 @@ void main() {
       final String month = switch (code) {
         'tr' => 'Eylül',
         'fr' => 'septembre',
-        _ => 'septiembre',
+        'es' => 'septiembre',
+        'id' || 'ms' => 'September',
+        'bn' => 'সেপ্টেম্বর',
+        'pa' => 'ستمبر',
+        _ => 'سپتامبر',
       };
       expect(
         s.date(DateTime(2026, 9, 7), pattern: 'EEEE, d MMMM y'),
@@ -197,14 +292,37 @@ void main() {
       final String hijriMonth = switch (code) {
         'tr' => 'Rebiülevvel',
         'fr' => 'Rabia al awal',
-        _ => 'Rabi al-awwal',
+        'es' => 'Rabi al-awwal',
+        'id' || 'ms' => 'Rabiulawal',
+        'bn' => 'রবিউল আউয়াল',
+        'pa' => 'ربیع الاول',
+        _ => 'ربیع‌الاول',
       };
-      expect(s.hijriDate('7 Rabīʿ al-awwal 1448'), '7 $hijriMonth 1448');
+      expect(
+        s.hijriDate('7 Rabīʿ al-awwal 1448'),
+        '${switch (code) {
+          'bn' => '৭',
+          'fa' || 'pa' => '۷',
+          _ => '7',
+        }} '
+        '$hijriMonth '
+        '${switch (code) {
+          'bn' => '১৪৪৮',
+          'fa' || 'pa' => '۱۴۴۸',
+          _ => '1448',
+        }}',
+      );
       expect(
         s.hijriDate('7 Jumādá al-ākhirah 1448'),
         isNot(contains('Jumādá')),
       );
-      expect(s.number(12.5), '12,5');
+      expect(s.number(12.5), switch (code) {
+        'bn' => '১২.৫',
+        'fa' => '۱۲٫۵',
+        'pa' => '۱۲.۵',
+        'ms' => '12.5',
+        _ => '12,5',
+      });
     });
 
     testWidgets('$code picker updates settings, dialogs, home and month view', (
@@ -265,15 +383,31 @@ void main() {
       await tester.scrollUntilVisible(find.text('Choose language'), 350);
       await tester.tap(find.text('Choose language'));
       await tester.pumpAndSettle();
-      for (final String language in ['Türkçe', 'Français', 'Español']) {
-        expect(find.text(language), findsOneWidget);
-      }
+      expect(find.text('বাংলা'), findsOneWidget);
+      expect(find.text('پنجابی'), findsOneWidget);
+      expect(
+        Directionality.of(tester.element(find.text('پنجابی'))),
+        TextDirection.rtl,
+      );
+      expect(
+        Directionality.of(tester.element(find.text('বাংলা'))),
+        TextDirection.ltr,
+      );
+      await tester.scrollUntilVisible(
+        find.text(languageName(code)),
+        250,
+        scrollable: find.byType(Scrollable).last,
+      );
       await tester.tap(find.text(languageName(code)));
       await tester.pumpAndSettle();
       expect(container.read(settingsControllerProvider).localeCode, code);
       expect(find.text(s.t('settings')), findsWidgets);
       expect(find.text('Settings'), findsNothing);
       expect((await SettingsRepository().load()).localeCode, code);
+      expect(
+        Directionality.of(tester.element(find.text(s.t('settings')).first)),
+        textDirectionForLanguage(code),
+      );
 
       await tester.scrollUntilVisible(
         find.text(s.t('calculationMethod')).hitTestable(),
@@ -285,7 +419,12 @@ void main() {
       final String calculation = switch (code) {
         'tr' => 'Dünya İslam Birliği',
         'fr' => 'Ligue islamique mondiale',
-        _ => 'Liga del Mundo Islámico',
+        'es' => 'Liga del Mundo Islámico',
+        'id' => 'Liga Muslim Dunia',
+        'bn' => 'মুসলিম বিশ্ব লীগ',
+        'pa' => 'مسلم ورلڈ لیگ',
+        'fa' => 'اتحادیهٔ جهانی مسلمانان',
+        _ => 'Liga Muslim Sedunia',
       };
       expect(find.text(calculation), findsWidgets);
       expect(find.text('Muslim World League'), findsNothing);
@@ -297,7 +436,12 @@ void main() {
         find.text(switch (code) {
           'tr' => 'Gecenin yedide biri',
           'fr' => 'Un septième de la nuit',
-          _ => 'Un séptimo de la noche',
+          'es' => 'Un séptimo de la noche',
+          'id' => 'Sepertujuh malam',
+          'bn' => 'রাতের এক-সপ্তমাংশ',
+          'pa' => 'رات دا ستواں حصہ',
+          'fa' => 'یک‌هفتم شب',
+          _ => 'Satu pertujuh malam',
         }),
         findsOneWidget,
       );
