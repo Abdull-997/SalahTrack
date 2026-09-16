@@ -63,9 +63,15 @@ void main() {
     }
   });
 
-  test('hosted policy is unset until a real HTTPS URL is configured', () {
-    expect(PrivacyLegalConfig.privacyPolicyUrl, isEmpty);
-    expect(PrivacyLegalConfig.privacyPolicyUri, isNull);
+  test('hosted policy uses the published HTTPS URL by default', () {
+    expect(
+      PrivacyLegalConfig.privacyPolicyUrl,
+      'https://abalh101.github.io/privacy-policy-salah/',
+    );
+    expect(
+      PrivacyLegalConfig.privacyPolicyUri,
+      Uri.parse('https://abalh101.github.io/privacy-policy-salah/'),
+    );
   });
 
   for (final AppLanguage language in appLanguages) {
@@ -110,7 +116,7 @@ void main() {
     expect(find.textContaining(PrivacyLegalConfig.contactEmail), findsWidgets);
     expect(
       find.byKey(const ValueKey<String>('online-privacy-policy-link')),
-      findsNothing,
+      findsOneWidget,
     );
     expect(tester.takeException(), isNull);
   });

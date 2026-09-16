@@ -11,18 +11,20 @@ dart run tool/export_legal_documents.dart build/legal_site
 ```
 
 The output includes English root files and one folder for every supported app
-language. Publish the generated files on a public HTTPS host. Then configure the
-canonical in-app link in the release build:
+language. The current canonical in-app URL is:
 
 ```text
-flutter build appbundle --dart-define=PRIVACY_POLICY_URL=https://YOUR-REAL-DOMAIN/PATH/privacy-policy.html
-flutter build ipa --dart-define=PRIVACY_POLICY_URL=https://YOUR-REAL-DOMAIN/PATH/privacy-policy.html
+https://abalh101.github.io/privacy-policy-salah/
 ```
 
-`PRIVACY_POLICY_URL` is intentionally empty by default. The app accepts and
-shows only a valid `https://` value, so no placeholder or non-secure URL can
-reach users accidentally.
+It is the default value in `PrivacyLegalConfig`. For a future domain change,
+either update that default or override it in both release builds:
 
-Before publishing, replace `YOUR-REAL-DOMAIN/PATH` with the actual address,
-regenerate the files, verify every language, and enter the public policy URL in
-App Store Connect and Google Play Console.
+```text
+flutter build appbundle --dart-define=PRIVACY_POLICY_URL=https://NEW-REAL-DOMAIN/PATH/
+flutter build ipa --dart-define=PRIVACY_POLICY_URL=https://NEW-REAL-DOMAIN/PATH/
+```
+
+The app accepts and shows only a valid `https://` value. Regenerate and publish
+the files whenever the legal source changes, verify every language, and enter
+the canonical URL in App Store Connect and Google Play Console.

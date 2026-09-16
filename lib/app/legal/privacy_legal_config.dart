@@ -4,12 +4,11 @@ abstract final class PrivacyLegalConfig {
   static const String contactEmail = 'ar830222@gmail.com';
   static const String linkedInName = 'Abdulrahman Al Hamidi';
 
-  /// Configure the externally hosted policy for release builds with:
+  /// Override the externally hosted policy for a future release with:
   /// `--dart-define=PRIVACY_POLICY_URL=https://your-domain.example/privacy`
-  ///
-  /// The value intentionally defaults to empty until a real HTTPS URL exists.
   static const String privacyPolicyUrl = String.fromEnvironment(
     'PRIVACY_POLICY_URL',
+    defaultValue: 'https://abalh101.github.io/privacy-policy-salah/',
   );
 
   static Uri? get privacyPolicyUri {

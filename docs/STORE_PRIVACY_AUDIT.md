@@ -187,8 +187,9 @@ Google reference:
 1. Supply a complete service/postal street address if required for the German
    Impressum. Only “Düsseldorf, Germany” was provided, so the app deliberately
    does not invent the missing address.
-2. Publish the generated privacy policy at a real public HTTPS URL and set
-   `PRIVACY_POLICY_URL` in both store release builds.
+2. Keep `https://abalh101.github.io/privacy-policy-salah/` synchronized with
+   the in-app legal source and use that URL in App Store Connect and Google
+   Play Console. Override `PRIVACY_POLICY_URL` only if the canonical URL moves.
 3. Confirm AlAdhan's operator, legal role, location/log retention, deletion
    process, and GDPR transfer safeguards. Do the same for the platform
    geocoding path used in the final Android/iOS builds.
