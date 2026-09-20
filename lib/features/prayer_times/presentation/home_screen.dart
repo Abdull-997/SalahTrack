@@ -31,6 +31,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   late int _lastMinute;
   bool _isVisible = false;
   bool _hasVisitedHome = false;
+  String? _loadedLocationKey;
 
   @override
   void initState() {
@@ -118,6 +119,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final AppStrings s = AppStrings.of(context);
     final preferences = ref.watch(settingsControllerProvider);
     final AsyncValue<PrayerDay?> dayAsync = ref.watch(todayPrayerDayProvider);
+    final location = preferences.location;
+    final String? locationKey = location == null
+        ? null
+        : '${location.latitude}|${location.longitude}|${location.timezoneId}';
+    final bool locationChanged = _loadedLocationKey != locationKey;
+    if (!dayAsync.isLoading && dayAsync.hasValue) {
+      _loadedLocationKey = locationKey;
+    }
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(todayPrayerDayProvider);
@@ -170,7 +179,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           dayAsync.when(
-            skipLoadingOnReload: true,
+            // Preserve content on ordinary refreshes, but hide the previous
+            // city's times while a newly selected location is loading.
+            skipLoadingOnReload: !locationChanged,
+            skipLoadingOnRefresh: !locationChanged,
             data: (PrayerDay? day) {
               if (day == null) {
                 return SliverFillRemaining(

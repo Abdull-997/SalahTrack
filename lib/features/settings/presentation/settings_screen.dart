@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
-import 'package:salah_focus/core/location/location_suggestions.dart';
+import 'package:salah_focus/core/location/manual_location_dialog.dart';
 import 'package:salah_focus/core/location/location_service.dart';
 import 'package:salah_focus/core/errors/app_exception.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
@@ -713,82 +713,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _manualLocationDialog() async {
-    final AppStrings s = AppStrings.of(context);
-    final TextEditingController city = TextEditingController();
-    final TextEditingController country = TextEditingController();
-    final bool accepted =
-        await showDialog<bool>(
-          context: context,
-          builder: (BuildContext context) => StatefulBuilder(
-            builder: (BuildContext context, StateSetter setDialogState) =>
-                AlertDialog(
-                  title: Text(s.t('chooseCity')),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        TextField(
-                          controller: city,
-                          textCapitalization: TextCapitalization.words,
-                          decoration: InputDecoration(labelText: s.t('city')),
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: country,
-                          textCapitalization: TextCapitalization.words,
-                          decoration: InputDecoration(
-                            labelText: s.t('country'),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children:
-                              locationSuggestionsFor(s.locale.languageCode)
-                                  .map(
-                                    (LocationSuggestion suggestion) =>
-                                        ActionChip(
-                                          label: Text(suggestion.label),
-                                          onPressed: () => setDialogState(() {
-                                            city.text = suggestion.city;
-                                            country.text = suggestion.country;
-                                          }),
-                                        ),
-                                  )
-                                  .toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: Text(s.t('cancel')),
-                    ),
-                    FilledButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      child: Text(s.t('save')),
-                    ),
-                  ],
-                ),
-          ),
-        ) ??
-        false;
-    final String cityValue = city.text.trim();
-    final String countryValue = country.text.trim();
-    city.dispose();
-    country.dispose();
-    if (!accepted || cityValue.isEmpty || countryValue.isEmpty) return;
+    final String timezoneId = ref.read(deviceTimezoneIdProvider);
+    final UserLocation? location = await showDialog<UserLocation>(
+      context: context,
+      builder: (dialogContext) => ManualLocationDialog(timezoneId: timezoneId),
+    );
+    if (!mounted || location == null) return;
     await _run(() async {
-      final UserLocation location = await ref
-          .read(locationServiceProvider)
-          .geocodeManual(
-            city: cityValue,
-            country: countryValue,
-            deviceTimezoneId: ref.read(deviceTimezoneIdProvider),
-            languageCode: AppStrings.of(context).locale.languageCode,
-          );
+      await ref
+          .read(notificationServiceProvider)
+          .cancelAllFuturePrayerNotifications();
       await ref.read(settingsControllerProvider.notifier).setLocation(location);
       ref.invalidate(todayPrayerDayProvider);
     });

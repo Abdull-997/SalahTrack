@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/additional_translations.dart';
 import 'package:salah_focus/app/localization/new_language_translations.dart';
+import 'package:salah_focus/app/localization/manual_location_translations.dart';
 import 'package:salah_focus/app/localization/privacy_legal_translations.dart';
 import 'package:salah_focus/app/localization/ramadan_translations.dart';
 
@@ -935,6 +936,8 @@ class AppStrings {
       return 'SalahTrack';
     }
     String value =
+        manualLocationTranslations[locale.languageCode]?[key] ??
+        manualLocationTranslations['en']?[key] ??
         privacyLegalUiTranslations[locale.languageCode]?[key] ??
         privacyLegalUiTranslations['en']?[key] ??
         _values[locale.languageCode]?[key] ??

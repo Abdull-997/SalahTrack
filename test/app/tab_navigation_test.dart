@@ -125,6 +125,50 @@ void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   testWidgets(
+    'location change hides previous prayer times until new data loads',
+    (tester) async {
+      const berlin = UserLocation(
+        latitude: 52.52,
+        longitude: 13.405,
+        city: 'Berlin',
+        country: 'Germany',
+        timezoneId: 'Europe/Berlin',
+        isAutomatic: false,
+      );
+      const duesseldorf = UserLocation(
+        latitude: 51.2277,
+        longitude: 6.7735,
+        city: 'Düsseldorf',
+        country: 'Germany',
+        timezoneId: 'Europe/Berlin',
+        isAutomatic: false,
+      );
+      final coordinator = _Coordinator();
+      final container = ProviderContainer(
+        overrides: [
+          initialPreferencesProvider.overrideWithValue(
+            _preferences.copyWith(location: berlin),
+          ),
+          clockServiceProvider.overrideWithValue(_Clock()),
+          prayerCoordinatorProvider.overrideWithValue(coordinator),
+        ],
+      );
+      await _mount(tester, container);
+      expect(find.text('Next prayer'), findsOneWidget);
+      coordinator.pending = Completer<PrayerDay?>();
+      await container
+          .read(settingsControllerProvider.notifier)
+          .setLocation(duesseldorf);
+      await tester.pump();
+      expect(find.text('Düsseldorf, Germany'), findsOneWidget);
+      expect(find.text('Next prayer'), findsNothing);
+      coordinator.pending!.complete(_day);
+      await tester.pumpAndSettle();
+      expect(find.text('Next prayer'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'theme changes reuse data and prayer refreshes keep content visible',
     (tester) async {
       final coordinator = _Coordinator();

@@ -2,6 +2,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:salah_focus/core/errors/app_exception.dart';
 import 'package:salah_focus/core/location/location_service.dart';
+import 'package:salah_focus/core/location/geocoding_locale.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 
 class LocationServiceImpl implements LocationService {
@@ -27,7 +28,7 @@ class LocationServiceImpl implements LocationService {
       String city = '';
       String country = '';
       try {
-        await setLocaleIdentifier(_localeIdentifier(languageCode));
+        await setLocaleIdentifier(geocodingLocaleIdentifier(languageCode));
         final List<Placemark> places = await placemarkFromCoordinates(
           position.latitude,
           position.longitude,
@@ -88,7 +89,7 @@ class LocationServiceImpl implements LocationService {
       String city = '';
       String country = '';
       try {
-        await setLocaleIdentifier(_localeIdentifier(languageCode));
+        await setLocaleIdentifier(geocodingLocaleIdentifier(languageCode));
         final List<Placemark> placemarks = await placemarkFromCoordinates(
           position.latitude,
           position.longitude,
@@ -132,7 +133,7 @@ class LocationServiceImpl implements LocationService {
       throw const LocationException('Bitte Stadt und Land angeben.');
     }
     try {
-      await setLocaleIdentifier(_localeIdentifier(languageCode));
+      await setLocaleIdentifier(geocodingLocaleIdentifier(languageCode));
       final List<Location> matches = await locationFromAddress(
         '$cleanedCity, $cleanedCountry',
       ).timeout(const Duration(seconds: 10));
@@ -161,7 +162,7 @@ class LocationServiceImpl implements LocationService {
     required String languageCode,
   }) async {
     try {
-      await setLocaleIdentifier(_localeIdentifier(languageCode));
+      await setLocaleIdentifier(geocodingLocaleIdentifier(languageCode));
       final List<Placemark> placemarks = await placemarkFromCoordinates(
         location.latitude,
         location.longitude,
@@ -186,27 +187,4 @@ class LocationServiceImpl implements LocationService {
 
   @override
   Future<bool> openLocationSettings() => Geolocator.openLocationSettings();
-
-  String _localeIdentifier(String languageCode) => switch (languageCode) {
-    'ar' => 'ar_SA',
-    'bn' => 'bn_BD',
-    'ur' => 'ur_PK',
-    'ps' => 'ps_AF',
-    'pa' => 'pa_PK',
-    'de' => 'de_DE',
-    'fa' => 'fa_IR',
-    'fr' => 'fr_FR',
-    'es' => 'es_ES',
-    'ha' => 'ha_NG',
-    'id' => 'id_ID',
-    'jv' => 'jv_ID',
-    'ms' => 'ms_MY',
-    'nl' => 'nl_NL',
-    'ru' => 'ru_RU',
-    'so' => 'so_SO',
-    'sw' => 'sw_TZ',
-    'ce' => 'ce_RU',
-    'tr' => 'tr_TR',
-    _ => 'en_US',
-  };
 }
