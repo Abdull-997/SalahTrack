@@ -330,7 +330,7 @@ class _StatsCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    s.t('confirmedPrayers'),
+                    s.t('todayConfirmedPrayers'),
                     style: Theme.of(context).textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.w800),
                   ),

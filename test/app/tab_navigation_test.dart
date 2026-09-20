@@ -171,7 +171,7 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsNothing);
       await _switchTab(tester, 1);
       await tester.pump();
-      expect(find.text('Confirmed prayers'), findsOneWidget);
+      expect(find.text('Prayers confirmed today'), findsOneWidget);
       expect(
         find
             .byType(CircularProgressIndicator)
@@ -296,7 +296,7 @@ void main() {
       TrackerData(entries: _day.entries, localNow: DateTime(2026, 9, 12)),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Confirmed prayers'), findsOneWidget);
+    expect(find.text('Prayers confirmed today'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
   });
