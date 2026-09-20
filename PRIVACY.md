@@ -1,4 +1,4 @@
-# SalahFocus privacy documents
+# SalahTrack privacy documents
 
 The canonical, localized privacy policy and legal notice are defined in:
 

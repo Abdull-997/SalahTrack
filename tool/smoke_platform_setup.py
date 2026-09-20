@@ -90,13 +90,11 @@ TESTS /* Tests */ = {
 
     with (r/'ios/Runner/Info.plist').open('rb') as h:
         info=plistlib.load(h)
-    assert info['CFBundleDisplayName']=='My Prayer'
-    assert info['CFBundleName']=='My Prayer'
-    names = {'en': 'My Prayer', 'de': 'Mein Gebet', 'ar': 'صلاتي',
-             'es': 'Mi oración', 'fr': 'Ma prière', 'tr': 'Namazım',
-             'ps': 'زما لمونځ', 'ur': 'میری نماز', 'id': 'Salatku',
-             'bn': 'আমার নামাজ', 'pa': 'میری نماز', 'fa': 'نماز من',
-             'ms': 'Solatku'}
+    assert info['CFBundleDisplayName']=='SalahTrack'
+    assert info['CFBundleName']=='SalahTrack'
+    names = {code: 'SalahTrack' for code in (
+        'ar', 'bn', 'de', 'en', 'es', 'fa', 'fr', 'id', 'ms', 'pa', 'ps', 'tr', 'ur'
+    )}
     project_path = r/'ios/Runner.xcodeproj/project.pbxproj'
     project_text = project_path.read_text()
     assert project_text.count('CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;') == 3

@@ -1,8 +1,8 @@
-# SalahFocus
+# SalahTrack
 
-**Prayer first, phone second.**
+**Prayer Tracker & Reminders**
 
-SalahFocus is a local-first Flutter app for Muslims who want reliable prayer reminders and a calm way to reduce phone distractions around Salah. It combines prayer times, confirmation, configurable grace periods, snooze, a prayer tracker, Qibla and a fail-safe Prayer Focus mode.
+SalahTrack lets you log the five daily prayers, track which were prayed or missed, and receive reminders at prayer time and again if a prayer has not been confirmed. It also includes Qibla and an optional Prayer Focus mode.
 
 The app is intentionally **not** a religious authority and does not shame or judge the user. Focus restrictions are voluntary and always fail open.
 
@@ -77,7 +77,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 The bootstrap script:
 
 1. creates fresh Android/iOS platform templates with the installed Flutter SDK,
-2. applies SalahFocus Android/iOS native code,
+2. applies SalahTrack Android/iOS native code,
 3. configures scheduled-notification receivers and permissions,
 4. enables Android core-library desugaring,
 5. configures the iOS location usage description,
@@ -152,19 +152,19 @@ The app deliberately does **not** request:
 
 ### Exact alarms
 
-Prayer notifications use exact scheduling only when Android reports that the app can schedule exact alarms. Otherwise SalahFocus automatically uses an inexact idle-safe notification mode.
+Prayer notifications use exact scheduling only when Android reports that the app can schedule exact alarms. Otherwise SalahTrack automatically uses an inexact idle-safe notification mode.
 
-Android vendors can still apply additional background/battery restrictions to scheduled work. The release checklist therefore requires physical-device testing on Samsung, Pixel and at least one aggressively managed Android skin such as Xiaomi; SalahFocus does not attempt to bypass OEM power-management policies.
+Android vendors can still apply additional background/battery restrictions to scheduled work. The release checklist therefore requires physical-device testing on Samsung, Pixel and at least one aggressively managed Android skin such as Xiaomi; SalahTrack does not attempt to bypass OEM power-management policies.
 
 The user can request precise-alarm permission from Onboarding or Settings. A denied permission must never crash the app.
 
 ### Android Prayer Focus
 
-A normal consumer Android app cannot safely suspend arbitrary third-party apps through a general public app-blocking API. SalahFocus therefore does **not** disguise an Accessibility Service or overlay as an app blocker.
+A normal consumer Android app cannot safely suspend arbitrary third-party apps through a general public app-blocking API. SalahTrack therefore does **not** disguise an Accessibility Service or overlay as an app blocker.
 
 Android MVP behavior:
 
-- Prayer Focus screen inside SalahFocus
+- Prayer Focus screen inside SalahTrack
 - persistent prayer/focus state
 - notifications after grace/snooze
 - confirmation, snooze and skip
@@ -350,4 +350,4 @@ Before publishing:
 
 ## Product safety rule
 
-If any platform-specific Prayer Focus operation fails, SalahFocus **fails open**. It must never leave a person permanently unable to use their device.
+If any platform-specific Prayer Focus operation fails, SalahTrack **fails open**. It must never leave a person permanently unable to use their device.

@@ -19,7 +19,7 @@ try {
     flutter pub get
     flutter analyze
     flutter test
-    Write-Host "SalahFocus is ready. Run: flutter run"
+    Write-Host "SalahTrack is ready. Run: flutter run"
 }
 finally {
     Remove-Item -Recurse -Force $Temp -ErrorAction SilentlyContinue

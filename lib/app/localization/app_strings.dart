@@ -50,8 +50,8 @@ class AppStrings {
       'fullScreenAlarmPermissionHelp': 'Erlaube Gebetserinnerungen, den Bildschirm einzuschalten und bei gesperrtem Gerät im Vollbild zu erscheinen. Android kann bei entsperrtem Gerät stattdessen eine Benachrichtigung anzeigen. Ohne diese Berechtigung erhältst du weiterhin normale Benachrichtigungen.',
       'openFullScreenAlarmSettings':
           'Vollbild-Zugriff in Systemeinstellungen öffnen',
-      'appName': 'Salaty',
-      'tagline': 'Weniger Ablenkung. Mehr Salah.',
+      'appName': 'SalahTrack',
+      'tagline': 'Gebete verfolgen & erinnern',
       'getStarted': "Los geht's",
       'home': 'Home',
       'tracker': 'Tracker',
@@ -199,7 +199,7 @@ class AppStrings {
       'networkError': 'Die Gebetszeiten konnten gerade nicht geladen werden. Gespeicherte Daten werden verwendet, wenn sie verfügbar sind.',
       'prayerDataError': 'Die Gebetszeiten konnten nicht zuverlässig verarbeitet werden. Bitte versuche es erneut.',
       'snoozeUnavailable': 'Dieses Gebet kann nicht weiter verschoben werden.',
-      'prayerFirst': 'Gebet zuerst, Handy danach.',
+      'prayerFirst': 'Erfasse deine fünf täglichen Gebete und sieh, welche gebetet oder verpasst wurden. Erhalte eine Erinnerung zur Gebetszeit und erneut, wenn du ein Gebet noch nicht bestätigt hast.',
       'heading': 'Ausrichtung',
       'minutesValue': '{value} Min.',
     },
@@ -225,8 +225,8 @@ class AppStrings {
       'fullScreenAlarmPermissionHelp': 'Allow prayer reminders to wake the screen and appear full-screen when your device is locked. Android may show a notification instead while your device is unlocked. Without this permission, you still receive regular notifications.',
       'openFullScreenAlarmSettings':
           'Open full-screen access in system settings',
-      'appName': 'Salaty',
-      'tagline': 'Less distraction. More Salah.',
+      'appName': 'SalahTrack',
+      'tagline': 'Prayer Tracker & Reminders',
       'getStarted': 'Get started',
       'home': 'Home',
       'tracker': 'Tracker',
@@ -375,7 +375,7 @@ class AppStrings {
       'prayerDataError':
           'Prayer times could not be processed reliably. Please try again.',
       'snoozeUnavailable': 'This prayer cannot be snoozed any further.',
-      'prayerFirst': 'Prayer first, phone second.',
+      'prayerFirst': 'Log your five daily prayers and see which were prayed or missed. Get a reminder at prayer time and another if a prayer remains unconfirmed.',
       'heading': 'Heading',
       'minutesValue': '{value} min',
     },
@@ -398,8 +398,8 @@ class AppStrings {
       'fullScreenAlarmsDisabled': 'التذكيرات بملء الشاشة غير مفعّلة',
       'fullScreenAlarmPermissionHelp': 'اسمح لتذكيرات الصلاة بتشغيل الشاشة والظهور بملء الشاشة عندما يكون جهازك مقفلاً. قد يعرض أندرويد إشعاراً بدلاً من ذلك عند فتح القفل. ستستمر في تلقي الإشعارات العادية دون هذا الإذن.',
       'openFullScreenAlarmSettings': 'فتح إذن ملء الشاشة في إعدادات النظام',
-      'appName': 'صلاتي',
-      'tagline': 'تشتيت أقل. صلاة أكثر.',
+      'appName': 'SalahTrack',
+      'tagline': 'تتبع صلواتك وتذكّرها',
       'getStarted': 'ابدأ',
       'home': 'الرئيسية',
       'tracker': 'المتابعة',
@@ -549,7 +549,7 @@ class AppStrings {
       'networkError': 'تعذر تحميل مواقيت الصلاة الآن. سيتم استخدام البيانات المحفوظة إن كانت متاحة.',
       'prayerDataError': 'تعذر معالجة مواقيت الصلاة بشكل موثوق. حاول مرة أخرى.',
       'snoozeUnavailable': 'لا يمكن تأجيل تذكير هذه الصلاة أكثر.',
-      'prayerFirst': 'الصلاة أولًا، ثم الهاتف.',
+      'prayerFirst': 'سجّل صلواتك الخمس اليومية وتابع ما أديته وما فاتك. تلقَّ تذكيرًا عند وقت الصلاة وتذكيرًا آخر إذا لم تؤكد أداءها.',
       'heading': 'اتجاه الهاتف',
       'minutesValue': '{value} دقيقة',
     },
@@ -574,8 +574,8 @@ class AppStrings {
       'fullScreenAlarmPermissionHelp': 'نماز کی یاددہانیوں کو اسکرین روشن کرنے اور مقفل آلے پر پوری اسکرین میں دکھنے کی اجازت دیں۔ آلہ کھلا ہونے پر اینڈرائیڈ اس کے بجائے اطلاع دکھا سکتا ہے۔ اس اجازت کے بغیر بھی عام اطلاعات موصول ہوتی رہیں گی۔',
       'openFullScreenAlarmSettings':
           'سسٹم کی ترتیبات میں پوری اسکرین کی اجازت کھولیں',
-      'appName': 'صلاتی',
-      'tagline': 'کم توجہ بھٹکنا۔ زیادہ نماز۔',
+      'appName': 'SalahTrack',
+      'tagline': 'نمازوں کا ریکارڈ اور یاد دہانیاں',
       'getStarted': 'شروع کریں',
       'home': 'ہوم',
       'tracker': 'ریکارڈ',
@@ -730,7 +730,7 @@ class AppStrings {
       'networkError': 'نماز کے اوقات ابھی لوڈ نہیں ہو سکے۔ دستیاب ہونے پر محفوظ ڈیٹا استعمال ہوگا۔',
       'prayerDataError': 'نماز کے اوقات قابل اعتماد طور پر پراسیس نہیں ہو سکے۔ براہ کرم دوبارہ کوشش کریں۔',
       'snoozeUnavailable': 'اس نماز کو مزید موخر نہیں کیا جا سکتا۔',
-      'prayerFirst': 'پہلے نماز، پھر فون۔',
+      'prayerFirst': 'روزانہ کی پانچ نمازیں درج کریں اور ادا شدہ یا چھوٹی ہوئی نمازوں کا ریکارڈ دیکھیں۔ نماز کے وقت یاد دہانی پائیں، اور تصدیق نہ کرنے پر دوبارہ یاد دہانی پائیں۔',
       'heading': 'سمت',
       'minutesValue': '{value} منٹ',
     },
@@ -754,8 +754,8 @@ class AppStrings {
       'fullScreenAlarmPermissionHelp': 'د لمانځه یادونو ته اجازه ورکړئ چې پرده روښانه کړي او د وسیلې د قلف پر مهال په بشپړه پرده ښکاره شي. کله چې وسیله خلاصه وي، انډرایډ ښايي پر ځای یې خبرتیا وښيي. له دې اجازې پرته به هم عادي خبرتیاوې ترلاسه کوئ.',
       'openFullScreenAlarmSettings':
           'د سیسټم په امستنو کې د بشپړې پردې اجازه پرانیزئ',
-      'appName': 'صلاتي',
-      'tagline': 'لږ ګډوډي. ډېره لمونځ.',
+      'appName': 'SalahTrack',
+      'tagline': 'د لمونځونو ثبت او یادونې',
       'getStarted': 'پیل کړئ',
       'home': 'کور',
       'tracker': 'څارونکی',
@@ -908,7 +908,7 @@ class AppStrings {
       'prayerDataError':
           'د لمانځه وختونه په باوري توګه پروسس نه شول. بیا هڅه وکړئ.',
       'snoozeUnavailable': 'دا لمونځ نور نه شي ځنډېدای.',
-      'prayerFirst': 'لومړی لمونځ، بیا فون.',
+      'prayerFirst': 'خپل پنځه ورځني لمونځونه ثبت کړئ او ادا شوي او پاتې شوي لمونځونه وڅارئ. د لمانځه پر وخت یادونه ترلاسه کړئ، او که مو لمونځ نه وي تایید کړی، بله یادونه ترلاسه کړئ.',
       'heading': 'لوری',
       'minutesValue': '{value} دقیقې',
     },
@@ -927,29 +927,7 @@ class AppStrings {
     Map<String, String> params = const <String, String>{},
   }) {
     if (key == 'appName') {
-      return const <String, String>{
-            'de': 'Mein Gebet',
-            'en': 'My Prayer',
-            'ar': 'صلاتي',
-            'bn': 'আমার নামাজ',
-            'fa': 'نماز من',
-            'fr': 'Ma prière',
-            'ha': "Addu'ata",
-            'id': 'Salatku',
-            'jv': 'Shalatku',
-            'ms': 'Solatku',
-            'nl': 'Mijn gebed',
-            'ps': 'زما لمونځ',
-            'pa': 'میری نماز',
-            'ru': 'Моя молитва',
-            'so': 'Salaaddayda',
-            'sw': 'Swala yangu',
-            'ce': 'Сан ламаз',
-            'tr': 'Namazım',
-            'ur': 'میری نماز',
-            'es': 'Mi oración',
-          }[locale.languageCode] ??
-          'My Prayer';
+      return 'SalahTrack';
     }
     String value =
         privacyLegalUiTranslations[locale.languageCode]?[key] ??

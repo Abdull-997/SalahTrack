@@ -1,3 +1,3 @@
-CFBundleDisplayName = "Solatku";
-CFBundleName = "Solatku";
-NSLocationWhenInUseUsageDescription = "Solatku menggunakan lokasi anda untuk mengira waktu solat tempatan dan arah Kiblat.";
+CFBundleDisplayName = "SalahTrack";
+CFBundleName = "SalahTrack";
+NSLocationWhenInUseUsageDescription = "SalahTrack menggunakan lokasi anda untuk mengira waktu solat tempatan dan arah Kiblat.";

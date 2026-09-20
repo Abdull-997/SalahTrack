@@ -1,4 +1,4 @@
-# SalahFocus store privacy audit
+# SalahTrack store privacy audit
 
 Audit date: 20 September 2026
 
@@ -8,8 +8,8 @@ and local persistence schemas. This is a technical audit, not legal advice.
 
 ## Executive summary
 
-SalahFocus is local-first, but it is not fully offline. It has no accounts and
-no SalahFocus backend. Prayer and Ramadan history stays in the app's SQLite
+SalahTrack is local-first, but it is not fully offline. It has no accounts and
+no SalahTrack backend. Prayer and Ramadan history stays in the app's SQLite
 database. Precise coordinates and prayer calculation parameters leave the
 device over HTTPS when the app requests a monthly calendar from
 `api.aladhan.com`. Manual place searches and reverse geocoding may also leave
@@ -33,8 +33,8 @@ code.
 | Preferences | Locale, theme, onboarding flag, prayer/Ramadan settings, custom confirmation text, first successful launch timestamp and whether a review request was attempted. | SharedPreferences. | No direct transmission found. Selected prayer calculation fields are separately sent for the prayer API request as described above. |
 | Qibla/compass | Qibla bearing is calculated from stored coordinates; live compass heading rotates the display. | Compass heading is not persisted. | No transmission found. |
 | Notifications | Local prayer, Friday, snooze, one-hour and Ramadan schedules; notification payloads contain schedule/prayer identifiers and actions. | Stored by the operating system/plugin as pending local notifications. | No remote push provider or push token is used. |
-| Time zone and app version | Reads the device time-zone name and installed package version/build number. | Time zone is stored with location and prayer cache; version is display-only. | No transmission found by SalahFocus. |
-| App review prompt | After the local eligibility delay, invokes the operating system's in-app review UI. | Only first-launch and attempted flags are stored locally. | Apple/Google store services may be contacted by the OS/plugin. SalahFocus does not receive review content. |
+| Time zone and app version | Reads the device time-zone name and installed package version/build number. | Time zone is stored with location and prayer cache; version is display-only. | No transmission found by SalahTrack. |
+| App review prompt | After the local eligibility delay, invokes the operating system's in-app review UI. | Only first-launch and attempted flags are stored locally. | Apple/Google store services may be contacted by the OS/plugin. SalahTrack does not receive review content. |
 
 Normal HTTPS and geocoding requests expose connection metadata such as IP
 address to network/service operators. The code does not add a device ID, user
@@ -65,9 +65,9 @@ at-rest protection is appropriate before release.
   `shared_preferences`, and `package_info_plus` provide device/local features;
   no independent analytics or advertising call was found.
 - `flutter_local_notifications` schedules local notifications. There is no
-  Firebase Messaging, APNs token handling, or SalahFocus notification server.
+  Firebase Messaging, APNs token handling, or SalahTrack notification server.
 - `in_app_review` invokes StoreKit/Google Play review UI. It does not add
-  SalahFocus analytics, but the app store service can receive its normal store
+  SalahTrack analytics, but the app store service can receive its normal store
   interaction data.
 - No Firebase, Crashlytics, Sentry, Google Mobile Ads, Meta, AppsFlyer,
   Adjust, Amplitude, Mixpanel, or similar SDK is present in the lockfile.
@@ -130,7 +130,7 @@ retention must be confirmed before choosing the final answer.
 Conservative submission recommendation until that confirmation exists:
 
 - Declare **Precise Location** as collected for **App Functionality**, optional,
-  not used for tracking, and not linked to a SalahFocus account (there is no
+  not used for tracking, and not linked to a SalahTrack account (there is no
   account). Confirm whether Apple expects Coarse Location as well for users who
   grant approximate access.
 - Do not declare locally stored prayer/Ramadan history as collected by the

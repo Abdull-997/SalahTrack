@@ -23,7 +23,7 @@
 		<string>ur</string>
 	</array>
 	<key>CFBundleDisplayName</key>
-	<string>My Prayer</string>
+	<string>SalahTrack</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -31,7 +31,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>My Prayer</string>
+	<string>SalahTrack</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -83,6 +83,6 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>SalahFocus uses your location to calculate local prayer times and Qibla direction.</string>
+	<string>SalahTrack uses your location to calculate local prayer times and Qibla direction.</string>
 </dict>
 </plist>

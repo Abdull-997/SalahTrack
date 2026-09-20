@@ -1,8 +1,8 @@
-# SalahFocus Architecture
+# SalahTrack Architecture
 
 ## Boundaries
 
-SalahFocus uses a feature-first architecture with separate domain, data/application and presentation responsibilities.
+SalahTrack uses a feature-first architecture with separate domain, data/application and presentation responsibilities.
 
 The two most important platform abstractions are:
 

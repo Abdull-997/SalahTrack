@@ -27,54 +27,54 @@ abstract final class PrivacyLegalDocuments {
     'en': LegalDocument(
       title: 'Privacy Policy',
       lastUpdated: '16 September 2026',
-      introduction: 'This policy describes the data processing performed by the current SalahFocus app. It does not describe future account, cloud-sync, analytics, or advertising features that are not present in this release.',
+      introduction: 'This policy describes the data processing performed by the current SalahTrack app. It does not describe future account, cloud-sync, analytics, or advertising features that are not present in this release.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. Controller and scope',
           paragraphs: <String>[
-            'The person responsible for SalahFocus is {controller}, {location}. Contact: {email}. LinkedIn: {linkedin}. SalahFocus has no user accounts and no developer-operated account or synchronization server.',
+            'The person responsible for SalahTrack is {controller}, {location}. Contact: {email}. LinkedIn: {linkedin}. SalahTrack has no user accounts and no developer-operated account or synchronization server.',
           ],
         ),
         LegalSection(
           title: '2. Location and geocoding',
           paragraphs: <String>[
-            'If you choose automatic location, SalahFocus requests foreground/while-in-use precise location. It stores latitude, longitude, city, country, time zone, and whether the location was automatic. While the app is running, automatic mode listens for location changes with an approximately 1 km distance filter so prayer data can be refreshed.',
+            'If you choose automatic location, SalahTrack requests foreground/while-in-use precise location. It stores latitude, longitude, city, country, time zone, and whether the location was automatic. While the app is running, automatic mode listens for location changes with an approximately 1 km distance filter so prayer data can be refreshed.',
             'The current builds do not request Android background location or iOS Always authorization and do not declare an iOS background-location mode. You may instead enter a city and country. Forward or reverse geocoding is performed by the device platform and may send the entered place or coordinates, language, IP address, and ordinary request metadata to the platform geocoding provider.',
           ],
         ),
         LegalSection(
           title: '3. Prayer times and Qibla',
           paragraphs: <String>[
-            'To download a monthly prayer calendar, SalahFocus sends the selected latitude and longitude, month and year, calculation method, Asr school, and high-latitude rule over HTTPS to the AlAdhan API at api.aladhan.com. The service and network operators can also receive ordinary connection data such as the IP address. City names and prayer history are not included in this request.',
-            'Qibla bearing is calculated on the device from the stored coordinates. Compass heading is read from the device sensor for display and is not stored or sent by SalahFocus.',
+            'To download a monthly prayer calendar, SalahTrack sends the selected latitude and longitude, month and year, calculation method, Asr school, and high-latitude rule over HTTPS to the AlAdhan API at api.aladhan.com. The service and network operators can also receive ordinary connection data such as the IP address. City names and prayer history are not included in this request.',
+            'Qibla bearing is calculated on the device from the stored coordinates. Compass heading is read from the device sensor for display and is not stored or sent by SalahTrack.',
           ],
         ),
         LegalSection(
           title: '4. Data stored on the device',
           paragraphs: <String>[
             'SharedPreferences stores selected location, prayer and Ramadan settings, language, theme, onboarding status, first successful launch time, and whether an in-app review request was attempted. SQLite stores cached prayer times, time zone and Hijri metadata, prayer status, confirmation/edit/snooze timestamps, manual offsets, Ramadan fasting, Tarawih and Qiyam records, custom Ramadan goal titles, and goal completions.',
-            'Prayer and Ramadan records can reveal religious practice and should be treated as sensitive. The current code keeps these records in the app database and does not upload them to SalahFocus or the prayer-time API. The app does not access contacts, photos, microphone, health data, advertising identifiers, or other device identifiers.',
+            'Prayer and Ramadan records can reveal religious practice and should be treated as sensitive. The current code keeps these records in the app database and does not upload them to SalahTrack or the prayer-time API. The app does not access contacts, photos, microphone, health data, advertising identifiers, or other device identifiers.',
           ],
         ),
         LegalSection(
           title: '5. Notifications and device features',
           paragraphs: <String>[
-            'With permission, SalahFocus schedules local prayer, Friday, snooze, and Ramadan notifications on the device. Notification text, dates, prayer identifiers, and actions are handled by the operating system; no remote-push token or notification server is used. Android may use exact alarms, vibration, restart scheduling after boot, and optional full-screen prayer alerts. iOS may use Time Sensitive notifications.',
-            'The current iOS target does not contain FamilyControls, ManagedSettings, DeviceActivity, an App Group, or a Family Controls entitlement. SalahFocus therefore does not access Screen Time app selections or usage data in this release.',
+            'With permission, SalahTrack schedules local prayer, Friday, snooze, and Ramadan notifications on the device. Notification text, dates, prayer identifiers, and actions are handled by the operating system; no remote-push token or notification server is used. Android may use exact alarms, vibration, restart scheduling after boot, and optional full-screen prayer alerts. iOS may use Time Sensitive notifications.',
+            'The current iOS target does not contain FamilyControls, ManagedSettings, DeviceActivity, an App Group, or a Family Controls entitlement. SalahTrack therefore does not access Screen Time app selections or usage data in this release.',
           ],
         ),
         LegalSection(
           title: '6. Third-party services and network transfers',
           paragraphs: <String>[
-            'External processing is limited to the AlAdhan prayer-time API, operating-system geocoding services, and an optional operating-system App Store or Google Play review prompt. Those providers may process technical connection logs under their own terms. SalahFocus contains no analytics, crash-reporting, advertising, tracking, or social-login SDK.',
-            'No prayer history, Ramadan history, custom goals, notification actions, or account data is transmitted to the developer. All app requests identified in the source use HTTPS, but SalahFocus does not control how external providers retain their server logs.',
+            'External processing is limited to the AlAdhan prayer-time API, operating-system geocoding services, and an optional operating-system App Store or Google Play review prompt. Those providers may process technical connection logs under their own terms. SalahTrack contains no analytics, crash-reporting, advertising, tracking, or social-login SDK.',
+            'No prayer history, Ramadan history, custom goals, notification actions, or account data is transmitted to the developer. All app requests identified in the source use HTTPS, but SalahTrack does not control how external providers retain their server logs.',
           ],
         ),
         LegalSection(
           title: '7. Retention and deletion',
           paragraphs: <String>[
             'Local settings remain until changed, app storage is cleared, or the app is uninstalled. Prayer and Ramadan history is retained in the local database without an automatic deletion period. Cached prayer data may be replaced by later downloads; scheduled notifications expire or are cancelled when schedules change.',
-            'You can revoke location and notification permissions in system settings. Clearing SalahFocus storage or uninstalling the app deletes the app-managed local database and preferences. Requests concerning data held by an external provider must be addressed under that provider’s process.',
+            'You can revoke location and notification permissions in system settings. Clearing SalahTrack storage or uninstalling the app deletes the app-managed local database and preferences. Requests concerning data held by an external provider must be addressed under that provider’s process.',
           ],
         ),
         LegalSection(
@@ -95,54 +95,54 @@ abstract final class PrivacyLegalDocuments {
     'de': LegalDocument(
       title: 'Datenschutzerklärung',
       lastUpdated: '16. September 2026',
-      introduction: 'Diese Erklärung beschreibt die Datenverarbeitung der aktuellen SalahFocus-App. Sie beschreibt keine künftigen Konto-, Cloud-Sync-, Analyse- oder Werbefunktionen, die in dieser Version nicht vorhanden sind.',
+      introduction: 'Diese Erklärung beschreibt die Datenverarbeitung der aktuellen SalahTrack-App. Sie beschreibt keine künftigen Konto-, Cloud-Sync-, Analyse- oder Werbefunktionen, die in dieser Version nicht vorhanden sind.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. Verantwortlicher und Geltungsbereich',
           paragraphs: <String>[
-            'Verantwortlich für SalahFocus ist {controller}, {location}. Kontakt: {email}. LinkedIn: {linkedin}. SalahFocus hat keine Benutzerkonten und keinen vom Entwickler betriebenen Konto- oder Synchronisationsserver.',
+            'Verantwortlich für SalahTrack ist {controller}, {location}. Kontakt: {email}. LinkedIn: {linkedin}. SalahTrack hat keine Benutzerkonten und keinen vom Entwickler betriebenen Konto- oder Synchronisationsserver.',
           ],
         ),
         LegalSection(
           title: '2. Standort und Geokodierung',
           paragraphs: <String>[
-            'Wenn du den automatischen Standort auswählst, fragt SalahFocus den genauen Standort im Vordergrund beziehungsweise während der Nutzung ab. Gespeichert werden Breiten- und Längengrad, Stadt, Land, Zeitzone sowie die Information, ob der Standort automatisch ermittelt wurde. Solange die App läuft, reagiert der automatische Modus ungefähr ab einer Ortsänderung von 1 km.',
+            'Wenn du den automatischen Standort auswählst, fragt SalahTrack den genauen Standort im Vordergrund beziehungsweise während der Nutzung ab. Gespeichert werden Breiten- und Längengrad, Stadt, Land, Zeitzone sowie die Information, ob der Standort automatisch ermittelt wurde. Solange die App läuft, reagiert der automatische Modus ungefähr ab einer Ortsänderung von 1 km.',
             'Die aktuellen Builds fordern weder Android-Hintergrundstandort noch die iOS-Berechtigung „Immer“ an und deklarieren keinen iOS-Hintergrundmodus für Standort. Alternativ kannst du Stadt und Land eingeben. Die Geokodierung erfolgt über den Plattformdienst und kann Ortsangaben oder Koordinaten, Sprache, IP-Adresse und übliche Verbindungsdaten an dessen Anbieter übermitteln.',
           ],
         ),
         LegalSection(
           title: '3. Gebetszeiten und Qibla',
           paragraphs: <String>[
-            'Für den monatlichen Gebetskalender sendet SalahFocus den gewählten Breiten- und Längengrad, Monat und Jahr, Berechnungsmethode, Asr-Rechtsschule und Höhenbreitenregel verschlüsselt per HTTPS an die AlAdhan-API unter api.aladhan.com. Der Dienst und Netzbetreiber können zusätzlich übliche Verbindungsdaten wie die IP-Adresse erhalten. Stadtname und Gebetsverlauf werden nicht mitgesendet.',
-            'Die Qibla-Richtung wird auf dem Gerät aus den gespeicherten Koordinaten berechnet. Die Kompassausrichtung wird nur zur Anzeige vom Sensor gelesen und von SalahFocus weder gespeichert noch übertragen.',
+            'Für den monatlichen Gebetskalender sendet SalahTrack den gewählten Breiten- und Längengrad, Monat und Jahr, Berechnungsmethode, Asr-Rechtsschule und Höhenbreitenregel verschlüsselt per HTTPS an die AlAdhan-API unter api.aladhan.com. Der Dienst und Netzbetreiber können zusätzlich übliche Verbindungsdaten wie die IP-Adresse erhalten. Stadtname und Gebetsverlauf werden nicht mitgesendet.',
+            'Die Qibla-Richtung wird auf dem Gerät aus den gespeicherten Koordinaten berechnet. Die Kompassausrichtung wird nur zur Anzeige vom Sensor gelesen und von SalahTrack weder gespeichert noch übertragen.',
           ],
         ),
         LegalSection(
           title: '4. Auf dem Gerät gespeicherte Daten',
           paragraphs: <String>[
             'SharedPreferences speichert Standort, Gebets- und Ramadan-Einstellungen, Sprache, Design, Onboarding-Status, Zeitpunkt des ersten erfolgreichen Starts und ob eine In-App-Bewertung angefragt wurde. SQLite speichert Gebetszeit-Cache, Zeitzonen- und Hijri-Daten, Gebetsstatus, Bestätigungs-, Bearbeitungs- und Snooze-Zeitpunkte, manuelle Korrekturen sowie Fasten-, Tarawih-, Qiyam- und Ramadan-Zieldaten.',
-            'Gebets- und Ramadan-Einträge können religiöse Praxis erkennen lassen und sind besonders sensibel. Der aktuelle Code belässt sie in der App-Datenbank und lädt sie weder zu SalahFocus noch zur Gebetszeiten-API hoch. Kontakte, Fotos, Mikrofon, Gesundheitsdaten, Werbe- oder andere Gerätekennungen werden nicht abgerufen.',
+            'Gebets- und Ramadan-Einträge können religiöse Praxis erkennen lassen und sind besonders sensibel. Der aktuelle Code belässt sie in der App-Datenbank und lädt sie weder zu SalahTrack noch zur Gebetszeiten-API hoch. Kontakte, Fotos, Mikrofon, Gesundheitsdaten, Werbe- oder andere Gerätekennungen werden nicht abgerufen.',
           ],
         ),
         LegalSection(
           title: '5. Benachrichtigungen und Gerätefunktionen',
           paragraphs: <String>[
-            'Mit deiner Erlaubnis plant SalahFocus lokale Gebets-, Freitags-, Snooze- und Ramadan-Benachrichtigungen. Inhalt, Termine, Gebetskennungen und Aktionen verarbeitet das Betriebssystem; es gibt keinen Remote-Push-Token und keinen Benachrichtigungsserver. Android kann exakte Alarme, Vibration, Neuplanung nach Neustart und optionale Vollbildhinweise verwenden. iOS kann zeitkritische Mitteilungen verwenden.',
+            'Mit deiner Erlaubnis plant SalahTrack lokale Gebets-, Freitags-, Snooze- und Ramadan-Benachrichtigungen. Inhalt, Termine, Gebetskennungen und Aktionen verarbeitet das Betriebssystem; es gibt keinen Remote-Push-Token und keinen Benachrichtigungsserver. Android kann exakte Alarme, Vibration, Neuplanung nach Neustart und optionale Vollbildhinweise verwenden. iOS kann zeitkritische Mitteilungen verwenden.',
             'Das aktuelle iOS-Ziel enthält keine FamilyControls-, ManagedSettings- oder DeviceActivity-Integration, keine App Group und keine Family-Controls-Berechtigung. Diese Version greift daher nicht auf Bildschirmzeit-Auswahlen oder Nutzungsdaten zu.',
           ],
         ),
         LegalSection(
           title: '6. Drittanbieter und Übermittlungen',
           paragraphs: <String>[
-            'Externe Verarbeitung beschränkt sich auf die AlAdhan-Gebetszeiten-API, Geokodierungsdienste des Betriebssystems und eine optionale Bewertungsabfrage über App Store oder Google Play. Diese Anbieter können technische Verbindungsprotokolle nach ihren eigenen Bedingungen verarbeiten. SalahFocus enthält keine Analyse-, Absturzbericht-, Werbe-, Tracking- oder Social-Login-SDKs.',
-            'Gebets- oder Ramadan-Verlauf, eigene Ziele und Benachrichtigungsaktionen werden nicht an den Entwickler übertragen. Alle im Quellcode festgelegten App-Anfragen verwenden HTTPS; die Speicherfristen externer Serverprotokolle werden jedoch nicht von SalahFocus kontrolliert.',
+            'Externe Verarbeitung beschränkt sich auf die AlAdhan-Gebetszeiten-API, Geokodierungsdienste des Betriebssystems und eine optionale Bewertungsabfrage über App Store oder Google Play. Diese Anbieter können technische Verbindungsprotokolle nach ihren eigenen Bedingungen verarbeiten. SalahTrack enthält keine Analyse-, Absturzbericht-, Werbe-, Tracking- oder Social-Login-SDKs.',
+            'Gebets- oder Ramadan-Verlauf, eigene Ziele und Benachrichtigungsaktionen werden nicht an den Entwickler übertragen. Alle im Quellcode festgelegten App-Anfragen verwenden HTTPS; die Speicherfristen externer Serverprotokolle werden jedoch nicht von SalahTrack kontrolliert.',
           ],
         ),
         LegalSection(
           title: '7. Speicherdauer und Löschung',
           paragraphs: <String>[
             'Lokale Einstellungen bleiben bis zur Änderung, Löschung der App-Daten oder Deinstallation erhalten. Für den lokalen Gebets- und Ramadan-Verlauf gibt es derzeit keine automatische Löschfrist. Gebetszeit-Caches können überschrieben werden; geplante Mitteilungen laufen ab oder werden bei Planänderungen gelöscht.',
-            'Standort- und Mitteilungsberechtigungen kannst du in den Systemeinstellungen widerrufen. Das Löschen des SalahFocus-App-Speichers oder die Deinstallation entfernt die von der App verwaltete Datenbank und Einstellungen. Für Daten eines externen Anbieters gilt dessen Löschverfahren.',
+            'Standort- und Mitteilungsberechtigungen kannst du in den Systemeinstellungen widerrufen. Das Löschen des SalahTrack-App-Speichers oder die Deinstallation entfernt die von der App verwaltete Datenbank und Einstellungen. Für Daten eines externen Anbieters gilt dessen Löschverfahren.',
           ],
         ),
         LegalSection(
@@ -163,12 +163,12 @@ abstract final class PrivacyLegalDocuments {
     'ar': LegalDocument(
       title: 'سياسة الخصوصية',
       lastUpdated: '16 سبتمبر 2026',
-      introduction: 'تصف هذه السياسة معالجة البيانات في الإصدار الحالي من تطبيق SalahFocus، ولا تشمل ميزات مستقبلية مثل الحسابات أو المزامنة السحابية أو التحليلات أو الإعلانات لأنها غير موجودة حاليًا.',
+      introduction: 'تصف هذه السياسة معالجة البيانات في الإصدار الحالي من تطبيق SalahTrack، ولا تشمل ميزات مستقبلية مثل الحسابات أو المزامنة السحابية أو التحليلات أو الإعلانات لأنها غير موجودة حاليًا.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. المسؤول ونطاق السياسة',
           paragraphs: <String>[
-            'المسؤول عن SalahFocus هو {controller}، {location}. التواصل: {email}. لينكدإن: {linkedin}. لا توجد حسابات مستخدمين ولا خادم حسابات أو مزامنة يديره المطور.',
+            'المسؤول عن SalahTrack هو {controller}، {location}. التواصل: {email}. لينكدإن: {linkedin}. لا توجد حسابات مستخدمين ولا خادم حسابات أو مزامنة يديره المطور.',
           ],
         ),
         LegalSection(
@@ -182,7 +182,7 @@ abstract final class PrivacyLegalDocuments {
           title: '3. مواقيت الصلاة والقبلة',
           paragraphs: <String>[
             'لتنزيل تقويم شهري يرسل التطبيق عبر HTTPS الإحداثيات والشهر والسنة وطريقة الحساب ومذهب العصر وقاعدة خطوط العرض العليا إلى واجهة AlAdhan على api.aladhan.com. وقد يستلم مزود الخدمة والشبكة عنوان IP وبيانات الاتصال المعتادة. لا يُرسل اسم المدينة ولا سجل الصلاة.',
-            'يُحسب اتجاه القبلة على الجهاز من الإحداثيات المحفوظة. تُقرأ جهة البوصلة من حساس الجهاز للعرض فقط ولا يحفظها SalahFocus أو يرسلها.',
+            'يُحسب اتجاه القبلة على الجهاز من الإحداثيات المحفوظة. تُقرأ جهة البوصلة من حساس الجهاز للعرض فقط ولا يحفظها SalahTrack أو يرسلها.',
           ],
         ),
         LegalSection(
@@ -202,15 +202,15 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '6. الخدمات الخارجية ونقل البيانات',
           paragraphs: <String>[
-            'تقتصر المعالجة الخارجية على AlAdhan وخدمات الترميز الجغرافي في النظام ونافذة تقييم اختيارية من App Store أو Google Play. قد يعالج هؤلاء المزودون سجلات تقنية وفق شروطهم. لا يحتوي SalahFocus على تحليلات أو تقارير أعطال أو إعلانات أو تتبع أو تسجيل اجتماعي.',
-            'لا تُنقل سجلات الصلاة ورمضان أو الأهداف أو إجراءات الإشعارات إلى المطور. تستخدم طلبات التطبيق المحددة في المصدر HTTPS، لكن SalahFocus لا يتحكم في مدة احتفاظ المزودين بسجلات خوادمهم.',
+            'تقتصر المعالجة الخارجية على AlAdhan وخدمات الترميز الجغرافي في النظام ونافذة تقييم اختيارية من App Store أو Google Play. قد يعالج هؤلاء المزودون سجلات تقنية وفق شروطهم. لا يحتوي SalahTrack على تحليلات أو تقارير أعطال أو إعلانات أو تتبع أو تسجيل اجتماعي.',
+            'لا تُنقل سجلات الصلاة ورمضان أو الأهداف أو إجراءات الإشعارات إلى المطور. تستخدم طلبات التطبيق المحددة في المصدر HTTPS، لكن SalahTrack لا يتحكم في مدة احتفاظ المزودين بسجلات خوادمهم.',
           ],
         ),
         LegalSection(
           title: '7. الاحتفاظ والحذف',
           paragraphs: <String>[
             'تبقى الإعدادات المحلية حتى تغييرها أو مسح بيانات التطبيق أو إلغاء تثبيته. لا توجد مدة حذف تلقائي لسجل الصلاة ورمضان المحلي. قد تُستبدل بيانات المواقيت المخبأة، وتنتهي الإشعارات أو تُلغى عند تغيير الجدول.',
-            'يمكن سحب أذونات الموقع والإشعارات من إعدادات النظام. يؤدي مسح تخزين SalahFocus أو إلغاء تثبيته إلى حذف قاعدة البيانات والتفضيلات التي يديرها التطبيق. تخضع بيانات المزود الخارجي لإجراءات ذلك المزود.',
+            'يمكن سحب أذونات الموقع والإشعارات من إعدادات النظام. يؤدي مسح تخزين SalahTrack أو إلغاء تثبيته إلى حذف قاعدة البيانات والتفضيلات التي يديرها التطبيق. تخضع بيانات المزود الخارجي لإجراءات ذلك المزود.',
           ],
         ),
         LegalSection(
@@ -231,12 +231,12 @@ abstract final class PrivacyLegalDocuments {
     'fr': LegalDocument(
       title: 'Politique de confidentialité',
       lastUpdated: '16 septembre 2026',
-      introduction: 'Cette politique décrit les traitements de la version actuelle de SalahFocus. Elle ne couvre pas de futurs comptes, synchronisation cloud, analyses ou publicités, absents de cette version.',
+      introduction: 'Cette politique décrit les traitements de la version actuelle de SalahTrack. Elle ne couvre pas de futurs comptes, synchronisation cloud, analyses ou publicités, absents de cette version.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. Responsable et portée',
           paragraphs: <String>[
-            'Le responsable de SalahFocus est {controller}, {location}. Contact : {email}. LinkedIn : {linkedin}. SalahFocus ne propose aucun compte utilisateur ni serveur de compte ou de synchronisation exploité par le développeur.',
+            'Le responsable de SalahTrack est {controller}, {location}. Contact : {email}. LinkedIn : {linkedin}. SalahTrack ne propose aucun compte utilisateur ni serveur de compte ou de synchronisation exploité par le développeur.',
           ],
         ),
         LegalSection(
@@ -249,8 +249,8 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '3. Horaires de prière et Qibla',
           paragraphs: <String>[
-            'Pour le calendrier mensuel, SalahFocus envoie par HTTPS latitude, longitude, mois, année, méthode de calcul, école de l’Asr et règle de haute latitude à l’API AlAdhan sur api.aladhan.com. Le service et les opérateurs réseau peuvent recevoir l’adresse IP et les données de connexion usuelles. La ville et l’historique des prières ne sont pas envoyés.',
-            'La Qibla est calculée sur l’appareil. Le cap du compas sert uniquement à l’affichage et SalahFocus ne le conserve ni ne le transmet.',
+            'Pour le calendrier mensuel, SalahTrack envoie par HTTPS latitude, longitude, mois, année, méthode de calcul, école de l’Asr et règle de haute latitude à l’API AlAdhan sur api.aladhan.com. Le service et les opérateurs réseau peuvent recevoir l’adresse IP et les données de connexion usuelles. La ville et l’historique des prières ne sont pas envoyés.',
+            'La Qibla est calculée sur l’appareil. Le cap du compas sert uniquement à l’affichage et SalahTrack ne le conserve ni ne le transmet.',
           ],
         ),
         LegalSection(
@@ -271,14 +271,14 @@ abstract final class PrivacyLegalDocuments {
           title: '6. Services tiers et transferts',
           paragraphs: <String>[
             'Les traitements externes se limitent à AlAdhan, au géocodage du système et à une éventuelle invite d’avis App Store/Google Play. Ces fournisseurs peuvent traiter des journaux techniques selon leurs règles. Aucun SDK d’analyse, de crash, de publicité, de suivi ou de connexion sociale n’est intégré.',
-            'Historique de prière/Ramadan, objectifs et actions de notification ne sont pas transmis au développeur. Les requêtes définies dans le code utilisent HTTPS, mais SalahFocus ne contrôle pas la conservation des journaux des fournisseurs.',
+            'Historique de prière/Ramadan, objectifs et actions de notification ne sont pas transmis au développeur. Les requêtes définies dans le code utilisent HTTPS, mais SalahTrack ne contrôle pas la conservation des journaux des fournisseurs.',
           ],
         ),
         LegalSection(
           title: '7. Conservation et suppression',
           paragraphs: <String>[
             'Les réglages restent jusqu’à modification, effacement des données ou désinstallation. Aucun délai automatique ne supprime actuellement l’historique local. Le cache peut être remplacé et les notifications expirent ou sont annulées lors d’un changement.',
-            'Vous pouvez retirer les autorisations dans les réglages système. Effacer le stockage de SalahFocus ou désinstaller l’app supprime sa base et ses préférences. Les données d’un fournisseur externe suivent sa propre procédure.',
+            'Vous pouvez retirer les autorisations dans les réglages système. Effacer le stockage de SalahTrack ou désinstaller l’app supprime sa base et ses préférences. Les données d’un fournisseur externe suivent sa propre procédure.',
           ],
         ),
         LegalSection(
@@ -299,12 +299,12 @@ abstract final class PrivacyLegalDocuments {
     'es': LegalDocument(
       title: 'Política de privacidad',
       lastUpdated: '16 de septiembre de 2026',
-      introduction: 'Esta política describe el tratamiento de datos de la versión actual de SalahFocus. No describe futuras cuentas, sincronización en la nube, analítica o publicidad que no existen en esta versión.',
+      introduction: 'Esta política describe el tratamiento de datos de la versión actual de SalahTrack. No describe futuras cuentas, sincronización en la nube, analítica o publicidad que no existen en esta versión.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. Responsable y alcance',
           paragraphs: <String>[
-            'El responsable de SalahFocus es {controller}, {location}. Contacto: {email}. LinkedIn: {linkedin}. SalahFocus no tiene cuentas de usuario ni un servidor de cuentas o sincronización operado por el desarrollador.',
+            'El responsable de SalahTrack es {controller}, {location}. Contacto: {email}. LinkedIn: {linkedin}. SalahTrack no tiene cuentas de usuario ni un servidor de cuentas o sincronización operado por el desarrollador.',
           ],
         ),
         LegalSection(
@@ -318,7 +318,7 @@ abstract final class PrivacyLegalDocuments {
           title: '3. Horarios de oración y Qibla',
           paragraphs: <String>[
             'Para el calendario mensual se envían por HTTPS latitud, longitud, mes, año, método, escuela del Asr y regla de latitudes altas a la API AlAdhan en api.aladhan.com. El servicio y la red pueden recibir la IP y datos de conexión. No se envían ciudad ni historial de oración.',
-            'La Qibla se calcula en el dispositivo. El rumbo de la brújula solo se usa para mostrarlo y SalahFocus no lo guarda ni transmite.',
+            'La Qibla se calcula en el dispositivo. El rumbo de la brújula solo se usa para mostrarlo y SalahTrack no lo guarda ni transmite.',
           ],
         ),
         LegalSection(
@@ -339,7 +339,7 @@ abstract final class PrivacyLegalDocuments {
           title: '6. Terceros y transferencias',
           paragraphs: <String>[
             'El tratamiento externo se limita a AlAdhan, geocodificación del sistema y una solicitud opcional de reseña de App Store/Google Play. Pueden tratar registros técnicos según sus términos. No hay SDK de analítica, fallos, anuncios, seguimiento o acceso social.',
-            'No se transmiten al desarrollador historial, objetivos ni acciones. Las solicitudes del código usan HTTPS, pero SalahFocus no controla la retención de registros de proveedores.',
+            'No se transmiten al desarrollador historial, objetivos ni acciones. Las solicitudes del código usan HTTPS, pero SalahTrack no controla la retención de registros de proveedores.',
           ],
         ),
         LegalSection(
@@ -367,12 +367,12 @@ abstract final class PrivacyLegalDocuments {
     'tr': LegalDocument(
       title: 'Gizlilik Politikası',
       lastUpdated: '16 Eylül 2026',
-      introduction: 'Bu politika SalahFocus’un mevcut sürümündeki veri işlemesini açıklar; bu sürümde bulunmayan gelecekteki hesap, bulut eşitleme, analiz veya reklam özelliklerini kapsamaz.',
+      introduction: 'Bu politika SalahTrack’un mevcut sürümündeki veri işlemesini açıklar; bu sürümde bulunmayan gelecekteki hesap, bulut eşitleme, analiz veya reklam özelliklerini kapsamaz.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. Sorumlu ve kapsam',
           paragraphs: <String>[
-            'SalahFocus’tan sorumlu kişi {controller}, {location}. İletişim: {email}. LinkedIn: {linkedin}. Kullanıcı hesabı ve geliştiricinin işlettiği hesap/eşitleme sunucusu yoktur.',
+            'SalahTrack’tan sorumlu kişi {controller}, {location}. İletişim: {email}. LinkedIn: {linkedin}. Kullanıcı hesabı ve geliştiricinin işlettiği hesap/eşitleme sunucusu yoktur.',
           ],
         ),
         LegalSection(
@@ -386,7 +386,7 @@ abstract final class PrivacyLegalDocuments {
           title: '3. Namaz vakitleri ve Kıble',
           paragraphs: <String>[
             'Aylık takvim için enlem, boylam, ay, yıl, hesap yöntemi, Asr ekolü ve yüksek enlem kuralı HTTPS ile api.aladhan.com adresindeki AlAdhan API’ye gönderilir. Hizmet ve ağ IP ile olağan bağlantı verilerini alabilir. Şehir adı ve namaz geçmişi gönderilmez.',
-            'Kıble cihazda hesaplanır. Pusula yönü yalnızca gösterim için okunur; SalahFocus bunu saklamaz veya iletmez.',
+            'Kıble cihazda hesaplanır. Pusula yönü yalnızca gösterim için okunur; SalahTrack bunu saklamaz veya iletmez.',
           ],
         ),
         LegalSection(
@@ -407,7 +407,7 @@ abstract final class PrivacyLegalDocuments {
           title: '6. Üçüncü taraflar ve aktarımlar',
           paragraphs: <String>[
             'Harici işleme AlAdhan, sistem coğrafi kodlaması ve isteğe bağlı App Store/Google Play değerlendirme penceresiyle sınırlıdır. Sağlayıcılar teknik günlükleri kendi koşullarına göre işleyebilir. Analiz, çökme raporu, reklam, izleme veya sosyal giriş SDK’sı yoktur.',
-            'Namaz/Ramazan geçmişi, hedefler ve bildirim eylemleri geliştiriciye aktarılmaz. Kodda tanımlı istekler HTTPS kullanır; sağlayıcı günlüklerinin saklama süresi SalahFocus’un denetiminde değildir.',
+            'Namaz/Ramazan geçmişi, hedefler ve bildirim eylemleri geliştiriciye aktarılmaz. Kodda tanımlı istekler HTTPS kullanır; sağlayıcı günlüklerinin saklama süresi SalahTrack’un denetiminde değildir.',
           ],
         ),
         LegalSection(
@@ -435,12 +435,12 @@ abstract final class PrivacyLegalDocuments {
     'id': LegalDocument(
       title: 'Kebijakan Privasi',
       lastUpdated: '16 September 2026',
-      introduction: 'Kebijakan ini menjelaskan pemrosesan data dalam SalahFocus versi saat ini. Fitur akun, sinkronisasi awan, analitik, atau iklan yang belum ada tidak tercakup.',
+      introduction: 'Kebijakan ini menjelaskan pemrosesan data dalam SalahTrack versi saat ini. Fitur akun, sinkronisasi awan, analitik, atau iklan yang belum ada tidak tercakup.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. Pengendali dan cakupan',
           paragraphs: <String>[
-            'Penanggung jawab SalahFocus adalah {controller}, {location}. Kontak: {email}. LinkedIn: {linkedin}. Tidak ada akun pengguna atau server akun/sinkronisasi yang dioperasikan pengembang.',
+            'Penanggung jawab SalahTrack adalah {controller}, {location}. Kontak: {email}. LinkedIn: {linkedin}. Tidak ada akun pengguna atau server akun/sinkronisasi yang dioperasikan pengembang.',
           ],
         ),
         LegalSection(
@@ -454,7 +454,7 @@ abstract final class PrivacyLegalDocuments {
           title: '3. Waktu salat dan Kiblat',
           paragraphs: <String>[
             'Untuk kalender bulanan, lintang, bujur, bulan, tahun, metode perhitungan, mazhab Asar, dan aturan lintang tinggi dikirim melalui HTTPS ke API AlAdhan di api.aladhan.com. Layanan dan jaringan dapat menerima IP serta data koneksi biasa. Nama kota dan riwayat salat tidak dikirim.',
-            'Arah Kiblat dihitung di perangkat. Arah kompas hanya dibaca untuk tampilan dan tidak disimpan atau dikirim oleh SalahFocus.',
+            'Arah Kiblat dihitung di perangkat. Arah kompas hanya dibaca untuk tampilan dan tidak disimpan atau dikirim oleh SalahTrack.',
           ],
         ),
         LegalSection(
@@ -475,7 +475,7 @@ abstract final class PrivacyLegalDocuments {
           title: '6. Pihak ketiga dan transfer',
           paragraphs: <String>[
             'Pemrosesan eksternal terbatas pada AlAdhan, geocoding sistem, dan dialog ulasan App Store/Google Play opsional. Penyedia dapat memproses log teknis berdasarkan ketentuan mereka. Tidak ada SDK analitik, laporan crash, iklan, pelacakan, atau login sosial.',
-            'Riwayat salat/Ramadan, sasaran, dan tindakan notifikasi tidak dikirim kepada pengembang. Permintaan dalam kode memakai HTTPS, tetapi retensi log penyedia tidak dikendalikan SalahFocus.',
+            'Riwayat salat/Ramadan, sasaran, dan tindakan notifikasi tidak dikirim kepada pengembang. Permintaan dalam kode memakai HTTPS, tetapi retensi log penyedia tidak dikendalikan SalahTrack.',
           ],
         ),
         LegalSection(
@@ -503,12 +503,12 @@ abstract final class PrivacyLegalDocuments {
     'ms': LegalDocument(
       title: 'Dasar Privasi',
       lastUpdated: '16 September 2026',
-      introduction: 'Dasar ini menerangkan pemprosesan data dalam versi semasa SalahFocus. Ia tidak meliputi akaun, penyegerakan awan, analitik atau pengiklanan masa hadapan yang belum wujud.',
+      introduction: 'Dasar ini menerangkan pemprosesan data dalam versi semasa SalahTrack. Ia tidak meliputi akaun, penyegerakan awan, analitik atau pengiklanan masa hadapan yang belum wujud.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. Pengawal dan skop',
           paragraphs: <String>[
-            'Orang yang bertanggungjawab terhadap SalahFocus ialah {controller}, {location}. Hubungan: {email}. LinkedIn: {linkedin}. Tiada akaun pengguna atau pelayan akaun/penyegerakan yang dikendalikan pembangun.',
+            'Orang yang bertanggungjawab terhadap SalahTrack ialah {controller}, {location}. Hubungan: {email}. LinkedIn: {linkedin}. Tiada akaun pengguna atau pelayan akaun/penyegerakan yang dikendalikan pembangun.',
           ],
         ),
         LegalSection(
@@ -522,7 +522,7 @@ abstract final class PrivacyLegalDocuments {
           title: '3. Waktu solat dan Kiblat',
           paragraphs: <String>[
             'Untuk kalendar bulanan, latitud, longitud, bulan, tahun, kaedah, mazhab Asar dan peraturan latitud tinggi dihantar melalui HTTPS ke API AlAdhan di api.aladhan.com. Perkhidmatan dan rangkaian boleh menerima IP dan data sambungan biasa. Nama bandar dan sejarah solat tidak dihantar.',
-            'Arah Kiblat dikira pada peranti. Arah kompas hanya dibaca untuk paparan dan tidak disimpan atau dihantar oleh SalahFocus.',
+            'Arah Kiblat dikira pada peranti. Arah kompas hanya dibaca untuk paparan dan tidak disimpan atau dihantar oleh SalahTrack.',
           ],
         ),
         LegalSection(
@@ -543,7 +543,7 @@ abstract final class PrivacyLegalDocuments {
           title: '6. Pihak ketiga dan pemindahan',
           paragraphs: <String>[
             'Pemprosesan luar terhad kepada AlAdhan, geokod sistem dan gesaan ulasan App Store/Google Play pilihan. Penyedia boleh memproses log teknikal mengikut syarat mereka. Tiada SDK analitik, laporan ranap, iklan, penjejakan atau log masuk sosial.',
-            'Sejarah solat/Ramadan, matlamat dan tindakan pemberitahuan tidak dihantar kepada pembangun. Permintaan kod menggunakan HTTPS, tetapi pengekalan log penyedia bukan di bawah kawalan SalahFocus.',
+            'Sejarah solat/Ramadan, matlamat dan tindakan pemberitahuan tidak dihantar kepada pembangun. Permintaan kod menggunakan HTTPS, tetapi pengekalan log penyedia bukan di bawah kawalan SalahTrack.',
           ],
         ),
         LegalSection(
@@ -571,12 +571,12 @@ abstract final class PrivacyLegalDocuments {
     'bn': LegalDocument(
       title: 'গোপনীয়তা নীতি',
       lastUpdated: '১৬ সেপ্টেম্বর ২০২৬',
-      introduction: 'এই নীতি SalahFocus-এর বর্তমান সংস্করণে ডেটা প্রক্রিয়াকরণ ব্যাখ্যা করে। এই সংস্করণে না থাকা ভবিষ্যৎ অ্যাকাউন্ট, ক্লাউড সিঙ্ক, অ্যানালিটিক্স বা বিজ্ঞাপন এতে অন্তর্ভুক্ত নয়।',
+      introduction: 'এই নীতি SalahTrack-এর বর্তমান সংস্করণে ডেটা প্রক্রিয়াকরণ ব্যাখ্যা করে। এই সংস্করণে না থাকা ভবিষ্যৎ অ্যাকাউন্ট, ক্লাউড সিঙ্ক, অ্যানালিটিক্স বা বিজ্ঞাপন এতে অন্তর্ভুক্ত নয়।',
       sections: <LegalSection>[
         LegalSection(
           title: '১. নিয়ন্ত্রক ও পরিধি',
           paragraphs: <String>[
-            'SalahFocus-এর দায়িত্বপ্রাপ্ত ব্যক্তি {controller}, {location}। যোগাযোগ: {email}। LinkedIn: {linkedin}। কোনো ব্যবহারকারী অ্যাকাউন্ট বা ডেভেলপার-চালিত অ্যাকাউন্ট/সিঙ্ক সার্ভার নেই।',
+            'SalahTrack-এর দায়িত্বপ্রাপ্ত ব্যক্তি {controller}, {location}। যোগাযোগ: {email}। LinkedIn: {linkedin}। কোনো ব্যবহারকারী অ্যাকাউন্ট বা ডেভেলপার-চালিত অ্যাকাউন্ট/সিঙ্ক সার্ভার নেই।',
           ],
         ),
         LegalSection(
@@ -590,7 +590,7 @@ abstract final class PrivacyLegalDocuments {
           title: '৩. নামাজের সময় ও কিবলা',
           paragraphs: <String>[
             'মাসিক ক্যালেন্ডারের জন্য অক্ষাংশ, দ্রাঘিমাংশ, মাস, বছর, গণনা পদ্ধতি, আসর মাযহাব ও উচ্চ অক্ষাংশ নিয়ম HTTPS-এ api.aladhan.com-এর AlAdhan API-তে যায়। সেবা ও নেটওয়ার্ক IP ও সাধারণ সংযোগ তথ্য পেতে পারে। শহরের নাম বা নামাজের ইতিহাস যায় না।',
-            'কিবলা ডিভাইসেই হিসাব হয়। কম্পাসের দিক শুধু দেখানোর জন্য পড়া হয়; SalahFocus তা সংরক্ষণ বা পাঠায় না।',
+            'কিবলা ডিভাইসেই হিসাব হয়। কম্পাসের দিক শুধু দেখানোর জন্য পড়া হয়; SalahTrack তা সংরক্ষণ বা পাঠায় না।',
           ],
         ),
         LegalSection(
@@ -611,7 +611,7 @@ abstract final class PrivacyLegalDocuments {
           title: '৬. তৃতীয় পক্ষ ও স্থানান্তর',
           paragraphs: <String>[
             'বাহ্যিক প্রক্রিয়াকরণ AlAdhan, সিস্টেম জিওকোডিং এবং ঐচ্ছিক App Store/Google Play রিভিউ প্রম্পটে সীমিত। সরবরাহকারীরা নিজ শর্তে প্রযুক্তিগত লগ রাখতে পারে। কোনো অ্যানালিটিক্স, ক্র্যাশ, বিজ্ঞাপন, ট্র্যাকিং বা সামাজিক লগইন SDK নেই।',
-            'নামাজ/রমজান ইতিহাস, লক্ষ্য বা নোটিফিকেশন কাজ ডেভেলপারের কাছে যায় না। কোডের অনুরোধ HTTPS ব্যবহার করে, তবে সরবরাহকারীর লগ ধরে রাখা SalahFocus নিয়ন্ত্রণ করে না।',
+            'নামাজ/রমজান ইতিহাস, লক্ষ্য বা নোটিফিকেশন কাজ ডেভেলপারের কাছে যায় না। কোডের অনুরোধ HTTPS ব্যবহার করে, তবে সরবরাহকারীর লগ ধরে রাখা SalahTrack নিয়ন্ত্রণ করে না।',
           ],
         ),
         LegalSection(
@@ -639,12 +639,12 @@ abstract final class PrivacyLegalDocuments {
     'fa': LegalDocument(
       title: 'سیاست حریم خصوصی',
       lastUpdated: '۱۶ سپتامبر ۲۰۲۶',
-      introduction: 'این سیاست پردازش داده در نسخهٔ فعلی SalahFocus را توضیح می‌دهد و شامل حساب، همگام‌سازی ابری، تحلیل یا تبلیغات آینده که اکنون وجود ندارند نیست.',
+      introduction: 'این سیاست پردازش داده در نسخهٔ فعلی SalahTrack را توضیح می‌دهد و شامل حساب، همگام‌سازی ابری، تحلیل یا تبلیغات آینده که اکنون وجود ندارند نیست.',
       sections: <LegalSection>[
         LegalSection(
           title: '۱. مسئول و دامنه',
           paragraphs: <String>[
-            'مسئول SalahFocus، {controller}، {location} است. تماس: {email}. لینکدین: {linkedin}. حساب کاربری یا سرور حساب/همگام‌سازی تحت ادارهٔ توسعه‌دهنده وجود ندارد.',
+            'مسئول SalahTrack، {controller}، {location} است. تماس: {email}. لینکدین: {linkedin}. حساب کاربری یا سرور حساب/همگام‌سازی تحت ادارهٔ توسعه‌دهنده وجود ندارد.',
           ],
         ),
         LegalSection(
@@ -658,7 +658,7 @@ abstract final class PrivacyLegalDocuments {
           title: '۳. اوقات نماز و قبله',
           paragraphs: <String>[
             'برای تقویم ماهانه، مختصات، ماه، سال، روش محاسبه، مذهب عصر و قاعدهٔ عرض‌های بالا با HTTPS به API ‏AlAdhan در api.aladhan.com فرستاده می‌شود. سرویس و شبکه ممکن است IP و دادهٔ اتصال را دریافت کنند. نام شهر و سابقهٔ نماز ارسال نمی‌شود.',
-            'قبله روی دستگاه محاسبه می‌شود. جهت قطب‌نما فقط برای نمایش خوانده می‌شود و SalahFocus آن را ذخیره یا ارسال نمی‌کند.',
+            'قبله روی دستگاه محاسبه می‌شود. جهت قطب‌نما فقط برای نمایش خوانده می‌شود و SalahTrack آن را ذخیره یا ارسال نمی‌کند.',
           ],
         ),
         LegalSection(
@@ -679,14 +679,14 @@ abstract final class PrivacyLegalDocuments {
           title: '۶. اشخاص ثالث و انتقال',
           paragraphs: <String>[
             'پردازش خارجی به AlAdhan، ژئوکدینگ سیستم و درخواست اختیاری امتیاز App Store/Google Play محدود است. ارائه‌دهندگان ممکن است طبق شرایط خود گزارش فنی پردازش کنند. SDK تحلیل، خرابی، تبلیغ، ردیابی یا ورود اجتماعی وجود ندارد.',
-            'سابقهٔ نماز/رمضان، اهداف و اقدامات اعلان برای توسعه‌دهنده ارسال نمی‌شود. درخواست‌های کد HTTPS هستند، اما نگهداری گزارش ارائه‌دهندگان در کنترل SalahFocus نیست.',
+            'سابقهٔ نماز/رمضان، اهداف و اقدامات اعلان برای توسعه‌دهنده ارسال نمی‌شود. درخواست‌های کد HTTPS هستند، اما نگهداری گزارش ارائه‌دهندگان در کنترل SalahTrack نیست.',
           ],
         ),
         LegalSection(
           title: '۷. نگهداری و حذف',
           paragraphs: <String>[
             'تنظیمات تا تغییر، پاک‌کردن داده یا حذف برنامه باقی می‌ماند. برای سابقهٔ محلی حذف خودکار تعیین نشده است. کش ممکن است جایگزین شود و اعلان‌ها با تغییر برنامه منقضی یا لغو می‌شوند.',
-            'مجوزها را می‌توان در تنظیمات سیستم پس گرفت. پاک‌کردن فضای SalahFocus یا حذف برنامه پایگاه داده و ترجیحات را حذف می‌کند. دادهٔ ارائه‌دهندهٔ خارجی تابع فرایند اوست.',
+            'مجوزها را می‌توان در تنظیمات سیستم پس گرفت. پاک‌کردن فضای SalahTrack یا حذف برنامه پایگاه داده و ترجیحات را حذف می‌کند. دادهٔ ارائه‌دهندهٔ خارجی تابع فرایند اوست.',
           ],
         ),
         LegalSection(
@@ -707,12 +707,12 @@ abstract final class PrivacyLegalDocuments {
     'pa': LegalDocument(
       title: 'رازداری پالیسی',
       lastUpdated: '۱۶ ستمبر ۲۰۲۶',
-      introduction: 'ایہہ پالیسی SalahFocus دے موجودہ ورژن وچ ڈیٹا پراسیسنگ دسدے اے۔ مستقبل دے اکاؤنٹ، کلاؤڈ سنک، تجزیے یا اشتہار جیہڑے ہن موجود نئیں، ایس وچ شامل نئیں۔',
+      introduction: 'ایہہ پالیسی SalahTrack دے موجودہ ورژن وچ ڈیٹا پراسیسنگ دسدے اے۔ مستقبل دے اکاؤنٹ، کلاؤڈ سنک، تجزیے یا اشتہار جیہڑے ہن موجود نئیں، ایس وچ شامل نئیں۔',
       sections: <LegalSection>[
         LegalSection(
           title: '۱. ذمہ وار تے دائرہ',
           paragraphs: <String>[
-            'SalahFocus دا ذمہ وار {controller}، {location} اے۔ رابطہ: {email}۔ LinkedIn: {linkedin}۔ صارف اکاؤنٹ یا ڈویلپر دا اکاؤنٹ/سنک سرور نئیں۔',
+            'SalahTrack دا ذمہ وار {controller}، {location} اے۔ رابطہ: {email}۔ LinkedIn: {linkedin}۔ صارف اکاؤنٹ یا ڈویلپر دا اکاؤنٹ/سنک سرور نئیں۔',
           ],
         ),
         LegalSection(
@@ -726,7 +726,7 @@ abstract final class PrivacyLegalDocuments {
           title: '۳. نماز دے ویلے تے قبلہ',
           paragraphs: <String>[
             'مہینے دے کیلنڈر لئی مختصات، مہینہ، سال، حساب طریقہ، عصر فقہ تے اونچی عرض دا اصول HTTPS نال api.aladhan.com دے AlAdhan API نوں جاندا اے۔ سروس تے نیٹ ورک IP تے عام کنکشن ڈیٹا لے سکدے نیں۔ شہر دا ناں تے نماز تاریخ نئیں بھیجی جاندی۔',
-            'قبلہ ڈیوائس تے حساب ہوندا اے۔ کمپاس سمت صرف دکھاؤن لئی پڑھی جاندی تے SalahFocus محفوظ یا منتقل نئیں کردا۔',
+            'قبلہ ڈیوائس تے حساب ہوندا اے۔ کمپاس سمت صرف دکھاؤن لئی پڑھی جاندی تے SalahTrack محفوظ یا منتقل نئیں کردا۔',
           ],
         ),
         LegalSection(
@@ -747,7 +747,7 @@ abstract final class PrivacyLegalDocuments {
           title: '۶. تیجی دھراں تے منتقلی',
           paragraphs: <String>[
             'باہرلی پراسیسنگ AlAdhan، سسٹم جیوکوڈنگ تے اختیاری App Store/Google Play ریویو تک محدود اے۔ فراہم کنندے اپنے شرطاں نال تکنیکی لاگ رکھ سکدے نیں۔ تجزیہ، کریش، اشتہار، ٹریکنگ یا سماجی لاگ اِن SDK نئیں۔',
-            'نماز/رمضان تاریخ، مقصد تے اطلاع عمل ڈویلپر نوں نئیں جاندا۔ کوڈ دیاں درخواستاں HTTPS نیں، پر فراہم کنندے دے لاگ دی مدت SalahFocus دے قابو وچ نئیں۔',
+            'نماز/رمضان تاریخ، مقصد تے اطلاع عمل ڈویلپر نوں نئیں جاندا۔ کوڈ دیاں درخواستاں HTTPS نیں، پر فراہم کنندے دے لاگ دی مدت SalahTrack دے قابو وچ نئیں۔',
           ],
         ),
         LegalSection(
@@ -775,12 +775,12 @@ abstract final class PrivacyLegalDocuments {
     'ps': LegalDocument(
       title: 'د محرمیت تګلاره',
       lastUpdated: '۱۶ سپتمبر ۲۰۲۶',
-      introduction: 'دا تګلاره د SalahFocus په اوسنۍ نسخه کې د معلوماتو پروسس بیانوي. راتلونکي حسابونه، کلاوډ همغږي، شننه یا اعلانونه چې اوس نشته پکې نه شاملېږي.',
+      introduction: 'دا تګلاره د SalahTrack په اوسنۍ نسخه کې د معلوماتو پروسس بیانوي. راتلونکي حسابونه، کلاوډ همغږي، شننه یا اعلانونه چې اوس نشته پکې نه شاملېږي.',
       sections: <LegalSection>[
         LegalSection(
           title: '۱. مسؤول او ساحه',
           paragraphs: <String>[
-            'د SalahFocus مسؤول {controller}، {location} دی. اړیکه: {email}. LinkedIn: {linkedin}. د کارن حساب یا د جوړوونکي حساب/همغږي سرور نشته.',
+            'د SalahTrack مسؤول {controller}، {location} دی. اړیکه: {email}. LinkedIn: {linkedin}. د کارن حساب یا د جوړوونکي حساب/همغږي سرور نشته.',
           ],
         ),
         LegalSection(
@@ -794,7 +794,7 @@ abstract final class PrivacyLegalDocuments {
           title: '۳. د لمانځه وختونه او قبله',
           paragraphs: <String>[
             'د میاشتني کلیزې لپاره مختصات، میاشت، کال، د حساب طریقه، د عصر مذهب او د لوړو عرضونو قاعده په HTTPS سره api.aladhan.com د AlAdhan API ته ځي. خدمت او شبکه IP او عادي نښلون معلومات اخیستلی شي. د ښار نوم او د لمانځه تاریخ نه لېږل کېږي.',
-            'قبله په وسیله کې حسابېږي. د کمپاس لوری یوازې د ښودلو لپاره لوستل کېږي او SalahFocus یې نه ساتي او نه لېږي.',
+            'قبله په وسیله کې حسابېږي. د کمپاس لوری یوازې د ښودلو لپاره لوستل کېږي او SalahTrack یې نه ساتي او نه لېږي.',
           ],
         ),
         LegalSection(
@@ -815,7 +815,7 @@ abstract final class PrivacyLegalDocuments {
           title: '۶. درېیم خدمتونه او لېږد',
           paragraphs: <String>[
             'بهرنی پروسس AlAdhan، د سیستم جیوکوډنګ او اختیاري App Store/Google Play ارزونې ته محدود دی. برابرونکي تخنیکي ثبتونه د خپلو شرطونو له مخې پروسس کولی شي. د شننې، خرابۍ، اعلان، تعقیب یا ټولنیز ننوتلو SDK نشته.',
-            'د لمانځه/رمضان تاریخ، موخې او د خبرتیا عمل جوړوونکي ته نه ځي. د کوډ غوښتنې HTTPS دي، خو د برابرونکي د ثبتونو ساتنه د SalahFocus تر کنټرول لاندې نه ده.',
+            'د لمانځه/رمضان تاریخ، موخې او د خبرتیا عمل جوړوونکي ته نه ځي. د کوډ غوښتنې HTTPS دي، خو د برابرونکي د ثبتونو ساتنه د SalahTrack تر کنټرول لاندې نه ده.',
           ],
         ),
         LegalSection(
@@ -843,12 +843,12 @@ abstract final class PrivacyLegalDocuments {
     'ur': LegalDocument(
       title: 'رازداری کی پالیسی',
       lastUpdated: '۱۶ ستمبر ۲۰۲۶',
-      introduction: 'یہ پالیسی SalahFocus کے موجودہ ورژن میں ڈیٹا پراسیسنگ بیان کرتی ہے۔ مستقبل کے اکاؤنٹس، کلاؤڈ سنک، تجزیات یا اشتہارات جو اس ورژن میں نہیں ہیں، اس میں شامل نہیں۔',
+      introduction: 'یہ پالیسی SalahTrack کے موجودہ ورژن میں ڈیٹا پراسیسنگ بیان کرتی ہے۔ مستقبل کے اکاؤنٹس، کلاؤڈ سنک، تجزیات یا اشتہارات جو اس ورژن میں نہیں ہیں، اس میں شامل نہیں۔',
       sections: <LegalSection>[
         LegalSection(
           title: '۱. ذمہ دار اور دائرہ',
           paragraphs: <String>[
-            'SalahFocus کے ذمہ دار {controller}، {location} ہیں۔ رابطہ: {email}۔ LinkedIn: {linkedin}۔ صارف اکاؤنٹ یا ڈویلپر کا اکاؤنٹ/سنک سرور موجود نہیں۔',
+            'SalahTrack کے ذمہ دار {controller}، {location} ہیں۔ رابطہ: {email}۔ LinkedIn: {linkedin}۔ صارف اکاؤنٹ یا ڈویلپر کا اکاؤنٹ/سنک سرور موجود نہیں۔',
           ],
         ),
         LegalSection(
@@ -862,7 +862,7 @@ abstract final class PrivacyLegalDocuments {
           title: '۳. نماز کے اوقات اور قبلہ',
           paragraphs: <String>[
             'ماہانہ کیلنڈر کے لیے مختصات، مہینہ، سال، حساب طریقہ، عصر فقہ اور بلند عرض کا اصول HTTPS سے api.aladhan.com کے AlAdhan API کو جاتا ہے۔ سروس اور نیٹ ورک IP اور عام کنکشن ڈیٹا لے سکتے ہیں۔ شہر کا نام اور نماز کی تاریخ نہیں بھیجی جاتی۔',
-            'قبلہ ڈیوائس پر حساب ہوتا ہے۔ کمپاس سمت صرف دکھانے کے لیے پڑھی جاتی ہے اور SalahFocus اسے محفوظ یا منتقل نہیں کرتا۔',
+            'قبلہ ڈیوائس پر حساب ہوتا ہے۔ کمپاس سمت صرف دکھانے کے لیے پڑھی جاتی ہے اور SalahTrack اسے محفوظ یا منتقل نہیں کرتا۔',
           ],
         ),
         LegalSection(
@@ -883,7 +883,7 @@ abstract final class PrivacyLegalDocuments {
           title: '۶. تیسرے فریق اور منتقلی',
           paragraphs: <String>[
             'بیرونی پراسیسنگ AlAdhan، سسٹم جیوکوڈنگ اور اختیاری App Store/Google Play ریویو تک محدود ہے۔ فراہم کنندے اپنی شرائط کے تحت تکنیکی لاگ رکھ سکتے ہیں۔ تجزیات، کریش، اشتہار، ٹریکنگ یا سوشل لاگ اِن SDK نہیں۔',
-            'نماز/رمضان تاریخ، اہداف اور اطلاع عمل ڈویلپر کو نہیں جاتے۔ کوڈ کی درخواستیں HTTPS ہیں، مگر فراہم کنندے کے لاگ کی مدت SalahFocus کے قابو میں نہیں۔',
+            'نماز/رمضان تاریخ، اہداف اور اطلاع عمل ڈویلپر کو نہیں جاتے۔ کوڈ کی درخواستیں HTTPS ہیں، مگر فراہم کنندے کے لاگ کی مدت SalahTrack کے قابو میں نہیں۔',
           ],
         ),
         LegalSection(
@@ -914,7 +914,7 @@ abstract final class PrivacyLegalDocuments {
     'en': LegalDocument(
       title: 'Legal Notice / Impressum',
       lastUpdated: '16 September 2026',
-      introduction: 'Provider information prepared for SalahFocus. Only information supplied by the developer is stated.',
+      introduction: 'Provider information prepared for SalahTrack. Only information supplied by the developer is stated.',
       sections: <LegalSection>[
         LegalSection(
           title: 'Provider',
@@ -932,7 +932,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: 'Open-source software',
           paragraphs: <String>[
-            'SalahFocus includes open-source software. The applicable notices and license texts are available from Privacy & Legal → Open-Source Licenses inside the app. Rights in third-party names and content remain with their respective owners.',
+            'SalahTrack includes open-source software. The applicable notices and license texts are available from Privacy & Legal → Open-Source Licenses inside the app. Rights in third-party names and content remain with their respective owners.',
           ],
         ),
         LegalSection(
@@ -946,7 +946,7 @@ abstract final class PrivacyLegalDocuments {
     'de': LegalDocument(
       title: 'Impressum / Rechtliche Hinweise',
       lastUpdated: '16. September 2026',
-      introduction: 'Anbieterangaben für SalahFocus. Es werden ausschließlich die vom Entwickler mitgeteilten Angaben verwendet.',
+      introduction: 'Anbieterangaben für SalahTrack. Es werden ausschließlich die vom Entwickler mitgeteilten Angaben verwendet.',
       sections: <LegalSection>[
         LegalSection(
           title: 'Anbieter',
@@ -963,7 +963,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: 'Open-Source-Software',
           paragraphs: <String>[
-            'SalahFocus enthält Open-Source-Software. Hinweise und Lizenztexte sind in der App unter Datenschutz & Rechtliches → Open-Source-Lizenzen abrufbar. Rechte an Namen und Inhalten Dritter verbleiben bei den jeweiligen Inhabern.',
+            'SalahTrack enthält Open-Source-Software. Hinweise und Lizenztexte sind in der App unter Datenschutz & Rechtliches → Open-Source-Lizenzen abrufbar. Rechte an Namen und Inhalten Dritter verbleiben bei den jeweiligen Inhabern.',
           ],
         ),
         LegalSection(
@@ -977,7 +977,7 @@ abstract final class PrivacyLegalDocuments {
     'ar': LegalDocument(
       title: 'الإشعار القانوني / بيانات الناشر',
       lastUpdated: '16 سبتمبر 2026',
-      introduction: 'بيانات مقدم SalahFocus كما زودنا بها المطور فقط.',
+      introduction: 'بيانات مقدم SalahTrack كما زودنا بها المطور فقط.',
       sections: <LegalSection>[
         LegalSection(
           title: 'مقدم التطبيق',
@@ -995,7 +995,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: 'البرمجيات مفتوحة المصدر',
           paragraphs: <String>[
-            'يتضمن SalahFocus برمجيات مفتوحة المصدر. الإشعارات ونصوص التراخيص متاحة داخل التطبيق تحت الخصوصية والشؤون القانونية ← تراخيص المصادر المفتوحة. حقوق الأطراف الأخرى محفوظة لأصحابها.',
+            'يتضمن SalahTrack برمجيات مفتوحة المصدر. الإشعارات ونصوص التراخيص متاحة داخل التطبيق تحت الخصوصية والشؤون القانونية ← تراخيص المصادر المفتوحة. حقوق الأطراف الأخرى محفوظة لأصحابها.',
           ],
         ),
         LegalSection(
@@ -1009,7 +1009,7 @@ abstract final class PrivacyLegalDocuments {
     'fr': LegalDocument(
       title: 'Mentions légales / Impressum',
       lastUpdated: '16 septembre 2026',
-      introduction: 'Informations du fournisseur de SalahFocus, limitées à celles communiquées par le développeur.',
+      introduction: 'Informations du fournisseur de SalahTrack, limitées à celles communiquées par le développeur.',
       sections: <LegalSection>[
         LegalSection(
           title: 'Éditeur',
@@ -1027,7 +1027,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: 'Logiciels libres',
           paragraphs: <String>[
-            'SalahFocus inclut des logiciels libres. Les avis et licences figurent dans Confidentialité et mentions légales → Licences libres. Les droits des tiers restent à leurs titulaires.',
+            'SalahTrack inclut des logiciels libres. Les avis et licences figurent dans Confidentialité et mentions légales → Licences libres. Les droits des tiers restent à leurs titulaires.',
           ],
         ),
         LegalSection(
@@ -1041,7 +1041,7 @@ abstract final class PrivacyLegalDocuments {
     'es': LegalDocument(
       title: 'Aviso legal / Impressum',
       lastUpdated: '16 de septiembre de 2026',
-      introduction: 'Datos del proveedor de SalahFocus, limitados a la información facilitada.',
+      introduction: 'Datos del proveedor de SalahTrack, limitados a la información facilitada.',
       sections: <LegalSection>[
         LegalSection(
           title: 'Proveedor',
@@ -1059,7 +1059,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: 'Software de código abierto',
           paragraphs: <String>[
-            'SalahFocus incluye software abierto. Los avisos y licencias están en Privacidad y aspectos legales → Licencias de código abierto. Los derechos de terceros pertenecen a sus titulares.',
+            'SalahTrack incluye software abierto. Los avisos y licencias están en Privacidad y aspectos legales → Licencias de código abierto. Los derechos de terceros pertenecen a sus titulares.',
           ],
         ),
         LegalSection(
@@ -1073,7 +1073,7 @@ abstract final class PrivacyLegalDocuments {
     'tr': LegalDocument(
       title: 'Yasal Bildirim / Künye',
       lastUpdated: '16 Eylül 2026',
-      introduction: 'SalahFocus sağlayıcı bilgileri yalnızca geliştiricinin verdiği bilgilerle hazırlanmıştır.',
+      introduction: 'SalahTrack sağlayıcı bilgileri yalnızca geliştiricinin verdiği bilgilerle hazırlanmıştır.',
       sections: <LegalSection>[
         LegalSection(
           title: 'Sağlayıcı',
@@ -1091,7 +1091,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: 'Açık kaynak',
           paragraphs: <String>[
-            'SalahFocus açık kaynak yazılım içerir. Bildirim ve lisanslar Gizlilik ve Yasal Bilgiler → Açık Kaynak Lisansları bölümündedir. Üçüncü taraf hakları sahiplerine aittir.',
+            'SalahTrack açık kaynak yazılım içerir. Bildirim ve lisanslar Gizlilik ve Yasal Bilgiler → Açık Kaynak Lisansları bölümündedir. Üçüncü taraf hakları sahiplerine aittir.',
           ],
         ),
         LegalSection(
@@ -1105,7 +1105,7 @@ abstract final class PrivacyLegalDocuments {
     'id': LegalDocument(
       title: 'Pemberitahuan Hukum / Impressum',
       lastUpdated: '16 September 2026',
-      introduction: 'Informasi penyedia SalahFocus hanya menggunakan data yang diberikan pengembang.',
+      introduction: 'Informasi penyedia SalahTrack hanya menggunakan data yang diberikan pengembang.',
       sections: <LegalSection>[
         LegalSection(
           title: 'Penyedia',
@@ -1123,7 +1123,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: 'Perangkat lunak sumber terbuka',
           paragraphs: <String>[
-            'SalahFocus memakai perangkat lunak sumber terbuka. Pemberitahuan dan lisensi tersedia di Privasi & Hukum → Lisensi Sumber Terbuka. Hak pihak ketiga tetap milik pemiliknya.',
+            'SalahTrack memakai perangkat lunak sumber terbuka. Pemberitahuan dan lisensi tersedia di Privasi & Hukum → Lisensi Sumber Terbuka. Hak pihak ketiga tetap milik pemiliknya.',
           ],
         ),
         LegalSection(
@@ -1137,7 +1137,7 @@ abstract final class PrivacyLegalDocuments {
     'ms': LegalDocument(
       title: 'Notis Undang-undang / Impressum',
       lastUpdated: '16 September 2026',
-      introduction: 'Maklumat penyedia SalahFocus menggunakan hanya maklumat yang diberikan pembangun.',
+      introduction: 'Maklumat penyedia SalahTrack menggunakan hanya maklumat yang diberikan pembangun.',
       sections: <LegalSection>[
         LegalSection(
           title: 'Penyedia',
@@ -1155,7 +1155,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: 'Perisian sumber terbuka',
           paragraphs: <String>[
-            'SalahFocus mengandungi perisian sumber terbuka. Notis dan lesen tersedia di Privasi & Perundangan → Lesen Sumber Terbuka. Hak pihak ketiga kekal milik pemiliknya.',
+            'SalahTrack mengandungi perisian sumber terbuka. Notis dan lesen tersedia di Privasi & Perundangan → Lesen Sumber Terbuka. Hak pihak ketiga kekal milik pemiliknya.',
           ],
         ),
         LegalSection(
@@ -1170,7 +1170,7 @@ abstract final class PrivacyLegalDocuments {
       title: 'আইনি বিজ্ঞপ্তি / ইমপ্রেসুম',
       lastUpdated: '১৬ সেপ্টেম্বর ২০২৬',
       introduction:
-          'SalahFocus প্রদানকারীর তথ্য শুধু ডেভেলপার-প্রদত্ত তথ্য দিয়ে তৈরি।',
+          'SalahTrack প্রদানকারীর তথ্য শুধু ডেভেলপার-প্রদত্ত তথ্য দিয়ে তৈরি।',
       sections: <LegalSection>[
         LegalSection(
           title: 'প্রদানকারী',
@@ -1188,7 +1188,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: 'ওপেন-সোর্স সফটওয়্যার',
           paragraphs: <String>[
-            'SalahFocus ওপেন-সোর্স সফটওয়্যার ব্যবহার করে। বিজ্ঞপ্তি ও লাইসেন্স গোপনীয়তা ও আইনি তথ্য → ওপেন-সোর্স লাইসেন্সে আছে। তৃতীয় পক্ষের অধিকার তাদের মালিকের।',
+            'SalahTrack ওপেন-সোর্স সফটওয়্যার ব্যবহার করে। বিজ্ঞপ্তি ও লাইসেন্স গোপনীয়তা ও আইনি তথ্য → ওপেন-সোর্স লাইসেন্সে আছে। তৃতীয় পক্ষের অধিকার তাদের মালিকের।',
           ],
         ),
         LegalSection(
@@ -1202,7 +1202,7 @@ abstract final class PrivacyLegalDocuments {
     'fa': LegalDocument(
       title: 'اطلاعیهٔ حقوقی / Impressum',
       lastUpdated: '۱۶ سپتامبر ۲۰۲۶',
-      introduction: 'اطلاعات ارائه‌دهندهٔ SalahFocus فقط بر اساس داده‌های ارائه‌شده تنظیم شده است.',
+      introduction: 'اطلاعات ارائه‌دهندهٔ SalahTrack فقط بر اساس داده‌های ارائه‌شده تنظیم شده است.',
       sections: <LegalSection>[
         LegalSection(
           title: 'ارائه‌دهنده',
@@ -1220,7 +1220,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: 'نرم‌افزار متن‌باز',
           paragraphs: <String>[
-            'SalahFocus نرم‌افزار متن‌باز دارد. اطلاعیه‌ها و مجوزها در حریم خصوصی و اطلاعات حقوقی ← مجوزهای متن‌باز موجود است. حقوق اشخاص ثالث برای مالکان آن‌ها محفوظ است.',
+            'SalahTrack نرم‌افزار متن‌باز دارد. اطلاعیه‌ها و مجوزها در حریم خصوصی و اطلاعات حقوقی ← مجوزهای متن‌باز موجود است. حقوق اشخاص ثالث برای مالکان آن‌ها محفوظ است.',
           ],
         ),
         LegalSection(
@@ -1235,7 +1235,7 @@ abstract final class PrivacyLegalDocuments {
       title: 'قانونی نوٹس / امپریسم',
       lastUpdated: '۱۶ ستمبر ۲۰۲۶',
       introduction:
-          'SalahFocus فراہم کنندے دی معلومات صرف ڈویلپر دے دِتے ڈیٹا تے اے۔',
+          'SalahTrack فراہم کنندے دی معلومات صرف ڈویلپر دے دِتے ڈیٹا تے اے۔',
       sections: <LegalSection>[
         LegalSection(
           title: 'فراہم کنندہ',
@@ -1253,7 +1253,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: 'اوپن سورس سافٹ ویئر',
           paragraphs: <String>[
-            'SalahFocus اوپن سورس سافٹ ویئر رکھدا اے۔ نوٹس تے لائسنس رازداری تے قانونی معلومات ← اوپن سورس لائسنس وچ نیں۔ تیجی دھراں دے حق انہاں دے مالکاں کول نیں۔',
+            'SalahTrack اوپن سورس سافٹ ویئر رکھدا اے۔ نوٹس تے لائسنس رازداری تے قانونی معلومات ← اوپن سورس لائسنس وچ نیں۔ تیجی دھراں دے حق انہاں دے مالکاں کول نیں۔',
           ],
         ),
         LegalSection(
@@ -1267,7 +1267,7 @@ abstract final class PrivacyLegalDocuments {
     'ps': LegalDocument(
       title: 'حقوقي خبرتیا / امپریسوم',
       lastUpdated: '۱۶ سپتمبر ۲۰۲۶',
-      introduction: 'د SalahFocus د برابرونکي معلومات یوازې د جوړوونکي له ورکړل شوو معلوماتو جوړ دي.',
+      introduction: 'د SalahTrack د برابرونکي معلومات یوازې د جوړوونکي له ورکړل شوو معلوماتو جوړ دي.',
       sections: <LegalSection>[
         LegalSection(
           title: 'برابرونکی',
@@ -1285,7 +1285,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: 'پرانیستې سرچینې سافټویر',
           paragraphs: <String>[
-            'SalahFocus د پرانیستې سرچینې سافټویر لري. خبرتیاوې او جوازونه محرمیت او حقوقي معلومات ← جوازونو کې دي. د درېیمو حقونه د هغوی له مالکانو سره دي.',
+            'SalahTrack د پرانیستې سرچینې سافټویر لري. خبرتیاوې او جوازونه محرمیت او حقوقي معلومات ← جوازونو کې دي. د درېیمو حقونه د هغوی له مالکانو سره دي.',
           ],
         ),
         LegalSection(
@@ -1299,7 +1299,7 @@ abstract final class PrivacyLegalDocuments {
     'ur': LegalDocument(
       title: 'قانونی نوٹس / امپریسم',
       lastUpdated: '۱۶ ستمبر ۲۰۲۶',
-      introduction: 'SalahFocus فراہم کنندہ معلومات صرف ڈویلپر کی فراہم کردہ معلومات پر مبنی ہیں۔',
+      introduction: 'SalahTrack فراہم کنندہ معلومات صرف ڈویلپر کی فراہم کردہ معلومات پر مبنی ہیں۔',
       sections: <LegalSection>[
         LegalSection(
           title: 'فراہم کنندہ',
@@ -1317,7 +1317,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: 'اوپن سورس سافٹ ویئر',
           paragraphs: <String>[
-            'SalahFocus اوپن سورس سافٹ ویئر رکھتا ہے۔ نوٹس اور لائسنس رازداری اور قانونی معلومات ← اوپن سورس لائسنس میں ہیں۔ تیسرے فریق کے حقوق ان کے مالکوں کے ہیں۔',
+            'SalahTrack اوپن سورس سافٹ ویئر رکھتا ہے۔ نوٹس اور لائسنس رازداری اور قانونی معلومات ← اوپن سورس لائسنس میں ہیں۔ تیسرے فریق کے حقوق ان کے مالکوں کے ہیں۔',
           ],
         ),
         LegalSection(

@@ -702,8 +702,8 @@ class LocalNotificationService implements NotificationService {
     const Map<String, Map<String, String>>
     values = <String, Map<String, String>>{
       'id': <String, String>{
-        'prayerTitle': '🕌 Waktu {prayer} telah tiba',
-        'prayerBody': 'Sudah waktunya menunaikan salat.',
+        'prayerTitle': 'Azan {prayer}',
+        'prayerBody': 'Waktu salat {prayer} telah tiba.',
         'graceTitle': 'Waktu {prayer}',
         'graceBody':
             'Anda ingin menyediakan beberapa menit untuk salat sekarang.',
@@ -713,8 +713,8 @@ class LocalNotificationService implements NotificationService {
         'softBody': 'Luangkan beberapa menit untuk {prayer}, jika Anda bisa.',
       },
       'bn': <String, String>{
-        'prayerTitle': '🕌 {prayer}-এর সময় হয়েছে',
-        'prayerBody': 'আপনার নামাজের সময় হয়েছে।',
+        'prayerTitle': '{prayer} আজান',
+        'prayerBody': '{prayer} নামাজের সময় শুরু হয়েছে।',
         'graceTitle': '{prayer}-এর সময়',
         'graceBody': 'আপনি এখন নামাজের জন্য কয়েক মিনিট রাখতে চেয়েছিলেন।',
         'snoozeTitle': '{prayer} – স্মরণিকা',
@@ -724,8 +724,8 @@ class LocalNotificationService implements NotificationService {
         'softBody': 'সম্ভব হলে {prayer}-এর জন্য কয়েক মিনিট সময় নিন।',
       },
       'pa': <String, String>{
-        'prayerTitle': '🕌 {prayer} دا ویلا ہو گیا',
-        'prayerBody': 'تہاڈی نماز دا ویلا ہو گیا اے۔',
+        'prayerTitle': '{prayer} دی اذان',
+        'prayerBody': '{prayer} دی نماز دا ویلا شروع ہو گیا اے۔',
         'graceTitle': '{prayer} دا ویلا',
         'graceBody': 'تسی ہن نماز لئی کجھ منٹ کڈھنا چاہیا سی۔',
         'snoozeTitle': '{prayer} – یاددہانی',
@@ -735,8 +735,8 @@ class LocalNotificationService implements NotificationService {
         'softBody': 'جے ہو سکے تے {prayer} لئی کجھ منٹ کڈھو۔',
       },
       'fa': <String, String>{
-        'prayerTitle': '🕌 وقت {prayer} فرا رسیده است',
-        'prayerBody': 'وقت نماز شماست.',
+        'prayerTitle': 'اذان {prayer}',
+        'prayerBody': 'وقت نماز {prayer} فرا رسیده است.',
         'graceTitle': 'وقت {prayer}',
         'graceBody': 'می‌خواستید اکنون چند دقیقه برای نماز وقت بگذارید.',
         'snoozeTitle': '{prayer} – یادآوری',
@@ -746,8 +746,8 @@ class LocalNotificationService implements NotificationService {
         'softBody': 'اگر می‌توانید چند دقیقه برای {prayer} وقت بگذارید.',
       },
       'ms': <String, String>{
-        'prayerTitle': '🕌 Waktu {prayer} telah tiba',
-        'prayerBody': 'Sudah tiba waktu untuk solat.',
+        'prayerTitle': 'Azan {prayer}',
+        'prayerBody': 'Waktu solat {prayer} telah bermula.',
         'graceTitle': 'Waktu {prayer}',
         'graceBody':
             'Anda mahu meluangkan beberapa minit untuk solat sekarang.',
@@ -757,8 +757,8 @@ class LocalNotificationService implements NotificationService {
         'softBody': 'Luangkan beberapa minit untuk {prayer}, jika anda mampu.',
       },
       'fr': <String, String>{
-        'prayerTitle': '🕌 C’est l’heure de {prayer}',
-        'prayerBody': 'C’est l’heure de votre prière.',
+        'prayerTitle': 'Adhan de {prayer}',
+        'prayerBody': 'L’heure de la prière de {prayer} est arrivée.',
         'graceTitle': 'L’heure de {prayer}',
         'graceBody': 'Vous souhaitiez consacrer quelques minutes à votre prière maintenant.',
         'snoozeTitle': '{prayer} – rappel',
@@ -767,8 +767,8 @@ class LocalNotificationService implements NotificationService {
         'softBody': 'Prenez quelques minutes pour {prayer}, si vous le pouvez.',
       },
       'es': <String, String>{
-        'prayerTitle': '🕌 Es la hora de {prayer}',
-        'prayerBody': 'Es la hora de tu oración.',
+        'prayerTitle': 'Azán de {prayer}',
+        'prayerBody': 'Ha comenzado el tiempo de la oración de {prayer}.',
         'graceTitle': 'Hora de {prayer}',
         'graceBody': 'Querías dedicar unos minutos a tu oración ahora.',
         'snoozeTitle': '{prayer} – recordatorio',
@@ -778,8 +778,8 @@ class LocalNotificationService implements NotificationService {
         'softBody': 'Dedica unos minutos a {prayer}, si puedes.',
       },
       'tr': <String, String>{
-        'prayerTitle': '🕌 {prayer} vakti geldi',
-        'prayerBody': 'Namaz vakti geldi.',
+        'prayerTitle': '{prayer} Ezanı',
+        'prayerBody': '{prayer} namazının vakti girdi.',
         'graceTitle': '{prayer} vakti',
         'graceBody': 'Şimdi namazın için birkaç dakika ayırmak istemiştin.',
         'snoozeTitle': '{prayer} – hatırlatma',
@@ -788,8 +788,8 @@ class LocalNotificationService implements NotificationService {
         'softBody': 'Müsaitsen {prayer} için birkaç dakika ayır.',
       },
       'de': <String, String>{
-        'prayerTitle': '🕌 {prayer} ist da',
-        'prayerBody': 'Es ist Zeit für dein Gebet.',
+        'prayerTitle': '{prayer} Adhan',
+        'prayerBody': 'Die Zeit für das {prayer}-Gebet ist eingetreten.',
         'graceTitle': 'Zeit für {prayer}',
         'graceBody':
             'Du wolltest dir jetzt ein paar Minuten für dein Gebet nehmen.',
@@ -800,8 +800,8 @@ class LocalNotificationService implements NotificationService {
         'softBody': 'Nimm dir ein paar Minuten für {prayer}, wenn du kannst.',
       },
       'en': <String, String>{
-        'prayerTitle': '🕌 {prayer} is here',
-        'prayerBody': 'It is time for your prayer.',
+        'prayerTitle': '{prayer} Adhan',
+        'prayerBody': 'The time for {prayer} prayer has begun.',
         'graceTitle': 'Time for {prayer}',
         'graceBody': 'You wanted to make a few minutes for your prayer now.',
         'snoozeTitle': '{prayer} – reminder',
@@ -810,8 +810,8 @@ class LocalNotificationService implements NotificationService {
         'softBody': 'Take a few minutes for {prayer}, if you can.',
       },
       'ar': <String, String>{
-        'prayerTitle': '🕌 حان وقت {prayer}',
-        'prayerBody': 'حان وقت الصلاة.',
+        'prayerTitle': 'أذان {prayer}',
+        'prayerBody': 'دخل وقت صلاة {prayer}.',
         'graceTitle': 'وقت {prayer}',
         'graceBody': 'أردت أن تخصص الآن بضع دقائق لصلاتك.',
         'snoozeTitle': 'تذكير {prayer}',
@@ -820,8 +820,8 @@ class LocalNotificationService implements NotificationService {
         'softBody': 'خذ بضع دقائق من أجل {prayer} إن استطعت.',
       },
       'ur': <String, String>{
-        'prayerTitle': '🕌 {prayer} کا وقت ہو گیا',
-        'prayerBody': 'آپ کی نماز کا وقت ہے۔',
+        'prayerTitle': '{prayer} کی اذان',
+        'prayerBody': '{prayer} کی نماز کا وقت شروع ہو گیا ہے۔',
         'graceTitle': '{prayer} کا وقت',
         'graceBody':
             'آپ نے ابھی اپنی نماز کے لیے چند منٹ نکالنے کا ارادہ کیا تھا۔',
@@ -832,8 +832,8 @@ class LocalNotificationService implements NotificationService {
         'softBody': 'اگر ممکن ہو تو {prayer} کے لیے چند منٹ نکالیں۔',
       },
       'ps': <String, String>{
-        'prayerTitle': '🕌 د {prayer} وخت شو',
-        'prayerBody': 'ستاسو د لمانځه وخت دی.',
+        'prayerTitle': 'د {prayer} اذان',
+        'prayerBody': 'د {prayer} د لمانځه وخت پیل شو.',
         'graceTitle': 'د {prayer} وخت',
         'graceBody': 'تاسو غوښتل اوس خپل لمانځه ته څو دقیقې ځانګړې کړئ.',
         'snoozeTitle': '{prayer} – یادونه',

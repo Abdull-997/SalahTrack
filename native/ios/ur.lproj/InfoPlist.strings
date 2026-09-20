@@ -1,3 +1,3 @@
-CFBundleDisplayName = "میری نماز";
-CFBundleName = "میری نماز";
-NSLocationWhenInUseUsageDescription = "میری نماز مقامی نماز کے اوقات اور قبلہ کی سمت معلوم کرنے کے لیے آپ کا مقام استعمال کرتی ہے۔";
+CFBundleDisplayName = "SalahTrack";
+CFBundleName = "SalahTrack";
+NSLocationWhenInUseUsageDescription = "SalahTrack مقامی نماز کے اوقات اور قبلہ کی سمت معلوم کرنے کے لیے آپ کا مقام استعمال کرتی ہے۔";

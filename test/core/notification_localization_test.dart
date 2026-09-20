@@ -132,6 +132,72 @@ void main() {
       Importance.high,
     );
   });
+
+  test('all five prayer-time alerts name the prayer in German and English', () async {
+    final DateTime later = DateTime.now().toUtc().add(const Duration(hours: 2));
+    for (final String code in <String>['de', 'en']) {
+      final _Plugin plugin = _Plugin();
+      final LocalNotificationService service = LocalNotificationService(
+        plugin: plugin,
+      );
+      for (final PrayerType type in PrayerType.values) {
+        final PrayerEntry entry = PrayerEntry(
+          id: 'test-${type.name}',
+          localDate: later.toIso8601String().substring(0, 10),
+          type: type,
+          scheduledAtUtc: later,
+          timezoneId: 'UTC',
+          graceEndsAtUtc: later.add(const Duration(hours: 1)),
+          trackingEndsAtUtc: later.add(const Duration(hours: 2)),
+          status: PrayerStatus.upcoming,
+        );
+        final String name = type.localizedName(code);
+        await service.schedulePrayer(entry, name, languageCode: code);
+        final item = plugin.scheduled.last;
+        expect(item.title, '$name Adhan');
+        expect(
+          item.body,
+          code == 'de'
+              ? 'Die Zeit für das $name-Gebet ist eingetreten.'
+              : 'The time for $name prayer has begun.',
+        );
+      }
+      expect(plugin.scheduled, hasLength(5));
+    }
+  });
+
+  test('Arabic, Urdu and Pashto prayer-time alerts use local Adhan text', () async {
+    final expected = <String, (String, String)>{
+      'ar': ('أذان المغرب', 'دخل وقت صلاة المغرب.'),
+      'ur': ('مغرب کی اذان', 'مغرب کی نماز کا وقت شروع ہو گیا ہے۔'),
+      'ps': ('د ماښام اذان', 'د ماښام د لمانځه وخت پیل شو.'),
+    };
+    final DateTime later = DateTime.now().toUtc().add(const Duration(hours: 2));
+    for (final MapEntry<String, (String, String)> language in expected.entries) {
+      final _Plugin plugin = _Plugin();
+      final LocalNotificationService service = LocalNotificationService(
+        plugin: plugin,
+      );
+      final PrayerEntry entry = PrayerEntry(
+        id: 'test-maghrib',
+        localDate: later.toIso8601String().substring(0, 10),
+        type: PrayerType.maghrib,
+        scheduledAtUtc: later,
+        timezoneId: 'UTC',
+        graceEndsAtUtc: later.add(const Duration(hours: 1)),
+        trackingEndsAtUtc: later.add(const Duration(hours: 2)),
+        status: PrayerStatus.upcoming,
+      );
+      await service.schedulePrayer(
+        entry,
+        entry.type.localizedName(language.key),
+        languageCode: language.key,
+      );
+      expect(plugin.scheduled.single.title, language.value.$1);
+      expect(plugin.scheduled.single.body, language.value.$2);
+    }
+  });
+
   for (final String code in <String>[
     'tr',
     'fr',
@@ -172,55 +238,66 @@ void main() {
         expect(plugin.scheduled, hasLength(4));
         final List<String> titles = switch (code) {
           'tr' => [
-            '🕌 Yatsı vakti geldi',
+            'Yatsı Ezanı',
             'Yatsı vakti',
             'Yatsı – hatırlatma',
             'Nazik bir hatırlatma 🤍',
           ],
           'fr' => [
-            '🕌 C’est l’heure de Icha',
+            'Adhan de Icha',
             'L’heure de Icha',
             'Icha – rappel',
             'Un petit rappel 🤍',
           ],
           'es' => [
-            '🕌 Es la hora de Isha',
+            'Azán de Isha',
             'Hora de Isha',
             'Isha – recordatorio',
             'Un pequeño recordatorio 🤍',
           ],
           'id' => [
-            '🕌 Waktu Isya telah tiba',
+            'Azan Isya',
             'Waktu Isya',
             'Isya – pengingat',
             'Pengingat lembut 🤍',
           ],
           'bn' => [
-            '🕌 ইশা-এর সময় হয়েছে',
+            'ইশা আজান',
             'ইশা-এর সময়',
             'ইশা – স্মরণিকা',
             'একটি কোমল স্মরণিকা 🤍',
           ],
           'pa' => [
-            '🕌 عشاء دا ویلا ہو گیا',
+            'عشاء دی اذان',
             'عشاء دا ویلا',
             'عشاء – یاددہانی',
             'اک ہولی یاددہانی 🤍',
           ],
           'fa' => [
-            '🕌 وقت عشا فرا رسیده است',
+            'اذان عشا',
             'وقت عشا',
             'عشا – یادآوری',
             'یک یادآوری ملایم 🤍',
           ],
           _ => [
-            '🕌 Waktu Isyak telah tiba',
+            'Azan Isyak',
             'Waktu Isyak',
             'Isyak – peringatan',
             'Peringatan lembut 🤍',
           ],
         };
         expect(plugin.scheduled.map((item) => item.title), titles);
+        final String prayerTimeBody = switch (code) {
+          'tr' => 'Yatsı namazının vakti girdi.',
+          'fr' => 'L’heure de la prière de Icha est arrivée.',
+          'es' => 'Ha comenzado el tiempo de la oración de Isha.',
+          'id' => 'Waktu salat Isya telah tiba.',
+          'bn' => 'ইশা নামাজের সময় শুরু হয়েছে।',
+          'pa' => 'عشاء دی نماز دا ویلا شروع ہو گیا اے۔',
+          'fa' => 'وقت نماز عشا فرا رسیده است.',
+          _ => 'Waktu solat Isyak telah bermula.',
+        };
+        expect(plugin.scheduled.first.body, prayerTimeBody);
         final String channelName = switch (code) {
           'tr' => 'Namaz hatırlatmaları',
           'fr' => 'Rappels de prière',

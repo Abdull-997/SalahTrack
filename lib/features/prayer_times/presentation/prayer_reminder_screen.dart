@@ -457,7 +457,7 @@ class PrayerConfirmationSuccess extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        s.t('alhamdulillah'),
+                        "${s.t('alhamdulillah')} 🤲🏼",
                         textAlign: TextAlign.center,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           color: scheme.primary,

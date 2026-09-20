@@ -58,7 +58,7 @@ void _writeDocument(File file, LegalDocument document, String language) {
     ..writeln(
       '<meta name="viewport" content="width=device-width,initial-scale=1">',
     )
-    ..writeln('<title>${_escape(document.title)} · SalahFocus</title>')
+    ..writeln('<title>${_escape(document.title)} · SalahTrack</title>')
     ..writeln(
       '<style>body{font-family:system-ui,sans-serif;line-height:1.6;max-width:760px;margin:auto;padding:24px;color:#17211b}h1,h2{line-height:1.25}small{color:#59635d}</style>',
     )

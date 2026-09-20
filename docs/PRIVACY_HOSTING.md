@@ -1,4 +1,4 @@
-# Hosting the SalahFocus privacy policy
+# Hosting the SalahTrack privacy policy
 
 The in-app privacy policy and legal notice are sourced from
 `lib/app/legal/legal_documents.dart`. Do not maintain a separate hand-written

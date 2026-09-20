@@ -27,4 +27,4 @@ flutter pub get
 flutter analyze
 flutter test
 
-echo "SalahFocus is ready. Run: flutter run"
+echo "SalahTrack is ready. Run: flutter run"

@@ -1,3 +1,3 @@
-CFBundleDisplayName = "صلاتي";
-CFBundleName = "صلاتي";
-NSLocationWhenInUseUsageDescription = "يستخدم صلاتي موقعك لحساب مواقيت الصلاة المحلية واتجاه القبلة.";
+CFBundleDisplayName = "SalahTrack";
+CFBundleName = "SalahTrack";
+NSLocationWhenInUseUsageDescription = "يستخدم SalahTrack موقعك لحساب مواقيت الصلاة المحلية واتجاه القبلة.";

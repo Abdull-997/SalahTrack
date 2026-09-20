@@ -1,4 +1,4 @@
-SalahFocus MVP source package
+SalahTrack MVP source package
 
 Implemented MVP areas:
 - Flutter/Riverpod/go_router application shell

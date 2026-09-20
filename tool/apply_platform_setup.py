@@ -269,13 +269,13 @@ def patch_ios() -> None:
     info_path = ROOT / "ios/Runner/Info.plist"
     with info_path.open("rb") as handle:
         info = plistlib.load(handle)
-    info["CFBundleDisplayName"] = "My Prayer"
-    info["CFBundleName"] = "My Prayer"
+    info["CFBundleDisplayName"] = "SalahTrack"
+    info["CFBundleName"] = "SalahTrack"
     info["CFBundleLocalizations"] = [
         'ar', 'bn', 'de', 'en', 'es', 'fa', 'fr', 'id', 'ms', 'pa', 'ps', 'tr', 'ur'
     ]
     info["NSLocationWhenInUseUsageDescription"] = (
-        "SalahFocus uses your location to calculate local prayer times and Qibla direction."
+        "SalahTrack uses your location to calculate local prayer times and Qibla direction."
     )
     with info_path.open("wb") as handle:
         plistlib.dump(info, handle, sort_keys=False)

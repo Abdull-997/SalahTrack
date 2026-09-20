@@ -202,7 +202,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(coordinator.confirms, 1);
     expect(find.byType(PrayerConfirmationSuccess), findsOneWidget);
-    expect(find.text('Alhamdulillah'), findsOneWidget);
+    expect(find.text('Alhamdulillah 🤲🏼'), findsOneWidget);
     expect(
       find.text('The Isha prayer has been prayed and recorded.'),
       findsOneWidget,
@@ -214,7 +214,7 @@ void main() {
     );
     expect(alarmStates.last, isFalse);
     await tester.pump(const Duration(seconds: 10));
-    expect(find.text('Alhamdulillah'), findsOneWidget);
+    expect(find.text('Alhamdulillah 🤲🏼'), findsOneWidget);
     await tester.tap(find.text('Home'));
     await tester.pumpAndSettle();
     expect(
@@ -240,6 +240,7 @@ void main() {
 
       final name = prayer.localizedName('en');
       expect(find.text(name), findsOneWidget);
+      expect(find.text('Alhamdulillah 🤲🏼'), findsOneWidget);
       expect(
         find.text('The $name prayer has been prayed and recorded.'),
         findsOneWidget,
@@ -282,7 +283,10 @@ void main() {
     expect(success, findsOneWidget);
     expect(Theme.of(context).brightness, Brightness.dark);
     expect(Directionality.of(context), TextDirection.rtl);
-    expect(find.text(strings.t('alhamdulillah')), findsOneWidget);
+    expect(
+      find.text("${strings.t('alhamdulillah')} 🤲🏼"),
+      findsOneWidget,
+    );
     expect(
       find.text(
         strings.t(
@@ -303,6 +307,30 @@ void main() {
       '/home',
     );
   });
+
+  for (final String code in <String>['fa', 'pa', 'ps', 'ur']) {
+    testRouting('$code success keeps the emoji after the localized RTL text', (
+      tester,
+    ) async {
+      final notifications = _Notifications()
+        ..initial = Future.value(_payload(prayer: PrayerType.isha));
+      final entry = _entry();
+      final coordinator = _Coordinator()..entries[entry.id] = entry;
+      await _mount(tester, notifications, coordinator, localeCode: code);
+
+      await tester.tap(find.byIcon(Icons.check_rounded));
+      await tester.pumpAndSettle();
+
+      final success = find.byType(PrayerConfirmationSuccess);
+      expect(success, findsOneWidget);
+      expect(Directionality.of(tester.element(success)), TextDirection.rtl);
+      expect(
+        find.text("${AppStrings(Locale(code)).t('alhamdulillah')} 🤲🏼"),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testRouting(
     'Friday Prayer tap opens Home without a decision or prayer state lookup',
@@ -385,7 +413,7 @@ void main() {
       coordinator.pending!.complete();
       await tester.pumpAndSettle();
       expect(coordinator.confirms, 1);
-      expect(find.text('Alhamdulillah'), findsOneWidget);
+      expect(find.text('Alhamdulillah 🤲🏼'), findsOneWidget);
     },
   );
 
@@ -460,7 +488,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(coordinator.reads, 2);
     expect(coordinator.confirms, 0);
-    expect(find.text('Alhamdulillah'), findsOneWidget);
+    expect(find.text('Alhamdulillah 🤲🏼'), findsOneWidget);
     expect(find.text('Home'), findsOneWidget);
   });
 
