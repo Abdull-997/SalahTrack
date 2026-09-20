@@ -1,2 +1,3 @@
 CFBundleDisplayName = "Mi oración";
 CFBundleName = "Mi oración";
+NSLocationWhenInUseUsageDescription = "Mi oración usa tu ubicación para calcular los horarios locales de oración y la dirección de la alquibla.";

@@ -12,7 +12,15 @@ Future<void> main() async {
   await initializeDateFormatting();
   final String timezoneId = await TimezoneService.initialize();
   final SettingsRepository settingsRepository = SettingsRepository();
-  final AppPreferences preferences = await settingsRepository.load();
+  AppPreferences preferences;
+  try {
+    preferences = await settingsRepository.load();
+  } on Object {
+    // A platform preferences failure must not leave the user on a blank
+    // native launch screen. The repository remains available for a later
+    // retry when the user saves onboarding or settings data.
+    preferences = settingsRepository.defaults();
+  }
 
   runApp(
     ProviderScope(

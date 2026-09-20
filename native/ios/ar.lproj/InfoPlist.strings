@@ -1,2 +1,3 @@
 CFBundleDisplayName = "صلاتي";
 CFBundleName = "صلاتي";
+NSLocationWhenInUseUsageDescription = "يستخدم صلاتي موقعك لحساب مواقيت الصلاة المحلية واتجاه القبلة.";

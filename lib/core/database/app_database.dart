@@ -272,7 +272,8 @@ class AppDatabase {
       'WHERE local_date LIKE ? AND source_key = ?',
       <Object?>[prefix, sourceKey],
     );
-    return ((rows.first['count'] as int?) ?? 0) >= 27;
+    final int expectedDays = DateTime.utc(year, month + 1, 0).day;
+    return ((rows.first['count'] as int?) ?? 0) >= expectedDays;
   }
 
   Future<void> close() async {

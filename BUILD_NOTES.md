@@ -1,8 +1,17 @@
 # Build and verification notes
 
+## Current release audit (2026-09-20)
+
+- `flutter clean`, `flutter pub get`, `flutter analyze` and `flutter test` completed; analysis found no issues and 289 tests passed.
+- The release AAB and APK built with `PRIVACY_POLICY_URL=https://abalh101.github.io/privacy-policy-salah/`. The merged APK targets API 36, and `zipalign -c -P 16 -v 4` passed. The 64-bit ELF libraries have at least 16 KB LOAD alignment.
+- No `android/key.properties` exists in this checkout. The current AAB and APK are **unsigned verification artifacts** and cannot be uploaded or installed as release builds. The signature results below describe an older signed build, not these artifacts.
+- The Android API 37 emulator startup test passed. The onboarding location page now waits for an explicit tap after its data-flow disclosure before requesting location. Full-screen prayer alerts now schedule as normal high-importance notifications when full-screen access is denied.
+
+## Historical verification (2026-09-13)
+
 Verified on 2026-09-13 with Flutter 3.47.4 / Dart 3.13.3 on Windows and the Android 17 (API 37) emulator. Existing notification, localization, settings, and tracking work was reviewed before continuing it.
 
-## Verification already performed
+### Verification performed then
 
 - `flutter test --reporter expanded`: 124 tests passed.
 - `flutter test integration_test -d emulator-5554 --reporter expanded`: all 4 integration tests passed.
@@ -15,7 +24,7 @@ Verified on 2026-09-13 with Flutter 3.47.4 / Dart 3.13.3 on Windows and the Andr
 
 Google's command-line tools were missing from the local Android SDK, which prevented Flutter's App Bundle symbol verification. Installed commandlinetools-win-15859902 after checking its SHA-256 against the [official Android download page](https://developer.android.com/studio#command-line-tools-only); the normal bundle build then passed.
 
-The existing Android release configuration signs with the Android debug certificate. These are verified development artifacts; configure the publishing/upload key before store release. Build output also reports existing `flutter_timezone` Kotlin migration and Cupertino font warnings.
+The Android release configuration never falls back to the Android debug certificate. It reads publishing credentials from the ignored `android/key.properties` file; without that file, generated release artifacts are unsigned verification builds and cannot be uploaded. Build output also reports existing `flutter_timezone` Kotlin migration and Cupertino font warnings.
 
 ## Notification verification
 

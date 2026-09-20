@@ -74,6 +74,8 @@ TESTS /* Tests */ = {
     gradle=(r/'android/app/build.gradle.kts').read_text()
     assert 'isCoreLibraryDesugaringEnabled = true' in gradle
     assert 'desugar_jdk_libs:2.1.4' in gradle
+    assert 'releaseKeystorePropertiesFile' in gradle
+    assert 'signingConfig = signingConfigs.getByName("debug")' not in gradle
     assert (r/'android/app/src/main/res/raw/keep.xml').is_file()
     native_main_activity = r/'native/android/MainActivity.kt'
     generated_main_activity = r/'android/app/src/main/kotlin/com/salahfocus/salah_focus/MainActivity.kt'
@@ -114,6 +116,7 @@ TESTS /* Tests */ = {
         assert android_name.find('string').text == name
         ios_name = (r/f'ios/Runner/{language}.lproj/InfoPlist.strings').read_text(encoding='utf-8')
         assert f'CFBundleDisplayName = "{name}";' in ios_name
+        assert 'NSLocationWhenInUseUsageDescription' in ios_name
         assert f'path = {language}.lproj/InfoPlist.strings;' in project_text
         assert language in info['CFBundleLocalizations']
     assert mod.localize_ios_project(project_text) == project_text

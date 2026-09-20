@@ -183,10 +183,12 @@ class LegalDocumentScreen extends StatelessWidget {
   }
 
   Future<void> _openOnlinePolicy(BuildContext context, Uri uri) async {
-    final bool opened = await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    );
+    bool opened = false;
+    try {
+      opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } on Exception {
+      // URL handlers can be missing or fail after the system accepts a launch.
+    }
     if (opened || !context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(AppStrings.of(context).t('unableToOpenLink'))),

@@ -19,6 +19,7 @@ const Map<String, Map<String, String>> privacyLegalUiTranslations = {
     'onlinePrivacyPolicySubtitle': 'Öffnet die veröffentlichte HTTPS-Version',
     'unableToOpenLink': 'Der Link konnte nicht geöffnet werden.',
     'lastUpdatedLabel': 'Stand',
+    'locationDataDisclosure': 'Für Gebetszeiten werden Koordinaten lokal gespeichert und per HTTPS an AlAdhan gesendet. Die Ortssuche kann Eingaben oder Koordinaten über den Geokodierungsdienst des Systems verarbeiten.',
   },
   'en': {
     'privacyLegal': 'Privacy & Legal',
@@ -41,6 +42,7 @@ const Map<String, Map<String, String>> privacyLegalUiTranslations = {
     'onlinePrivacyPolicySubtitle': 'Opens the published HTTPS version',
     'unableToOpenLink': 'The link could not be opened.',
     'lastUpdatedLabel': 'Last updated',
+    'locationDataDisclosure': 'For prayer times, coordinates are stored locally and sent to AlAdhan over HTTPS. Location search may process entries or coordinates through the system geocoding service.',
   },
   'ar': {
     'privacyLegal': 'الخصوصية والشؤون القانونية',
@@ -62,6 +64,7 @@ const Map<String, Map<String, String>> privacyLegalUiTranslations = {
     'onlinePrivacyPolicySubtitle': 'يفتح النسخة المنشورة عبر HTTPS',
     'unableToOpenLink': 'تعذّر فتح الرابط.',
     'lastUpdatedLabel': 'آخر تحديث',
+    'locationDataDisclosure': 'لحساب مواقيت الصلاة، تُحفظ الإحداثيات محليًا وتُرسل إلى AlAdhan عبر HTTPS. وقد تعالج خدمة الترميز الجغرافي للنظام بيانات البحث أو الإحداثيات.',
   },
   'ur': {
     'privacyLegal': 'رازداری اور قانونی معلومات',
@@ -85,6 +88,7 @@ const Map<String, Map<String, String>> privacyLegalUiTranslations = {
     'onlinePrivacyPolicySubtitle': 'شائع شدہ HTTPS نسخہ کھولتا ہے',
     'unableToOpenLink': 'لنک نہیں کھولا جا سکا۔',
     'lastUpdatedLabel': 'آخری تازہ کاری',
+    'locationDataDisclosure': 'نماز کے اوقات کے لیے مقام کے نقاط مقامی طور پر محفوظ اور HTTPS کے ذریعے AlAdhan کو بھیجے جاتے ہیں۔ مقام کی تلاش میں سسٹم جیوکوڈنگ سروس اندراجات یا نقاط پراسیس کر سکتی ہے۔',
   },
   'ps': {
     'privacyLegal': 'محرمیت او حقوقي معلومات',
@@ -106,6 +110,7 @@ const Map<String, Map<String, String>> privacyLegalUiTranslations = {
     'onlinePrivacyPolicySubtitle': 'خپره شوې HTTPS نسخه پرانیزي',
     'unableToOpenLink': 'لینک پرانیستل نه شو.',
     'lastUpdatedLabel': 'وروستی اوسمهال',
+    'locationDataDisclosure': 'د لمانځه وختونو لپاره همغږي په وسیله کې ساتل کېږي او د HTTPS له لارې AlAdhan ته لېږل کېږي. د ځای لټون ښايي معلومات یا همغږي د سیستم د جیوکوډینګ خدمت له لارې پروسس کړي.',
   },
   'tr': {
     'privacyLegal': 'Gizlilik ve Yasal Bilgiler',
@@ -128,6 +133,7 @@ const Map<String, Map<String, String>> privacyLegalUiTranslations = {
     'onlinePrivacyPolicySubtitle': 'Yayımlanmış HTTPS sürümünü açar',
     'unableToOpenLink': 'Bağlantı açılamadı.',
     'lastUpdatedLabel': 'Son güncelleme',
+    'locationDataDisclosure': 'Namaz vakitleri için koordinatlar cihazda saklanır ve HTTPS üzerinden AlAdhan’a gönderilir. Konum araması, girişleri veya koordinatları sistemin coğrafi kodlama hizmetiyle işleyebilir.',
   },
   'fr': {
     'privacyLegal': 'Confidentialité et mentions légales',
@@ -149,6 +155,7 @@ const Map<String, Map<String, String>> privacyLegalUiTranslations = {
     'onlinePrivacyPolicySubtitle': 'Ouvre la version HTTPS publiée',
     'unableToOpenLink': 'Impossible d’ouvrir le lien.',
     'lastUpdatedLabel': 'Dernière mise à jour',
+    'locationDataDisclosure': 'Pour les horaires de prière, les coordonnées sont stockées localement et envoyées à AlAdhan via HTTPS. La recherche de lieu peut traiter les saisies ou coordonnées avec le service de géocodage du système.',
   },
   'es': {
     'privacyLegal': 'Privacidad y aspectos legales',
@@ -170,6 +177,7 @@ const Map<String, Map<String, String>> privacyLegalUiTranslations = {
     'onlinePrivacyPolicySubtitle': 'Abre la versión HTTPS publicada',
     'unableToOpenLink': 'No se pudo abrir el enlace.',
     'lastUpdatedLabel': 'Última actualización',
+    'locationDataDisclosure': 'Para calcular los horarios de oración, las coordenadas se guardan localmente y se envían a AlAdhan por HTTPS. La búsqueda puede procesar entradas o coordenadas mediante el servicio de geocodificación del sistema.',
   },
   'id': {
     'privacyLegal': 'Privasi & Hukum',
@@ -191,6 +199,7 @@ const Map<String, Map<String, String>> privacyLegalUiTranslations = {
     'onlinePrivacyPolicySubtitle': 'Membuka versi HTTPS yang dipublikasikan',
     'unableToOpenLink': 'Tautan tidak dapat dibuka.',
     'lastUpdatedLabel': 'Terakhir diperbarui',
+    'locationDataDisclosure': 'Untuk waktu salat, koordinat disimpan secara lokal dan dikirim ke AlAdhan melalui HTTPS. Pencarian lokasi dapat memproses masukan atau koordinat melalui layanan geocoding sistem.',
   },
   'bn': {
     'privacyLegal': 'গোপনীয়তা ও আইনি তথ্য',
@@ -212,6 +221,7 @@ const Map<String, Map<String, String>> privacyLegalUiTranslations = {
     'onlinePrivacyPolicySubtitle': 'প্রকাশিত HTTPS সংস্করণ খুলবে',
     'unableToOpenLink': 'লিংকটি খোলা যায়নি।',
     'lastUpdatedLabel': 'সর্বশেষ হালনাগাদ',
+    'locationDataDisclosure': 'নামাজের সময়ের জন্য স্থানাঙ্ক ডিভাইসে সংরক্ষিত হয় এবং HTTPS-এর মাধ্যমে AlAdhan-এ পাঠানো হয়। স্থান অনুসন্ধানে সিস্টেম জিওকোডিং সেবা লেখা বা স্থানাঙ্ক প্রক্রিয়া করতে পারে।',
   },
   'pa': {
     'privacyLegal': 'رازداری تے قانونی معلومات',
@@ -234,6 +244,7 @@ const Map<String, Map<String, String>> privacyLegalUiTranslations = {
     'onlinePrivacyPolicySubtitle': 'شائع شدہ HTTPS نسخہ کھولدا اے',
     'unableToOpenLink': 'لنک نئیں کھل سکیا۔',
     'lastUpdatedLabel': 'آخری تازہ کاری',
+    'locationDataDisclosure': 'نماز دے ویلیاں لئی تھاں دے نقاط ڈیوائس تے محفوظ ہوندے تے HTTPS راہیں AlAdhan نوں بھیجے جاندے نیں۔ تھاں دی تلاش سسٹم جیوکوڈنگ راہیں لکھت یا نقاط پراسیس کر سکدی اے۔',
   },
   'fa': {
     'privacyLegal': 'حریم خصوصی و اطلاعات حقوقی',
@@ -256,6 +267,7 @@ const Map<String, Map<String, String>> privacyLegalUiTranslations = {
     'onlinePrivacyPolicySubtitle': 'نسخهٔ منتشرشدهٔ HTTPS را باز می‌کند',
     'unableToOpenLink': 'پیوند باز نشد.',
     'lastUpdatedLabel': 'آخرین به‌روزرسانی',
+    'locationDataDisclosure': 'برای اوقات نماز، مختصات به‌صورت محلی ذخیره و از طریق HTTPS به AlAdhan ارسال می‌شود. جست‌وجوی مکان ممکن است ورودی یا مختصات را با سرویس مکان‌یابی سیستم پردازش کند.',
   },
   'ms': {
     'privacyLegal': 'Privasi & Perundangan',
@@ -277,5 +289,6 @@ const Map<String, Map<String, String>> privacyLegalUiTranslations = {
     'onlinePrivacyPolicySubtitle': 'Membuka versi HTTPS yang diterbitkan',
     'unableToOpenLink': 'Pautan tidak dapat dibuka.',
     'lastUpdatedLabel': 'Kemas kini terakhir',
+    'locationDataDisclosure': 'Untuk waktu solat, koordinat disimpan secara setempat dan dihantar kepada AlAdhan melalui HTTPS. Carian lokasi boleh memproses input atau koordinat melalui perkhidmatan geokod sistem.',
   },
 };

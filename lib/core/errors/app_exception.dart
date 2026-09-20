@@ -16,6 +16,18 @@ class LocationException extends AppException {
   const LocationException(super.message, {super.cause});
 }
 
+enum LocationSettingsTarget { app, locationServices }
+
+class LocationSettingsException extends LocationException {
+  const LocationSettingsException(
+    super.message, {
+    required this.settingsTarget,
+    super.cause,
+  });
+
+  final LocationSettingsTarget settingsTarget;
+}
+
 class PrayerDataException extends AppException {
   const PrayerDataException(super.message, {super.cause});
 }

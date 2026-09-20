@@ -111,6 +111,12 @@ flutter build ipa --release
 
 Signing still has to be configured with your own Google Play / Apple Developer credentials.
 
+Android reads publishing credentials only from the ignored
+`android/key.properties` file. Without that file, release bundles are built
+unsigned for verification; the build never falls back to Flutter's debug key.
+Use the standard properties `storeFile`, `storePassword`, `keyAlias`, and
+`keyPassword`, with `storeFile` relative to `android/app`.
+
 
 ### Source-only verification
 
@@ -134,12 +140,12 @@ This is not a replacement for `flutter analyze` or `flutter test`; compiler-leve
 - `RECEIVE_BOOT_COMPLETED`
 - `VIBRATE`
 - `SCHEDULE_EXACT_ALARM`
+- `USE_FULL_SCREEN_INTENT`
 
 The app deliberately does **not** request:
 
 - `QUERY_ALL_PACKAGES`
 - `SYSTEM_ALERT_WINDOW`
-- `USE_FULL_SCREEN_INTENT`
 - background location
 - an Accessibility Service
 - device-owner privileges
@@ -340,7 +346,6 @@ Before publishing:
 - configure Android release signing
 - configure Apple signing and verify only the intended Time Sensitive entitlement
 - prepare App Store privacy details and Google Play Data Safety declaration
-- replace default Flutter app icons with final licensed brand assets
 - only add licensed Adhan audio if audio is enabled in a later release
 
 ## Product safety rule

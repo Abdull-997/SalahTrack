@@ -952,7 +952,6 @@ abstract final class PrivacyLegalDocuments {
           title: 'Anbieter',
           paragraphs: <String>[
             '{controller}\n{location}\nE-Mail: {email}\nLinkedIn: {linkedin}',
-            'Eine vollständige Straßen- beziehungsweise ladungsfähige Anschrift wurde noch nicht mitgeteilt. Vor der Veröffentlichung ist sie hier zu ergänzen, soweit sie nach deutschem Recht erforderlich ist.',
           ],
         ),
         LegalSection(

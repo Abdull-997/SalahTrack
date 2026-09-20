@@ -358,13 +358,21 @@ class _NextPrayerCard extends StatelessWidget {
   }
 }
 
-class _PrayerTile extends ConsumerWidget {
+class _PrayerTile extends ConsumerStatefulWidget {
   const _PrayerTile({required this.prayer});
 
   final PrayerEntry prayer;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_PrayerTile> createState() => _PrayerTileState();
+}
+
+class _PrayerTileState extends ConsumerState<_PrayerTile> {
+  bool _working = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final PrayerEntry prayer = widget.prayer;
     final String language = Localizations.localeOf(context).languageCode;
     final DateTime local = TimezoneService.toLocal(
       prayer.scheduledAtUtc,
@@ -378,7 +386,7 @@ class _PrayerTile extends ConsumerWidget {
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
-        onTap: actionable
+        onTap: actionable && !_working
             ? () => context.push('/reminder/${Uri.encodeComponent(prayer.id)}')
             : null,
         child: Padding(
@@ -413,18 +421,13 @@ class _PrayerTile extends ConsumerWidget {
                 const SizedBox(width: 8),
                 IconButton(
                   tooltip: AppStrings.of(context).t('prayed'),
-                  onPressed: () async {
-                    await ref.read(prayerCoordinatorProvider).confirm(prayer);
-                    ref.invalidate(todayPrayerDayProvider);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(AppStrings.of(context).t('accepted')),
-                        ),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.check_circle_outline_rounded),
+                  onPressed: _working ? null : () => _confirm(prayer),
+                  icon: _working
+                      ? const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.check_circle_outline_rounded),
                 ),
               ],
             ],
@@ -432,6 +435,29 @@ class _PrayerTile extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _confirm(PrayerEntry prayer) async {
+    if (_working) return;
+    setState(() => _working = true);
+    try {
+      await ref.read(prayerCoordinatorProvider).confirm(prayer);
+      ref.invalidate(todayPrayerDayProvider);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppStrings.of(context).t('accepted'))),
+      );
+    } catch (error) {
+      // The database may already contain the update if only notification
+      // cancellation failed, so always reload before showing the error.
+      ref.invalidate(todayPrayerDayProvider);
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(userErrorMessage(context, error))));
+    } finally {
+      if (mounted) setState(() => _working = false);
+    }
   }
 }
 

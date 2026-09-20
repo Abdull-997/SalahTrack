@@ -1,6 +1,6 @@
 # SalahFocus store privacy audit
 
-Audit date: 16 September 2026
+Audit date: 20 September 2026
 
 Scope: Flutter/Dart source, `pubspec.yaml` and lockfile, Android manifests and
 Kotlin code, iOS `Info.plist`, entitlements and Swift code, native templates,
@@ -24,7 +24,7 @@ code.
 
 | Data | Access/use | Storage | Off-device transfer |
 | --- | --- | --- | --- |
-| Precise or approximate location | Optional automatic location for prayer times and Qibla; a high-accuracy current position is requested after the user chooses the feature. While automatic mode is selected and the app process runs, a location stream uses a 1 km distance filter. | Latitude, longitude, city, country, time zone, and automatic/manual flag in SharedPreferences; coordinates also appear in the local prayer-cache source key. | Latitude/longitude is sent to AlAdhan for prayer calendars. Coordinates may be sent to the OS geocoder for a place label. |
+| Precise or approximate location | Optional automatic location for prayer times and Qibla; a high-accuracy current position is requested only after the user taps the location button below the localized disclosure. While automatic mode is selected and the app process runs, a location stream uses a 1 km distance filter. | Latitude, longitude, city, country, time zone, and automatic/manual flag in SharedPreferences; coordinates also appear in the local prayer-cache source key. | Latitude/longitude is sent to AlAdhan for prayer calendars. Coordinates may be sent to the OS geocoder for a place label. |
 | Manually entered city/country | Converts a place name into coordinates. | Entered labels and returned coordinates in SharedPreferences. | City/country is sent to the OS geocoding service; returned coordinates are later sent to AlAdhan. |
 | Prayer calculation configuration | Calculation method, Asr school, high-latitude rule, date/month, manual offsets, grace/snooze and Friday settings. | SharedPreferences and SQLite source/cache fields. | AlAdhan receives coordinates, year/month, method, school, and high-latitude adjustment. Manual minute offsets, grace/snooze settings, Friday settings, and confirmation text are not in the API request. |
 | Prayer schedule/cache | Five prayer times, sunrise, Gregorian/Hijri date, time zone and fetch/source metadata. | SQLite database `salah_focus.db`. | Downloaded from AlAdhan; cached values are not uploaded again as user data. |
@@ -158,11 +158,15 @@ if a provider claims to process it ephemerally.
 
 Conservative submission recommendation:
 
-- **Precise location**: collected, optional, for **App functionality**. Mark
+- **Precise location**: collected when automatic precise access is granted,
+  optional because the user can choose a city instead, for **App functionality**. Mark
   ephemeral only if AlAdhan and the applicable platform geocoder actually meet
   Google's real-time/in-memory standard. Otherwise mark it non-ephemeral.
-- **Approximate location**: also declare if the released app accepts Android
-  approximate permission or geocoding city-level data is transmitted.
+- **Approximate location**: declare for Android approximate permission and
+  manual city selection. The current onboarding requires a location or city
+  before continuing, so treat city-level location collection as **required**
+  unless the final released flow changes. A manually geocoded city center is
+  not evidence of the user's precise physical location.
 - Whether transfer to AlAdhan/geocoding is “shared” depends on whether the
   provider qualifies as a service provider under Google's definition or the
   user-initiated/prominent-disclosure exception. Verify terms before answering.
@@ -193,9 +197,9 @@ Google reference:
 3. Confirm AlAdhan's operator, legal role, location/log retention, deletion
    process, and GDPR transfer safeguards. Do the same for the platform
    geocoding path used in the final Android/iOS builds.
-4. Add a concise disclosure before the first location request stating that
-   coordinates are sent to AlAdhan and may be processed by platform geocoding,
-   then verify consent/legal-basis wording for the target markets.
+4. The pre-permission location disclosure and explicit-tap flow are covered by
+   a widget regression test. Review its consent/legal-basis wording for the
+   target markets.
 5. Consider an in-app local-data deletion control and a retention choice for
    sensitive prayer/Ramadan history.
 6. Verify the merged iOS privacy manifest report and signed entitlements in an

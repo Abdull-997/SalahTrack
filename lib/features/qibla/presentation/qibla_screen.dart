@@ -126,90 +126,101 @@ class _CompassFace extends StatelessWidget {
   final double relative;
 
   @override
-  Widget build(BuildContext context) => Column(
-    children: <Widget>[
-      Semantics(
-        label: 'Qibla ${bearing.round()} degrees',
-        child: Container(
-          width: 290,
-          height: 290,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant,
-              width: 2,
-            ),
-            color: Theme.of(context).colorScheme.surfaceContainerLow,
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: <Widget>[
-              Positioned(
-                top: 16,
-                child: Text(
-                  AppStrings.of(context).compassDirection('N'),
-                  style: const TextStyle(fontWeight: FontWeight.w900),
-                ),
-              ),
-              Positioned(
-                bottom: 16,
-                child: Text(
-                  AppStrings.of(context).compassDirection('S'),
-                  style: const TextStyle(fontWeight: FontWeight.w900),
-                ),
-              ),
-              Positioned(
-                left: 16,
-                child: Text(
-                  AppStrings.of(context).compassDirection('W'),
-                  style: const TextStyle(fontWeight: FontWeight.w900),
-                ),
-              ),
-              Positioned(
-                right: 16,
-                child: Text(
-                  AppStrings.of(context).compassDirection('E'),
-                  style: const TextStyle(fontWeight: FontWeight.w900),
-                ),
-              ),
-              Transform.rotate(
-                angle: relative * math.pi / 180,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Icon(
-                      Icons.navigation_rounded,
-                      size: 105,
-                      color: Theme.of(context).colorScheme.primary,
+  Widget build(BuildContext context) {
+    final AppStrings s = AppStrings.of(context);
+    return Column(
+      children: <Widget>[
+        LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final double size = math.min(290, constraints.maxWidth);
+            return Semantics(
+              image: true,
+              label: '${s.t('qiblaDirection')}: ${s.number(bearing.round())}°',
+              child: SizedBox(
+                width: size,
+                height: size,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                      width: 2,
                     ),
-                    const Text('🕋', style: TextStyle(fontSize: 32)),
-                  ],
+                    color: Theme.of(context).colorScheme.surfaceContainerLow,
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: <Widget>[
+                      Positioned(
+                        top: 16,
+                        child: Text(
+                          AppStrings.of(context).compassDirection('N'),
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 16,
+                        child: Text(
+                          AppStrings.of(context).compassDirection('S'),
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                      Positioned(
+                        left: 16,
+                        child: Text(
+                          AppStrings.of(context).compassDirection('W'),
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                      Positioned(
+                        right: 16,
+                        child: Text(
+                          AppStrings.of(context).compassDirection('E'),
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                      Transform.rotate(
+                        angle: relative * math.pi / 180,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Icon(
+                              Icons.navigation_rounded,
+                              size: size * 0.36,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const Text('🕋', style: TextStyle(fontSize: 32)),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
-      ),
-      const SizedBox(height: 18),
-      Text(
-        '${AppStrings.of(context).number(bearing)}°',
-        style: Theme.of(context).textTheme.displaySmall
-            ?.copyWith(fontWeight: FontWeight.w900),
-      ),
-      Text(
-        '${AppStrings.of(context).t('heading')} ${AppStrings.of(context).number(heading)}°',
-        style: Theme.of(context).textTheme.bodyMedium,
-      ),
-    ],
-  );
+        const SizedBox(height: 18),
+        Text(
+          '${s.number(bearing)}°',
+          style: Theme.of(context).textTheme.displaySmall
+              ?.copyWith(fontWeight: FontWeight.w900),
+        ),
+        Text(
+          '${s.t('heading')} ${s.number(heading)}°',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ],
+    );
+  }
 }
 
 class _BearingOnly extends StatelessWidget {
@@ -221,21 +232,28 @@ class _BearingOnly extends StatelessWidget {
     final AppStrings s = AppStrings.of(context);
     return Column(
       children: <Widget>[
-        Container(
-          width: 240,
-          height: 240,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Theme.of(context).colorScheme.primaryContainer,
-          ),
-          child: Transform.rotate(
-            angle: bearing * math.pi / 180,
-            child: Icon(
-              Icons.navigation_rounded,
-              size: 112,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
-          ),
+        LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final double size = math.min(240, constraints.maxWidth);
+            return SizedBox(
+              width: size,
+              height: size,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                ),
+                child: Transform.rotate(
+                  angle: bearing * math.pi / 180,
+                  child: Icon(
+                    Icons.navigation_rounded,
+                    size: size * 0.47,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+            );
+          },
         ),
         const SizedBox(height: 18),
         Text(

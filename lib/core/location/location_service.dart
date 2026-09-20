@@ -22,4 +22,8 @@ abstract interface class LocationService {
     UserLocation location, {
     required String languageCode,
   });
+
+  Future<bool> openAppSettings();
+
+  Future<bool> openLocationSettings();
 }

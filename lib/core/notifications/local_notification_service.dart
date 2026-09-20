@@ -49,6 +49,7 @@ class LocalNotificationService implements NotificationService {
     String languageCode, {
     bool reminder = false,
     bool soft = false,
+    bool fullScreenAllowed = true,
   }) {
     final AppStrings s = AppStrings(Locale(languageCode));
     return AndroidNotificationDetails(
@@ -60,7 +61,7 @@ class LocalNotificationService implements NotificationService {
       category: soft
           ? AndroidNotificationCategory.reminder
           : AndroidNotificationCategory.alarm,
-      fullScreenIntent: !soft,
+      fullScreenIntent: !soft && fullScreenAllowed,
       ongoing: !soft,
       autoCancel: soft,
       visibility: NotificationVisibility.public,
@@ -382,6 +383,8 @@ class LocalNotificationService implements NotificationService {
           false;
     } on MissingPluginException {
       return false;
+    } on PlatformException {
+      return false;
     }
   }
 
@@ -435,6 +438,7 @@ class LocalNotificationService implements NotificationService {
     String prayerName, {
     required String languageCode,
   }) async {
+    final bool fullScreenAllowed = await canUseFullScreenIntent();
     await _schedule(
       id: NotificationIds.prayer(prayer),
       whenUtc: prayer.scheduledAtUtc,
@@ -442,7 +446,10 @@ class LocalNotificationService implements NotificationService {
       title: _text(languageCode, 'prayerTitle', prayerName),
       body: _text(languageCode, 'prayerBody', prayerName),
       details: NotificationDetails(
-        android: _androidDetails(languageCode),
+        android: _androidDetails(
+          languageCode,
+          fullScreenAllowed: fullScreenAllowed,
+        ),
         iOS: _darwinDetails(languageCode),
       ),
       payload: PrayerNotificationPayload(prayerId: prayer.id).encode(),
@@ -455,6 +462,7 @@ class LocalNotificationService implements NotificationService {
     String prayerName, {
     required String languageCode,
   }) async {
+    final bool fullScreenAllowed = await canUseFullScreenIntent();
     await _schedule(
       id: NotificationIds.grace(prayer),
       whenUtc: prayer.graceEndsAtUtc,
@@ -462,7 +470,11 @@ class LocalNotificationService implements NotificationService {
       title: _text(languageCode, 'graceTitle', prayerName),
       body: _text(languageCode, 'graceBody', prayerName),
       details: NotificationDetails(
-        android: _androidDetails(languageCode, reminder: true),
+        android: _androidDetails(
+          languageCode,
+          reminder: true,
+          fullScreenAllowed: fullScreenAllowed,
+        ),
         iOS: _darwinDetails(languageCode),
       ),
       payload: PrayerNotificationPayload(
@@ -482,6 +494,7 @@ class LocalNotificationService implements NotificationService {
     if (when == null) {
       return;
     }
+    final bool fullScreenAllowed = await canUseFullScreenIntent();
     final bool scheduled = await _schedule(
       id: NotificationIds.snooze(prayer),
       whenUtc: when,
@@ -489,7 +502,11 @@ class LocalNotificationService implements NotificationService {
       title: _text(languageCode, 'snoozeTitle', prayerName),
       body: _text(languageCode, 'snoozeBody', prayerName),
       details: NotificationDetails(
-        android: _androidDetails(languageCode, reminder: true),
+        android: _androidDetails(
+          languageCode,
+          reminder: true,
+          fullScreenAllowed: fullScreenAllowed,
+        ),
         iOS: _darwinDetails(languageCode),
       ),
       payload: PrayerNotificationPayload(

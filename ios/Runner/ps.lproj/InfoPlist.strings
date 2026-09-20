@@ -1,2 +1,3 @@
 CFBundleDisplayName = "زما لمونځ";
 CFBundleName = "زما لمونځ";
+NSLocationWhenInUseUsageDescription = "زما لمونځ ستاسو ځای د سیمه‌ییزو لمانځه وختونو او د قبلې لوري د محاسبې لپاره کاروي.";

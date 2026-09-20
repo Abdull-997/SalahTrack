@@ -1,2 +1,3 @@
 CFBundleDisplayName = "My Prayer";
 CFBundleName = "My Prayer";
+NSLocationWhenInUseUsageDescription = "My Prayer uses your location to calculate local prayer times and the Qibla direction.";

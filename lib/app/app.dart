@@ -25,6 +25,8 @@ class SalahFocusApp extends ConsumerStatefulWidget {
 
 class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
   StreamSubscription<UserLocation>? _automaticLocationSubscription;
+  Future<void> _pendingAutomaticLocationUpdate = Future<void>.value();
+  int _automaticLocationGeneration = 0;
   final Map<String, DateTime> _recentNotificationEvents = <String, DateTime>{};
   int _notificationDelivery = 0;
   bool _receivedLivePayload = false;
@@ -63,7 +65,12 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
       });
     });
     ref.listen(
-      settingsControllerProvider,
+      settingsControllerProvider.select(
+        (preferences) => (
+          location: preferences.location,
+          localeCode: preferences.localeCode,
+        ),
+      ),
       (_, _) => _syncAutomaticLocationUpdates(),
     );
     ref.listen(
@@ -88,7 +95,10 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
       (_, _) => _syncRamadanReminders(),
     );
     ref.listen<AsyncValue<PrayerDay?>>(todayPrayerDayProvider, (_, next) {
-      if (next.hasValue) _syncRamadanReminders();
+      if (next.hasValue) {
+        _syncFridayPrayerReminders();
+        _syncRamadanReminders();
+      }
     });
 
     final ThemeMode themeMode = switch (preferences.themeMode) {
@@ -120,41 +130,81 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
   }
 
   Future<void> _syncAutomaticLocationUpdates() async {
-    await _automaticLocationSubscription?.cancel();
+    final int generation = ++_automaticLocationGeneration;
+    final StreamSubscription<UserLocation>? previous =
+        _automaticLocationSubscription;
     _automaticLocationSubscription = null;
+    await previous?.cancel();
+    if (!mounted || generation != _automaticLocationGeneration) return;
     final preferences = ref.read(settingsControllerProvider);
     final UserLocation? location = preferences.location;
     if (location == null || !location.isAutomatic) return;
-    _automaticLocationSubscription = ref
+    final StreamSubscription<UserLocation> subscription = ref
         .read(locationServiceProvider)
         .automaticLocationUpdates(
           deviceTimezoneId: ref.read(deviceTimezoneIdProvider),
           languageCode: preferences.localeCode,
         )
-        .listen((UserLocation updated) async {
-          final UserLocation? current = ref
-              .read(settingsControllerProvider)
-              .location;
-          if (current == null ||
-              !current.isAutomatic ||
-              (current.latitude - updated.latitude).abs() > 0.005 ||
-              (current.longitude - updated.longitude).abs() > 0.005) {
-            await ref
-                .read(settingsControllerProvider.notifier)
-                .setLocation(updated);
-            ref.invalidate(todayPrayerDayProvider);
-          }
-        });
+        .listen(
+          (UserLocation updated) {
+            final Future<void> update = _pendingAutomaticLocationUpdate.then(
+              (_) => _saveAutomaticLocation(updated, generation),
+            );
+            _pendingAutomaticLocationUpdate = update.then<void>(
+              (_) {},
+              onError: (Object _, StackTrace _) {},
+            );
+          },
+          // Permission or service changes can terminate a native location
+          // stream. Treat that as a recoverable state; the user can re-enable
+          // automatic location from Settings without an uncaught zone error.
+          onError: (Object _, StackTrace _) {},
+          cancelOnError: true,
+        );
+    if (!mounted || generation != _automaticLocationGeneration) {
+      await subscription.cancel();
+      return;
+    }
+    _automaticLocationSubscription = subscription;
+  }
+
+  Future<void> _saveAutomaticLocation(
+    UserLocation updated,
+    int generation,
+  ) async {
+    if (!mounted || generation != _automaticLocationGeneration) return;
+    final UserLocation? current = ref.read(settingsControllerProvider).location;
+    if (current == null || !current.isAutomatic) return;
+    if ((current.latitude - updated.latitude).abs() <= 0.005 &&
+        (current.longitude - updated.longitude).abs() <= 0.005) {
+      return;
+    }
+    try {
+      await ref.read(settingsControllerProvider.notifier).setLocation(updated);
+      if (!mounted || generation != _automaticLocationGeneration) return;
+      ref.invalidate(todayPrayerDayProvider);
+    } on Object {
+      // A transient preferences failure must not escape a stream callback.
+    }
   }
 
   Future<void> _syncFridayPrayerReminders() async {
     final preferences = ref.read(settingsControllerProvider);
     try {
+      PrayerDay? today = ref.read(todayPrayerDayProvider).value;
+      if (today == null && preferences.location != null) {
+        try {
+          today = await ref.read(todayPrayerDayProvider.future);
+        } on Object {
+          // Cached location time zone remains a usable offline fallback.
+        }
+      }
       await ref
           .read(fridayPrayerReminderPlannerProvider)
           .reschedule(
             preferences.prayerSettings.fridayPrayer,
             timezoneId:
+                today?.timezoneId ??
                 preferences.location?.timezoneId ??
                 ref.read(deviceTimezoneIdProvider),
             languageCode: preferences.localeCode,

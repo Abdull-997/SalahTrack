@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +9,7 @@ import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/core/location/location_suggestions.dart';
 import 'package:salah_focus/core/location/location_service.dart';
+import 'package:salah_focus/core/errors/app_exception.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
@@ -123,19 +126,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _next() {
     if (_page >= 5) return;
-    final int nextPage = _page + 1;
-    setState(() => _page = nextPage);
+    setState(() => _page += 1);
     _pageController.animateToPage(
       _page,
       duration: const Duration(milliseconds: 280),
       curve: Curves.easeOutCubic,
     );
-    if (nextPage == 2 &&
-        ref.read(settingsControllerProvider).location == null) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _useAutomaticLocation(),
-      );
-    }
   }
 
   Future<void> _setInitialLocale(String languageCode) =>
@@ -296,11 +292,33 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(userErrorMessage(context, error))),
+          SnackBar(
+            content: Text(userErrorMessage(context, error)),
+            action: error is LocationSettingsException
+                ? SnackBarAction(
+                    label: AppStrings.of(context).t('openSystemSettings'),
+                    onPressed: () => unawaited(_openLocationSettings(error)),
+                  )
+                : null,
+          ),
         );
       }
     } finally {
       if (mounted) setState(() => _working = false);
+    }
+  }
+
+  Future<void> _openLocationSettings(LocationSettingsException error) async {
+    final LocationService service = ref.read(locationServiceProvider);
+    try {
+      if (error.settingsTarget == LocationSettingsTarget.locationServices) {
+        await service.openLocationSettings();
+      } else {
+        await service.openAppSettings();
+      }
+    } on Object {
+      // The manual-city path remains available on devices without a settings
+      // activity for this permission.
     }
   }
 }
@@ -393,6 +411,15 @@ class _LocationPage extends StatelessWidget {
           : currentLocation.label,
       child: Column(
         children: <Widget>[
+          Text(
+            s.t('locationDataDisclosure'),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 18),
           FilledButton.icon(
             onPressed: working ? null : onAutomatic,
             icon: const Icon(Icons.my_location_rounded),

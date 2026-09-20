@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +7,8 @@ import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/location/location_suggestions.dart';
+import 'package:salah_focus/core/location/location_service.dart';
+import 'package:salah_focus/core/errors/app_exception.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
@@ -1191,11 +1195,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _syncFridayPrayerReminders() async {
     final preferences = ref.read(settingsControllerProvider);
     try {
+      PrayerDay? today = ref.read(todayPrayerDayProvider).value;
+      if (today == null && preferences.location != null) {
+        try {
+          today = await ref.read(todayPrayerDayProvider.future);
+        } on Object {
+          // Cached location time zone remains a usable offline fallback.
+        }
+      }
       await ref
           .read(fridayPrayerReminderPlannerProvider)
           .reschedule(
             preferences.prayerSettings.fridayPrayer,
             timezoneId:
+                today?.timezoneId ??
                 preferences.location?.timezoneId ??
                 ref.read(deviceTimezoneIdProvider),
             languageCode: preferences.localeCode,
@@ -1234,13 +1247,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(userErrorMessage(context, error))),
+          SnackBar(
+            content: Text(userErrorMessage(context, error)),
+            action: error is LocationSettingsException
+                ? SnackBarAction(
+                    label: AppStrings.of(context).t('openSystemSettings'),
+                    onPressed: () => unawaited(_openLocationSettings(error)),
+                  )
+                : null,
+          ),
         );
       }
     } finally {
       if (mounted) {
         setState(() => _working = false);
       }
+    }
+  }
+
+  Future<void> _openLocationSettings(LocationSettingsException error) async {
+    final LocationService service = ref.read(locationServiceProvider);
+    try {
+      if (error.settingsTarget == LocationSettingsTarget.locationServices) {
+        await service.openLocationSettings();
+      } else {
+        await service.openAppSettings();
+      }
+    } on Object {
+      // Manual location remains available if a vendor has no matching page.
     }
   }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:salah_focus/core/notifications/local_notification_service.dart';
 import 'package:salah_focus/core/notifications/notification_ids.dart';
@@ -87,6 +88,50 @@ class _Plugin implements FlutterLocalNotificationsPlugin {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  const MethodChannel settingsChannel = MethodChannel(
+    'salah_focus/system_settings',
+  );
+  setUp(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(settingsChannel, (call) async {
+          if (call.method == 'canUseFullScreenIntent') return true;
+          return null;
+        });
+  });
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(settingsChannel, null);
+  });
+
+  test('prayer alert falls back to a normal notification when full screen is denied', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(settingsChannel, (call) async {
+          if (call.method == 'canUseFullScreenIntent') return false;
+          return null;
+        });
+    final _Plugin plugin = _Plugin();
+    final LocalNotificationService service = LocalNotificationService(
+      plugin: plugin,
+    );
+    final DateTime later = DateTime.now().toUtc().add(const Duration(hours: 2));
+    final PrayerEntry entry = PrayerEntry(
+      id: 'test-fajr',
+      localDate: later.toIso8601String().substring(0, 10),
+      type: PrayerType.fajr,
+      scheduledAtUtc: later,
+      timezoneId: 'UTC',
+      graceEndsAtUtc: later.add(const Duration(hours: 1)),
+      trackingEndsAtUtc: later.add(const Duration(hours: 2)),
+      status: PrayerStatus.upcoming,
+    );
+    await service.schedulePrayer(entry, 'Fajr', languageCode: 'en');
+    expect(plugin.scheduled, hasLength(1));
+    expect(plugin.scheduled.single.details.android!.fullScreenIntent, isFalse);
+    expect(
+      plugin.scheduled.single.details.android!.importance,
+      Importance.high,
+    );
+  });
   for (final String code in <String>[
     'tr',
     'fr',

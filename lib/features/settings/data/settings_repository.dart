@@ -63,6 +63,19 @@ class SettingsRepository {
   static const String _firstLaunchKey = 'first_successful_launch_utc';
   static const String _reviewAttemptedKey = 'review_request_attempted_v1';
 
+  AppPreferences defaults() {
+    final String localeCode = _systemLocaleCode();
+    return AppPreferences(
+      prayerSettings: PrayerSettings(
+        confirmationText: PrayerSettings.defaultConfirmationText(localeCode),
+      ),
+      localeCode: localeCode,
+      themeMode: 'system',
+      onboardingComplete: false,
+      firstLaunchAtUtc: DateTime.now().toUtc(),
+    );
+  }
+
   Future<AppPreferences> load() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     PrayerSettings prayerSettings = const PrayerSettings();

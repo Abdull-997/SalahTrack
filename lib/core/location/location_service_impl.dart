@@ -9,42 +9,52 @@ class LocationServiceImpl implements LocationService {
   Stream<UserLocation> automaticLocationUpdates({
     required String deviceTimezoneId,
     required String languageCode,
-  }) =>
-      Geolocator.getPositionStream(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: 1000,
-        ),
-      ).asyncMap((Position position) async {
-        String city = '';
-        String country = '';
-        try {
-          await setLocaleIdentifier(_localeIdentifier(languageCode));
-          final List<Placemark> places = await placemarkFromCoordinates(
-            position.latitude,
-            position.longitude,
-          );
-          if (places.isNotEmpty) {
-            final Placemark place = places.first;
-            city =
-                place.locality ??
-                place.subAdministrativeArea ??
-                place.administrativeArea ??
-                '';
-            country = place.country ?? '';
-          }
-        } on Object {
-          // Keep coordinates even when reverse geocoding is unavailable.
+  }) async* {
+    // Never trigger a permission dialog merely because the app restarted.
+    // Automatic updates resume only after the user has already granted access.
+    if (!await Geolocator.isLocationServiceEnabled()) return;
+    final LocationPermission permission = await Geolocator.checkPermission();
+    if (permission != LocationPermission.whileInUse &&
+        permission != LocationPermission.always) {
+      return;
+    }
+    yield* Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 1000,
+      ),
+    ).asyncMap((Position position) async {
+      String city = '';
+      String country = '';
+      try {
+        await setLocaleIdentifier(_localeIdentifier(languageCode));
+        final List<Placemark> places = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        ).timeout(const Duration(seconds: 10));
+        if (places.isNotEmpty) {
+          final Placemark place = places.first;
+          city =
+              place.locality ??
+              place.subAdministrativeArea ??
+              place.administrativeArea ??
+              '';
+          country = place.country ?? '';
         }
-        return UserLocation(
-          latitude: position.latitude,
-          longitude: position.longitude,
-          city: city,
-          country: country,
-          timezoneId: deviceTimezoneId,
-          isAutomatic: true,
-        );
-      });
+      } on Object {
+        // Keep coordinates even when reverse geocoding is unavailable.
+      }
+      return UserLocation(
+        latitude: position.latitude,
+        longitude: position.longitude,
+        city: city,
+        country: country,
+        timezoneId: deviceTimezoneId,
+        isAutomatic: true,
+      );
+    });
+  }
+
   @override
   Future<UserLocation> currentLocation({
     required String deviceTimezoneId,
@@ -53,18 +63,20 @@ class LocationServiceImpl implements LocationService {
     try {
       final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        throw const LocationException(
+        throw const LocationSettingsException(
           'Standortdienste sind deaktiviert. Du kannst stattdessen eine Stadt auswählen.',
+          settingsTarget: LocationSettingsTarget.locationServices,
         );
       }
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        throw const LocationException(
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
+        throw const LocationSettingsException(
           'Standortzugriff wurde nicht erlaubt. Du kannst eine Stadt manuell auswählen.',
+          settingsTarget: LocationSettingsTarget.app,
         );
       }
       final Position position = await Geolocator.getCurrentPosition(
@@ -80,7 +92,7 @@ class LocationServiceImpl implements LocationService {
         final List<Placemark> placemarks = await placemarkFromCoordinates(
           position.latitude,
           position.longitude,
-        );
+        ).timeout(const Duration(seconds: 10));
         if (placemarks.isNotEmpty) {
           city =
               placemarks.first.locality ??
@@ -123,7 +135,7 @@ class LocationServiceImpl implements LocationService {
       await setLocaleIdentifier(_localeIdentifier(languageCode));
       final List<Location> matches = await locationFromAddress(
         '$cleanedCity, $cleanedCountry',
-      );
+      ).timeout(const Duration(seconds: 10));
       if (matches.isEmpty) {
         throw const LocationException('Dieser Ort wurde nicht gefunden.');
       }
@@ -153,7 +165,7 @@ class LocationServiceImpl implements LocationService {
       final List<Placemark> placemarks = await placemarkFromCoordinates(
         location.latitude,
         location.longitude,
-      );
+      ).timeout(const Duration(seconds: 10));
       if (placemarks.isEmpty) return location;
       final Placemark place = placemarks.first;
       return UserLocation(
@@ -168,6 +180,12 @@ class LocationServiceImpl implements LocationService {
       return location;
     }
   }
+
+  @override
+  Future<bool> openAppSettings() => Geolocator.openAppSettings();
+
+  @override
+  Future<bool> openLocationSettings() => Geolocator.openLocationSettings();
 
   String _localeIdentifier(String languageCode) => switch (languageCode) {
     'ar' => 'ar_SA',

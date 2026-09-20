@@ -94,12 +94,54 @@ def patch_android() -> None:
     gradle = ROOT / "android/app/build.gradle.kts"
     if gradle.exists():
         g = gradle.read_text(encoding="utf-8")
+        if "releaseKeystorePropertiesFile" not in g:
+            signing = '''import java.io.FileInputStream
+import java.util.Properties
+
+val releaseKeystorePropertiesFile = rootProject.file("key.properties")
+val releaseKeystoreProperties = Properties()
+if (releaseKeystorePropertiesFile.exists()) {
+    FileInputStream(releaseKeystorePropertiesFile).use(releaseKeystoreProperties::load)
+    val requiredKeys = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+    val missingKeys = requiredKeys.filter { releaseKeystoreProperties.getProperty(it).isNullOrBlank() }
+    require(missingKeys.isEmpty()) {
+        "android/key.properties is missing: ${missingKeys.joinToString()}"
+    }
+}
+
+'''
+            g = signing + g
         if "isCoreLibraryDesugaringEnabled" not in g:
             g = g.replace("compileOptions {", "compileOptions {\n        isCoreLibraryDesugaringEnabled = true", 1)
         if "multiDexEnabled = true" not in g:
             g = g.replace("defaultConfig {", "defaultConfig {\n        multiDexEnabled = true", 1)
         if "coreLibraryDesugaring(" not in g:
             g += '\n\ndependencies {\n    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")\n}\n'
+        g = re.sub(
+            r'\s*// TODO: Add your own signing config for the release build\.\n'
+            r'\s*// Signing with the debug keys for now, so `flutter run --release` works\.\n'
+            r'\s*signingConfig = signingConfigs\.getByName\("debug"\)',
+            '\n            // Never publish an artifact signed with Flutter\'s debug key.\n'
+            '            if (releaseKeystorePropertiesFile.exists()) {\n'
+            '                signingConfig = signingConfigs.getByName("release")\n'
+            '            }',
+            g,
+            count=1,
+        )
+        if 'create("release")' not in g and "buildTypes {" in g:
+            signing_config = '''    signingConfigs {
+        if (releaseKeystorePropertiesFile.exists()) {
+            create("release") {
+                keyAlias = releaseKeystoreProperties.getProperty("keyAlias")
+                keyPassword = releaseKeystoreProperties.getProperty("keyPassword")
+                storeFile = file(releaseKeystoreProperties.getProperty("storeFile"))
+                storePassword = releaseKeystoreProperties.getProperty("storePassword")
+            }
+        }
+    }
+
+'''
+            g = g.replace("    buildTypes {", signing_config + "    buildTypes {", 1)
         gradle.write_text(g, encoding="utf-8")
 
     keep = ROOT / "android/app/src/main/res/raw/keep.xml"
