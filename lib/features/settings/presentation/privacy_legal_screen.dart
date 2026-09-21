@@ -226,10 +226,6 @@ class _ContactCard extends StatelessWidget {
             label: strings.t('email'),
             value: PrivacyLegalConfig.contactEmail,
           ),
-          _ContactLine(
-            label: strings.t('linkedin'),
-            value: PrivacyLegalConfig.linkedInName,
-          ),
         ],
       ),
     ),

@@ -38,5 +38,4 @@ class LegalDocument {
 String _resolveLegalTokens(String value) => value
     .replaceAll('{controller}', PrivacyLegalConfig.controllerName)
     .replaceAll('{location}', PrivacyLegalConfig.controllerLocation)
-    .replaceAll('{email}', PrivacyLegalConfig.contactEmail)
-    .replaceAll('{linkedin}', PrivacyLegalConfig.linkedInName);
+    .replaceAll('{email}', PrivacyLegalConfig.contactEmail);

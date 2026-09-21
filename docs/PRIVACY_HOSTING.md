@@ -7,14 +7,15 @@ copy for the website.
 Generate static, localized HTML from that same source:
 
 ```text
-dart run tool/export_legal_documents.dart build/legal_site
+dart run tool/export_legal_documents.dart privacy_site_update
 ```
 
-The output includes English root files and one folder for every supported app
-language. The current canonical in-app URL is:
+The output includes an English root page, separate policy/legal pages, shared
+responsive light/dark styling, and a complete RTL-aware folder for every
+supported app language. The current canonical in-app URL is:
 
 ```text
-https://abalh101.github.io/privacy-policy-salah/
+https://abalh101.github.io/salahtrack-privacy/index.html
 ```
 
 It is the default value in `PrivacyLegalConfig`. For a future domain change,

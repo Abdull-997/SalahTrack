@@ -409,4 +409,29 @@ void main() {
       },
     );
   }
+
+  testWidgets('report form remains usable on a wide RTL layout', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 720);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await tester.pumpWidget(_reportApp(const Locale('fa'), _Service()));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ReportProblemScreen), findsOneWidget);
+    expect(
+      Directionality.of(tester.element(find.byType(ReportProblemScreen))),
+      TextDirection.rtl,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('problem-description-field')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
 }

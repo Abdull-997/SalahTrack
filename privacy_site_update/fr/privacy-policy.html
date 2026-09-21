@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Politique de confidentialité · SalahTrack</title>
+<link rel="stylesheet" href="../styles.css">
+</head><body>
+<header class="site-header">
+<a class="brand" href="../index.html">SalahTrack</a>
+<nav class="languages" aria-label="Language">
+<a lang="ar" dir="rtl" hreflang="ar" href="../ar/index.html">العربية</a>
+<a lang="bn" dir="ltr" hreflang="bn" href="../bn/index.html">বাংলা</a>
+<a lang="de" dir="ltr" hreflang="de" href="../de/index.html">Deutsch</a>
+<a lang="en" dir="ltr" hreflang="en" href="../en/index.html">English</a>
+<a lang="es" dir="ltr" hreflang="es" href="../es/index.html">Español</a>
+<a lang="fa" dir="rtl" hreflang="fa" href="../fa/index.html">فارسی</a>
+<a lang="fr" dir="ltr" hreflang="fr" href="../fr/index.html" aria-current="page">Français</a>
+<a lang="id" dir="ltr" hreflang="id" href="../id/index.html">Bahasa Indonesia</a>
+<a lang="ms" dir="ltr" hreflang="ms" href="../ms/index.html">Bahasa Melayu</a>
+<a lang="pa" dir="rtl" hreflang="pa" href="../pa/index.html">پنجابی</a>
+<a lang="ps" dir="rtl" hreflang="ps" href="../ps/index.html">پښتو</a>
+<a lang="tr" dir="ltr" hreflang="tr" href="../tr/index.html">Türkçe</a>
+<a lang="ur" dir="rtl" hreflang="ur" href="../ur/index.html">اردو</a>
+</nav>
+</header>
+<main>
+<nav class="document-nav" aria-label="Documents">
+<a href="index.html">SalahTrack</a>
+<a href="legal-notice.html">Mentions légales / Impressum</a>
+</nav>
+<article><h1>Politique de confidentialité</h1>
+<p class="updated">21 septembre 2026</p>
+<p>Cette politique décrit les traitements de la version actuelle de SalahTrack. Elle ne couvre pas de futurs comptes, synchronisation cloud, analyses ou publicités, absents de cette version.</p>
+<section><h2>1. Responsable et portée</h2>
+<p>Le responsable de SalahTrack est Abdulrahman Al Hamidi, Universitätsstr. 70<br>40225 Düsseldorf<br>Germany. Contact : <a dir="ltr" href="mailto:ar830222@gmail.com">ar830222@gmail.com</a>. SalahTrack ne propose aucun compte utilisateur ni serveur de compte ou de synchronisation exploité par le développeur.</p>
+</section>
+<section><h2>2. Localisation et géocodage</h2>
+<p>Si vous choisissez la localisation automatique, l’app demande la position précise au premier plan/pendant l’utilisation et conserve latitude, longitude, ville, pays, fuseau horaire et mode de sélection. Pendant que l’app fonctionne, ce mode écoute les changements avec un filtre d’environ 1 km.</p>
+<p>Les versions actuelles ne demandent ni localisation Android en arrière-plan, ni autorisation iOS « Toujours », et ne déclarent aucun mode iOS de localisation en arrière-plan. Pour la sélection manuelle, la recherche de ville transmet le texte saisi, le code du pays choisi et la langue de l’app par HTTPS à Photon sur photon.komoot.io, qui utilise les données OpenStreetMap. Photon et les opérateurs réseau peuvent aussi recevoir l’adresse IP et les métadonnées usuelles. Le géocodage natif peut en outre recevoir un lieu ou des coordonnées et la langue pour une recherche directe ou inverse.</p>
+</section>
+<section><h2>3. Horaires de prière et Qibla</h2>
+<p>Pour le calendrier mensuel, SalahTrack envoie par HTTPS latitude, longitude, mois, année, méthode de calcul, école de l’Asr et règle de haute latitude à l’API AlAdhan sur api.aladhan.com. Le service et les opérateurs réseau peuvent recevoir l’adresse IP et les données de connexion usuelles. La ville et l’historique des prières ne sont pas envoyés.</p>
+<p>La Qibla est calculée sur l’appareil. Le cap du compas sert uniquement à l’affichage et SalahTrack ne le conserve ni ne le transmet.</p>
+</section>
+<section><h2>4. Données conservées sur l’appareil</h2>
+<p>SharedPreferences conserve localisation, réglages de prière et Ramadan, langue, thème, état de l’accueil initial, premier lancement et état de demande d’avis. SQLite conserve cache des horaires, fuseau et données hégiriennes, statuts, dates de confirmation/modification/report, ajustements, jeûne, Tarawih, Qiyam, objectifs Ramadan et accomplissements.</p>
+<p>Ces données peuvent révéler une pratique religieuse et sont sensibles. Le code actuel les garde dans la base locale et ne les envoie ni au développeur ni à l’API. L’app n’accède pas aux contacts, photos, microphone, données de santé, identifiants publicitaires ou autres identifiants de l’appareil.</p>
+<p>Le formulaire facultatif « Signaler un problème » prépare sur l’appareil la catégorie, la description, les étapes de reproduction, la version et le build de l’app, la plateforme, la version du système, le modèle d’appareil et la langue. Vous pouvez relire, modifier, annuler ou envoyer explicitement ce texte dans votre app de messagerie. Rien n’est envoyé automatiquement et aucune coordonnée, aucun historique de prière/Ramadan, activité religieuse ou identifiant d’appareil n’est joint discrètement.</p>
+</section>
+<section><h2>5. Notifications et fonctions de l’appareil</h2>
+<p>Avec votre autorisation, l’app programme localement les rappels de prière, du vendredi, de report et de Ramadan. Le système traite textes, dates, identifiants et actions ; aucun jeton push distant ni serveur de notifications n’est utilisé. Android peut utiliser alarmes exactes, vibration, reprogrammation au démarrage et plein écran facultatif ; iOS peut utiliser les notifications urgentes.</p>
+<p>La cible iOS actuelle n’intègre pas FamilyControls, ManagedSettings, DeviceActivity, App Group ni l’autorisation Family Controls. Cette version n’accède donc pas aux choix ou données Temps d’écran.</p>
+</section>
+<section><h2>6. Services tiers et transferts</h2>
+<p>Les traitements externes se limitent à AlAdhan, à la recherche de villes Photon/OpenStreetMap, au géocodage du système, à une éventuelle invite d’avis App Store/Google Play et aux fournisseurs de messagerie uniquement si vous envoyez un rapport. Ces fournisseurs peuvent traiter des journaux techniques selon leurs règles. Aucun SDK d’analyse, de crash, de publicité, de suivi ou de connexion sociale n’est intégré.</p>
+<p>Historique de prière/Ramadan, objectifs et actions de notification ne sont pas transmis au développeur. Un rapport n’atteint la boîte d’assistance qu’après votre appui sur « Envoyer » dans l’app de messagerie ; il peut contenir les informations affichées et les métadonnées courantes d’un courriel. Les requêtes de l’app utilisent HTTPS, mais SalahTrack ne contrôle pas la conservation des journaux externes.</p>
+</section>
+<section><h2>7. Conservation et suppression</h2>
+<p>Les réglages restent jusqu’à modification, effacement des données ou désinstallation. Aucun délai automatique ne supprime actuellement l’historique local. Le cache peut être remplacé et les notifications expirent ou sont annulées lors d’un changement.</p>
+<p>Vous pouvez retirer les autorisations dans les réglages système. Effacer le stockage de SalahTrack ou désinstaller l’app supprime sa base et ses préférences. Les données d’un fournisseur externe suivent sa propre procédure.</p>
+</section>
+<section><h2>8. Bases juridiques et droits</h2>
+<p>Selon le cas, les fonctions demandées reposent sur l’article 6(1)(b) du RGPD et les traitements soumis à permission sur le consentement de l’article 6(1)(a). Vous pouvez retirer une autorisation pour l’avenir.</p>
+<p>Sous réserve des conditions légales, vous disposez de droits d’accès, rectification, effacement, limitation, portabilité et opposition, ainsi que du droit de saisir une autorité de contrôle. Les données restant surtout en stockage local, le responsable ne peut normalement pas les consulter ou restaurer à distance.</p>
+</section>
+<section><h2>9. Contact et modifications</h2>
+<p>Pour toute question ou demande, écrivez à <a dir="ltr" href="mailto:ar830222@gmail.com">ar830222@gmail.com</a>. Cette politique devra être actualisée avant d’ajouter comptes, cloud, analyses, publicité, nouveaux destinataires ou permissions sensiblement différentes. La date ci-dessus identifie la version affichée.</p>
+</section>
+</article>
+</main><footer><span>SalahTrack</span><a dir="ltr" href="mailto:ar830222@gmail.com">ar830222@gmail.com</a></footer></body></html>

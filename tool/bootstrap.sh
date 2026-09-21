@@ -9,19 +9,6 @@ if ! command -v flutter >/dev/null 2>&1; then
   exit 1
 fi
 
-TMP="$(mktemp -d)"
-trap 'rm -rf "$TMP"' EXIT
-
-flutter create \
-  --platforms=android,ios \
-  --org com.salahfocus \
-  --project-name salah_focus \
-  "$TMP/salah_focus"
-
-rm -rf android ios
-cp -R "$TMP/salah_focus/android" ./android
-cp -R "$TMP/salah_focus/ios" ./ios
-
 python3 tool/apply_platform_setup.py
 flutter pub get
 flutter analyze

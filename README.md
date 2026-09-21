@@ -47,8 +47,9 @@ Recommended baseline:
 - Dart **3.13.0+** (bundled with Flutter 3.47)
 - Android Studio with Android SDK API 36
 - Java 17+
-- Xcode with an iOS 16+ SDK for iOS builds
-- CocoaPods for iOS
+- Xcode **26+** with the iOS **26 SDK** for App Store builds
+- Swift Package Manager (Flutter plugin integration; CocoaPods is not required
+  by the checked-in project)
 
 Check your environment:
 
@@ -58,7 +59,9 @@ flutter doctor -v
 
 ## First-time setup
 
-This source archive intentionally keeps generated Flutter platform scaffolding reproducible instead of checking in machine-generated Android/iOS template files.
+The production Android and iOS projects are checked in. The setup command
+updates SalahTrack's known native settings in place; it does not regenerate or
+replace either platform project.
 
 ### macOS / Linux
 
@@ -76,14 +79,13 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 The bootstrap script:
 
-1. creates fresh Android/iOS platform templates with the installed Flutter SDK,
-2. applies SalahTrack Android/iOS native code,
-3. configures scheduled-notification receivers and permissions,
-4. enables Android core-library desugaring,
-5. configures the iOS location usage description,
-6. runs `flutter pub get`,
-7. runs `flutter analyze`,
-8. runs `flutter test`.
+1. applies the checked-in SalahTrack Android/iOS native settings,
+2. configures scheduled-notification receivers and permissions,
+3. enables Android core-library desugaring,
+4. configures the iOS location usage description,
+5. runs `flutter pub get`,
+6. runs `flutter analyze`,
+7. runs `flutter test`.
 
 Then start the app:
 
@@ -178,7 +180,7 @@ The Kotlin platform bridge explicitly reports system-level app shielding as unav
 The current iOS app delegate is in:
 
 ```text
-native/ios/AppDelegate.swift
+ios/Runner/AppDelegate.swift
 ```
 
 The release target currently uses local notifications, including Apple's Time

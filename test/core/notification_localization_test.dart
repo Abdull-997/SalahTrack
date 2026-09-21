@@ -30,6 +30,7 @@ class _Plugin implements FlutterLocalNotificationsPlugin {
   Completer<void>? initializeGate;
   int initializeCalls = 0;
   bool failSchedule = false;
+  final List<AndroidScheduleMode> scheduleModes = <AndroidScheduleMode>[];
   final List<int> cancelled = [];
   final List<PendingNotificationRequest> pending = [];
 
@@ -71,6 +72,7 @@ class _Plugin implements FlutterLocalNotificationsPlugin {
     DateTimeComponents? matchDateTimeComponents,
   }) async {
     if (failSchedule) throw StateError('Scheduling failed');
+    scheduleModes.add(androidScheduleMode);
     scheduled.add((
       id: id,
       title: title,
@@ -84,6 +86,28 @@ class _Plugin implements FlutterLocalNotificationsPlugin {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _CapabilityService extends LocalNotificationService {
+  _CapabilityService({
+    required super.plugin,
+    required this.notificationsEnabled,
+    required this.exactEnabled,
+    required this.fullScreenEnabled,
+  });
+
+  final bool notificationsEnabled;
+  final bool exactEnabled;
+  final bool fullScreenEnabled;
+
+  @override
+  Future<bool> notificationsAllowed() async => notificationsEnabled;
+
+  @override
+  Future<bool> canScheduleExactly() async => exactEnabled;
+
+  @override
+  Future<bool> canUseFullScreenIntent() async => fullScreenEnabled;
 }
 
 void main() {
@@ -131,6 +155,62 @@ void main() {
       plugin.scheduled.single.details.android!.importance,
       Importance.high,
     );
+  });
+
+  test('exact-alarm denial schedules an inexact high-priority fallback', () async {
+    final _Plugin plugin = _Plugin();
+    final LocalNotificationService service = _CapabilityService(
+      plugin: plugin,
+      notificationsEnabled: true,
+      exactEnabled: false,
+      fullScreenEnabled: false,
+    );
+    final DateTime later = DateTime.now().toUtc().add(const Duration(hours: 2));
+    final PrayerEntry entry = PrayerEntry(
+      id: 'test-inexact-fajr',
+      localDate: later.toIso8601String().substring(0, 10),
+      type: PrayerType.fajr,
+      scheduledAtUtc: later,
+      timezoneId: 'UTC',
+      graceEndsAtUtc: later.add(const Duration(hours: 1)),
+      trackingEndsAtUtc: later.add(const Duration(hours: 2)),
+      status: PrayerStatus.upcoming,
+    );
+
+    await service.schedulePrayer(entry, 'Fajr', languageCode: 'en');
+
+    expect(plugin.scheduled, hasLength(1));
+    expect(plugin.scheduleModes, <AndroidScheduleMode>[
+      AndroidScheduleMode.inexactAllowWhileIdle,
+    ]);
+    expect(plugin.scheduled.single.details.android!.fullScreenIntent, isFalse);
+    expect(plugin.scheduled.single.details.android!.importance, Importance.high);
+  });
+
+  test('denied notification permission is a safe no-op', () async {
+    final _Plugin plugin = _Plugin();
+    final LocalNotificationService service = _CapabilityService(
+      plugin: plugin,
+      notificationsEnabled: false,
+      exactEnabled: false,
+      fullScreenEnabled: false,
+    );
+    final DateTime later = DateTime.now().toUtc().add(const Duration(hours: 2));
+    final PrayerEntry entry = PrayerEntry(
+      id: 'test-denied-fajr',
+      localDate: later.toIso8601String().substring(0, 10),
+      type: PrayerType.fajr,
+      scheduledAtUtc: later,
+      timezoneId: 'UTC',
+      graceEndsAtUtc: later.add(const Duration(hours: 1)),
+      trackingEndsAtUtc: later.add(const Duration(hours: 2)),
+      status: PrayerStatus.upcoming,
+    );
+
+    await service.schedulePrayer(entry, 'Fajr', languageCode: 'en');
+
+    expect(plugin.scheduled, isEmpty);
+    expect(plugin.scheduleModes, isEmpty);
   });
 
   test('all five prayer-time alerts name the prayer in German and English', () async {

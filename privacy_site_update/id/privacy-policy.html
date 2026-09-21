@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="id" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Kebijakan Privasi · SalahTrack</title>
+<link rel="stylesheet" href="../styles.css">
+</head><body>
+<header class="site-header">
+<a class="brand" href="../index.html">SalahTrack</a>
+<nav class="languages" aria-label="Language">
+<a lang="ar" dir="rtl" hreflang="ar" href="../ar/index.html">العربية</a>
+<a lang="bn" dir="ltr" hreflang="bn" href="../bn/index.html">বাংলা</a>
+<a lang="de" dir="ltr" hreflang="de" href="../de/index.html">Deutsch</a>
+<a lang="en" dir="ltr" hreflang="en" href="../en/index.html">English</a>
+<a lang="es" dir="ltr" hreflang="es" href="../es/index.html">Español</a>
+<a lang="fa" dir="rtl" hreflang="fa" href="../fa/index.html">فارسی</a>
+<a lang="fr" dir="ltr" hreflang="fr" href="../fr/index.html">Français</a>
+<a lang="id" dir="ltr" hreflang="id" href="../id/index.html" aria-current="page">Bahasa Indonesia</a>
+<a lang="ms" dir="ltr" hreflang="ms" href="../ms/index.html">Bahasa Melayu</a>
+<a lang="pa" dir="rtl" hreflang="pa" href="../pa/index.html">پنجابی</a>
+<a lang="ps" dir="rtl" hreflang="ps" href="../ps/index.html">پښتو</a>
+<a lang="tr" dir="ltr" hreflang="tr" href="../tr/index.html">Türkçe</a>
+<a lang="ur" dir="rtl" hreflang="ur" href="../ur/index.html">اردو</a>
+</nav>
+</header>
+<main>
+<nav class="document-nav" aria-label="Documents">
+<a href="index.html">SalahTrack</a>
+<a href="legal-notice.html">Pemberitahuan Hukum / Impressum</a>
+</nav>
+<article><h1>Kebijakan Privasi</h1>
+<p class="updated">21 September 2026</p>
+<p>Kebijakan ini menjelaskan pemrosesan data dalam SalahTrack versi saat ini. Fitur akun, sinkronisasi awan, analitik, atau iklan yang belum ada tidak tercakup.</p>
+<section><h2>1. Pengendali dan cakupan</h2>
+<p>Penanggung jawab SalahTrack adalah Abdulrahman Al Hamidi, Universitätsstr. 70<br>40225 Düsseldorf<br>Germany. Kontak: <a dir="ltr" href="mailto:ar830222@gmail.com">ar830222@gmail.com</a>. Tidak ada akun pengguna atau server akun/sinkronisasi yang dioperasikan pengembang.</p>
+</section>
+<section><h2>2. Lokasi dan geocoding</h2>
+<p>Jika memilih lokasi otomatis, aplikasi meminta lokasi presisi saat digunakan dan menyimpan lintang, bujur, kota, negara, zona waktu, serta cara lokasi dipilih. Saat aplikasi berjalan, mode otomatis mendengarkan perubahan dengan filter jarak sekitar 1 km.</p>
+<p>Versi saat ini tidak meminta lokasi latar belakang Android, izin iOS “Selalu”, atau mode lokasi latar belakang iOS. Untuk pilihan manual, pencarian kota mengirim teks yang diketik, kode negara terpilih, dan bahasa aplikasi melalui HTTPS ke Photon di photon.komoot.io, yang menggunakan data OpenStreetMap. Photon dan operator jaringan juga dapat menerima alamat IP dan metadata permintaan biasa. Geocoding bawaan platform dapat pula menerima tempat atau koordinat dan bahasa untuk pencarian maju atau balik.</p>
+</section>
+<section><h2>3. Waktu salat dan Kiblat</h2>
+<p>Untuk kalender bulanan, lintang, bujur, bulan, tahun, metode perhitungan, mazhab Asar, dan aturan lintang tinggi dikirim melalui HTTPS ke API AlAdhan di api.aladhan.com. Layanan dan jaringan dapat menerima IP serta data koneksi biasa. Nama kota dan riwayat salat tidak dikirim.</p>
+<p>Arah Kiblat dihitung di perangkat. Arah kompas hanya dibaca untuk tampilan dan tidak disimpan atau dikirim oleh SalahTrack.</p>
+</section>
+<section><h2>4. Data yang disimpan di perangkat</h2>
+<p>SharedPreferences menyimpan lokasi, pengaturan, bahasa, tema, status orientasi awal, waktu peluncuran pertama, dan status permintaan ulasan. SQLite menyimpan cache waktu salat, zona waktu/Hijriah, status dan waktu konfirmasi/edit/tunda, penyesuaian, puasa, Tarawih, Qiyam, judul sasaran Ramadan, dan penyelesaiannya.</p>
+<p>Catatan ini dapat mengungkap praktik agama dan bersifat sensitif. Kode saat ini menyimpannya secara lokal dan tidak mengunggahnya kepada pengembang atau API. Aplikasi tidak mengakses kontak, foto, mikrofon, data kesehatan, ID iklan, atau ID perangkat lainnya.</p>
+<p>Formulir opsional “Laporkan masalah” menyiapkan kategori, uraian, langkah reproduksi, versi dan nomor build aplikasi, platform, versi sistem operasi, model perangkat, serta bahasa aplikasi di perangkat. Anda dapat meninjau, menyunting, membatalkan, atau secara tegas mengirim teks melalui aplikasi email sendiri. Tidak ada yang dikirim otomatis dan koordinat, riwayat salat/Ramadan, aktivitas keagamaan, atau ID perangkat tidak dilampirkan secara tersembunyi.</p>
+</section>
+<section><h2>5. Notifikasi dan fitur perangkat</h2>
+<p>Dengan izin, notifikasi salat, Jumat, tunda, dan Ramadan dijadwalkan secara lokal. Sistem operasi menangani teks, tanggal, ID, dan tindakan; tidak ada token push jarak jauh atau server notifikasi. Android dapat memakai alarm tepat, getaran, penjadwalan setelah boot, dan layar penuh opsional; iOS dapat memakai notifikasi Peka Waktu.</p>
+<p>Target iOS saat ini tidak memiliki FamilyControls, ManagedSettings, DeviceActivity, App Group, atau hak Family Controls, sehingga tidak mengakses pilihan atau data Durasi Layar.</p>
+</section>
+<section><h2>6. Pihak ketiga dan transfer</h2>
+<p>Pemrosesan eksternal terbatas pada AlAdhan, pencarian kota Photon/OpenStreetMap, geocoding sistem, dialog ulasan App Store/Google Play opsional, dan penyedia email hanya jika Anda memilih mengirim laporan. Penyedia dapat memproses log teknis berdasarkan ketentuan mereka. Tidak ada SDK analitik, laporan crash, iklan, pelacakan, atau login sosial.</p>
+<p>Riwayat salat/Ramadan, sasaran, dan tindakan notifikasi tidak dikirim kepada pengembang. Laporan baru mencapai kotak masuk dukungan setelah Anda menekan “Kirim” di aplikasi email dan dapat memuat informasi laporan/teknis yang ditampilkan serta metadata email biasa. Permintaan aplikasi memakai HTTPS, tetapi retensi log eksternal tidak dikendalikan SalahTrack.</p>
+</section>
+<section><h2>7. Retensi dan penghapusan</h2>
+<p>Pengaturan lokal tetap ada sampai diubah, data aplikasi dihapus, atau aplikasi dicopot. Tidak ada masa penghapusan otomatis untuk riwayat lokal. Cache dapat diganti dan notifikasi berakhir atau dibatalkan saat jadwal berubah.</p>
+<p>Izin dapat dicabut di pengaturan sistem. Menghapus penyimpanan atau mencopot aplikasi menghapus basis data dan preferensi yang dikelola aplikasi. Data penyedia eksternal mengikuti proses penyedia itu.</p>
+</section>
+<section><h2>8. Dasar hukum dan hak</h2>
+<p>Sesuai konteks, fungsi yang diminta didasarkan pada Pasal 6(1)(b) GDPR dan pemrosesan berbasis izin pada persetujuan Pasal 6(1)(a). Anda dapat mencabut izin untuk masa depan.</p>
+<p>Sesuai syarat hukum, Anda dapat meminta akses, koreksi, penghapusan, pembatasan, portabilitas, keberatan, dan mengadu kepada otoritas. Karena sebagian besar data lokal, pengendali biasanya tidak dapat melihat atau memulihkannya dari jarak jauh.</p>
+</section>
+<section><h2>9. Kontak dan perubahan</h2>
+<p>Untuk pertanyaan atau permintaan hak, hubungi <a dir="ltr" href="mailto:ar830222@gmail.com">ar830222@gmail.com</a>. Kebijakan harus diperbarui sebelum menambah akun, awan, analitik, iklan, penerima baru, atau izin yang berbeda secara material. Tanggal di atas menunjukkan versi ini.</p>
+</section>
+</article>
+</main><footer><span>SalahTrack</span><a dir="ltr" href="mailto:ar830222@gmail.com">ar830222@gmail.com</a></footer></body></html>

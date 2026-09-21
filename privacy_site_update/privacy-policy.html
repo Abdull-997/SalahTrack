@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Privacy Policy · SalahTrack</title>
+<link rel="stylesheet" href="styles.css">
+</head><body>
+<header class="site-header">
+<a class="brand" href="index.html">SalahTrack</a>
+<nav class="languages" aria-label="Language">
+<a lang="ar" dir="rtl" hreflang="ar" href="ar/index.html">العربية</a>
+<a lang="bn" dir="ltr" hreflang="bn" href="bn/index.html">বাংলা</a>
+<a lang="de" dir="ltr" hreflang="de" href="de/index.html">Deutsch</a>
+<a lang="en" dir="ltr" hreflang="en" href="en/index.html" aria-current="page">English</a>
+<a lang="es" dir="ltr" hreflang="es" href="es/index.html">Español</a>
+<a lang="fa" dir="rtl" hreflang="fa" href="fa/index.html">فارسی</a>
+<a lang="fr" dir="ltr" hreflang="fr" href="fr/index.html">Français</a>
+<a lang="id" dir="ltr" hreflang="id" href="id/index.html">Bahasa Indonesia</a>
+<a lang="ms" dir="ltr" hreflang="ms" href="ms/index.html">Bahasa Melayu</a>
+<a lang="pa" dir="rtl" hreflang="pa" href="pa/index.html">پنجابی</a>
+<a lang="ps" dir="rtl" hreflang="ps" href="ps/index.html">پښتو</a>
+<a lang="tr" dir="ltr" hreflang="tr" href="tr/index.html">Türkçe</a>
+<a lang="ur" dir="rtl" hreflang="ur" href="ur/index.html">اردو</a>
+</nav>
+</header>
+<main>
+<nav class="document-nav" aria-label="Documents">
+<a href="index.html">SalahTrack</a>
+<a href="legal-notice.html">Legal Notice / Impressum</a>
+</nav>
+<article><h1>Privacy Policy</h1>
+<p class="updated">21 September 2026</p>
+<p>This policy describes the data processing performed by the current SalahTrack app. It does not describe future account, cloud-sync, analytics, or advertising features that are not present in this release.</p>
+<section><h2>1. Controller and scope</h2>
+<p>The person responsible for SalahTrack is Abdulrahman Al Hamidi, Universitätsstr. 70<br>40225 Düsseldorf<br>Germany. Contact: <a dir="ltr" href="mailto:ar830222@gmail.com">ar830222@gmail.com</a>. SalahTrack has no user accounts and no developer-operated account or synchronization server.</p>
+</section>
+<section><h2>2. Location and geocoding</h2>
+<p>If you choose automatic location, SalahTrack requests foreground/while-in-use precise location. It stores latitude, longitude, city, country, time zone, and whether the location was automatic. While the app is running, automatic mode listens for location changes with an approximately 1 km distance filter so prayer data can be refreshed.</p>
+<p>The current builds do not request Android background location or iOS Always authorization and do not declare an iOS background-location mode. For manual selection, city search sends the typed search text, selected country code, and app language over HTTPS to the Photon service at photon.komoot.io, which uses OpenStreetMap data. Photon and network operators can also receive the IP address and ordinary request metadata. Native platform geocoding may additionally receive an entered place or coordinates and language for forward or reverse lookup.</p>
+</section>
+<section><h2>3. Prayer times and Qibla</h2>
+<p>To download a monthly prayer calendar, SalahTrack sends the selected latitude and longitude, month and year, calculation method, Asr school, and high-latitude rule over HTTPS to the AlAdhan API at api.aladhan.com. The service and network operators can also receive ordinary connection data such as the IP address. City names and prayer history are not included in this request.</p>
+<p>Qibla bearing is calculated on the device from the stored coordinates. Compass heading is read from the device sensor for display and is not stored or sent by SalahTrack.</p>
+</section>
+<section><h2>4. Data stored on the device</h2>
+<p>SharedPreferences stores selected location, prayer and Ramadan settings, language, theme, onboarding status, first successful launch time, and whether an in-app review request was attempted. SQLite stores cached prayer times, time zone and Hijri metadata, prayer status, confirmation/edit/snooze timestamps, manual offsets, Ramadan fasting, Tarawih and Qiyam records, custom Ramadan goal titles, and goal completions.</p>
+<p>Prayer and Ramadan records can reveal religious practice and should be treated as sensitive. The current code keeps these records in the app database and does not upload them to SalahTrack or the prayer-time API. The app does not access contacts, photos, microphone, health data, advertising identifiers, or other device identifiers.</p>
+<p>The optional Report a Problem form prepares the category, description, reproduction steps, app version and build, platform, operating-system version, device model, and app language on the device. You can review, edit, cancel, or explicitly send this text through your own email app. Nothing is sent automatically, and SalahTrack does not silently attach coordinates, prayer or Ramadan history, religious activity, or device identifiers.</p>
+</section>
+<section><h2>5. Notifications and device features</h2>
+<p>With permission, SalahTrack schedules local prayer, Friday, snooze, and Ramadan notifications on the device. Notification text, dates, prayer identifiers, and actions are handled by the operating system; no remote-push token or notification server is used. Android may use exact alarms, vibration, restart scheduling after boot, and optional full-screen prayer alerts. iOS may use Time Sensitive notifications.</p>
+<p>The current iOS target does not contain FamilyControls, ManagedSettings, DeviceActivity, an App Group, or a Family Controls entitlement. SalahTrack therefore does not access Screen Time app selections or usage data in this release.</p>
+</section>
+<section><h2>6. Third-party services and network transfers</h2>
+<p>External processing is limited to the AlAdhan prayer-time API, Photon/OpenStreetMap city search, operating-system geocoding services, an optional operating-system App Store or Google Play review prompt, and email providers only if you choose to send a problem report. Those providers may process technical connection logs under their own terms. SalahTrack contains no analytics, crash-reporting, advertising, tracking, or social-login SDK.</p>
+<p>No prayer history, Ramadan history, custom goals, notification actions, or account data is transmitted to the developer. A problem report reaches the support mailbox only after you press Send in the email app and can include the report and technical information shown to you, together with normal email metadata handled by the email providers. All app requests identified in the source use HTTPS, but SalahTrack does not control how external providers retain their server logs.</p>
+</section>
+<section><h2>7. Retention and deletion</h2>
+<p>Local settings remain until changed, app storage is cleared, or the app is uninstalled. Prayer and Ramadan history is retained in the local database without an automatic deletion period. Cached prayer data may be replaced by later downloads; scheduled notifications expire or are cancelled when schedules change.</p>
+<p>You can revoke location and notification permissions in system settings. Clearing SalahTrack storage or uninstalling the app deletes the app-managed local database and preferences. Requests concerning data held by an external provider must be addressed under that provider’s process.</p>
+</section>
+<section><h2>8. Legal bases and your rights</h2>
+<p>Processing needed to provide the functions you request is based, as applicable, on Article 6(1)(b) GDPR; permission-based processing is based on consent under Article 6(1)(a) GDPR. You can withdraw device permission consent at any time without affecting earlier lawful processing.</p>
+<p>Subject to the legal conditions, you may request access, rectification, erasure, restriction, portability, or object to processing, and you may complain to a data-protection supervisory authority. Because most data stays only in your local app storage, the controller normally cannot inspect or recover it remotely.</p>
+</section>
+<section><h2>9. Contact and policy changes</h2>
+<p>For privacy questions or rights requests, contact <a dir="ltr" href="mailto:ar830222@gmail.com">ar830222@gmail.com</a>. This policy must be updated before any release adds accounts, cloud backup, analytics, advertising, new data recipients, or materially different permissions. The effective date above identifies the displayed version.</p>
+</section>
+</article>
+</main><footer><span>SalahTrack</span><a dir="ltr" href="mailto:ar830222@gmail.com">ar830222@gmail.com</a></footer></body></html>

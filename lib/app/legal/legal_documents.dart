@@ -26,20 +26,20 @@ abstract final class PrivacyLegalDocuments {
   static const Map<String, LegalDocument> _privacyPolicies = {
     'en': LegalDocument(
       title: 'Privacy Policy',
-      lastUpdated: '16 September 2026',
+      lastUpdated: '21 September 2026',
       introduction: 'This policy describes the data processing performed by the current SalahTrack app. It does not describe future account, cloud-sync, analytics, or advertising features that are not present in this release.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. Controller and scope',
           paragraphs: <String>[
-            'The person responsible for SalahTrack is {controller}, {location}. Contact: {email}. LinkedIn: {linkedin}. SalahTrack has no user accounts and no developer-operated account or synchronization server.',
+            'The person responsible for SalahTrack is {controller}, {location}. Contact: {email}. SalahTrack has no user accounts and no developer-operated account or synchronization server.',
           ],
         ),
         LegalSection(
           title: '2. Location and geocoding',
           paragraphs: <String>[
             'If you choose automatic location, SalahTrack requests foreground/while-in-use precise location. It stores latitude, longitude, city, country, time zone, and whether the location was automatic. While the app is running, automatic mode listens for location changes with an approximately 1 km distance filter so prayer data can be refreshed.',
-            'The current builds do not request Android background location or iOS Always authorization and do not declare an iOS background-location mode. You may instead enter a city and country. Forward or reverse geocoding is performed by the device platform and may send the entered place or coordinates, language, IP address, and ordinary request metadata to the platform geocoding provider.',
+            'The current builds do not request Android background location or iOS Always authorization and do not declare an iOS background-location mode. For manual selection, city search sends the typed search text, selected country code, and app language over HTTPS to the Photon service at photon.komoot.io, which uses OpenStreetMap data. Photon and network operators can also receive the IP address and ordinary request metadata. Native platform geocoding may additionally receive an entered place or coordinates and language for forward or reverse lookup.',
           ],
         ),
         LegalSection(
@@ -54,6 +54,7 @@ abstract final class PrivacyLegalDocuments {
           paragraphs: <String>[
             'SharedPreferences stores selected location, prayer and Ramadan settings, language, theme, onboarding status, first successful launch time, and whether an in-app review request was attempted. SQLite stores cached prayer times, time zone and Hijri metadata, prayer status, confirmation/edit/snooze timestamps, manual offsets, Ramadan fasting, Tarawih and Qiyam records, custom Ramadan goal titles, and goal completions.',
             'Prayer and Ramadan records can reveal religious practice and should be treated as sensitive. The current code keeps these records in the app database and does not upload them to SalahTrack or the prayer-time API. The app does not access contacts, photos, microphone, health data, advertising identifiers, or other device identifiers.',
+            'The optional Report a Problem form prepares the category, description, reproduction steps, app version and build, platform, operating-system version, device model, and app language on the device. You can review, edit, cancel, or explicitly send this text through your own email app. Nothing is sent automatically, and SalahTrack does not silently attach coordinates, prayer or Ramadan history, religious activity, or device identifiers.',
           ],
         ),
         LegalSection(
@@ -66,8 +67,8 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '6. Third-party services and network transfers',
           paragraphs: <String>[
-            'External processing is limited to the AlAdhan prayer-time API, operating-system geocoding services, and an optional operating-system App Store or Google Play review prompt. Those providers may process technical connection logs under their own terms. SalahTrack contains no analytics, crash-reporting, advertising, tracking, or social-login SDK.',
-            'No prayer history, Ramadan history, custom goals, notification actions, or account data is transmitted to the developer. All app requests identified in the source use HTTPS, but SalahTrack does not control how external providers retain their server logs.',
+            'External processing is limited to the AlAdhan prayer-time API, Photon/OpenStreetMap city search, operating-system geocoding services, an optional operating-system App Store or Google Play review prompt, and email providers only if you choose to send a problem report. Those providers may process technical connection logs under their own terms. SalahTrack contains no analytics, crash-reporting, advertising, tracking, or social-login SDK.',
+            'No prayer history, Ramadan history, custom goals, notification actions, or account data is transmitted to the developer. A problem report reaches the support mailbox only after you press Send in the email app and can include the report and technical information shown to you, together with normal email metadata handled by the email providers. All app requests identified in the source use HTTPS, but SalahTrack does not control how external providers retain their server logs.',
           ],
         ),
         LegalSection(
@@ -94,20 +95,20 @@ abstract final class PrivacyLegalDocuments {
     ),
     'de': LegalDocument(
       title: 'Datenschutzerklärung',
-      lastUpdated: '16. September 2026',
+      lastUpdated: '21. September 2026',
       introduction: 'Diese Erklärung beschreibt die Datenverarbeitung der aktuellen SalahTrack-App. Sie beschreibt keine künftigen Konto-, Cloud-Sync-, Analyse- oder Werbefunktionen, die in dieser Version nicht vorhanden sind.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. Verantwortlicher und Geltungsbereich',
           paragraphs: <String>[
-            'Verantwortlich für SalahTrack ist {controller}, {location}. Kontakt: {email}. LinkedIn: {linkedin}. SalahTrack hat keine Benutzerkonten und keinen vom Entwickler betriebenen Konto- oder Synchronisationsserver.',
+            'Verantwortlich für SalahTrack ist {controller}, {location}. Kontakt: {email}. SalahTrack hat keine Benutzerkonten und keinen vom Entwickler betriebenen Konto- oder Synchronisationsserver.',
           ],
         ),
         LegalSection(
           title: '2. Standort und Geokodierung',
           paragraphs: <String>[
             'Wenn du den automatischen Standort auswählst, fragt SalahTrack den genauen Standort im Vordergrund beziehungsweise während der Nutzung ab. Gespeichert werden Breiten- und Längengrad, Stadt, Land, Zeitzone sowie die Information, ob der Standort automatisch ermittelt wurde. Solange die App läuft, reagiert der automatische Modus ungefähr ab einer Ortsänderung von 1 km.',
-            'Die aktuellen Builds fordern weder Android-Hintergrundstandort noch die iOS-Berechtigung „Immer“ an und deklarieren keinen iOS-Hintergrundmodus für Standort. Alternativ kannst du Stadt und Land eingeben. Die Geokodierung erfolgt über den Plattformdienst und kann Ortsangaben oder Koordinaten, Sprache, IP-Adresse und übliche Verbindungsdaten an dessen Anbieter übermitteln.',
+            'Die aktuellen Builds fordern weder Android-Hintergrundstandort noch die iOS-Berechtigung „Immer“ an und deklarieren keinen iOS-Hintergrundmodus für Standort. Bei der manuellen Auswahl sendet die Städtesuche Suchtext, gewählten Ländercode und App-Sprache verschlüsselt per HTTPS an Photon unter photon.komoot.io; der Dienst nutzt OpenStreetMap-Daten. Photon und Netzbetreiber können außerdem IP-Adresse und übliche Anfragedaten erhalten. Die native Plattform-Geokodierung kann für Vorwärts- oder Rückwärtssuche zusätzlich Ortsangaben oder Koordinaten und Sprache erhalten.',
           ],
         ),
         LegalSection(
@@ -122,6 +123,7 @@ abstract final class PrivacyLegalDocuments {
           paragraphs: <String>[
             'SharedPreferences speichert Standort, Gebets- und Ramadan-Einstellungen, Sprache, Design, Onboarding-Status, Zeitpunkt des ersten erfolgreichen Starts und ob eine In-App-Bewertung angefragt wurde. SQLite speichert Gebetszeit-Cache, Zeitzonen- und Hijri-Daten, Gebetsstatus, Bestätigungs-, Bearbeitungs- und Snooze-Zeitpunkte, manuelle Korrekturen sowie Fasten-, Tarawih-, Qiyam- und Ramadan-Zieldaten.',
             'Gebets- und Ramadan-Einträge können religiöse Praxis erkennen lassen und sind besonders sensibel. Der aktuelle Code belässt sie in der App-Datenbank und lädt sie weder zu SalahTrack noch zur Gebetszeiten-API hoch. Kontakte, Fotos, Mikrofon, Gesundheitsdaten, Werbe- oder andere Gerätekennungen werden nicht abgerufen.',
+            'Das optionale Formular „Problem melden“ bereitet Kategorie, Beschreibung, Schritte zur Reproduktion, App-Version und Build, Plattform, Betriebssystemversion, Gerätemodell und App-Sprache auf dem Gerät vor. Du kannst den Text in deiner E-Mail-App prüfen, bearbeiten, verwerfen oder ausdrücklich senden. Es wird nichts automatisch gesendet; Koordinaten, Gebets- oder Ramadan-Verlauf, religiöse Aktivität und Gerätekennungen werden nicht unbemerkt angehängt.',
           ],
         ),
         LegalSection(
@@ -134,8 +136,8 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '6. Drittanbieter und Übermittlungen',
           paragraphs: <String>[
-            'Externe Verarbeitung beschränkt sich auf die AlAdhan-Gebetszeiten-API, Geokodierungsdienste des Betriebssystems und eine optionale Bewertungsabfrage über App Store oder Google Play. Diese Anbieter können technische Verbindungsprotokolle nach ihren eigenen Bedingungen verarbeiten. SalahTrack enthält keine Analyse-, Absturzbericht-, Werbe-, Tracking- oder Social-Login-SDKs.',
-            'Gebets- oder Ramadan-Verlauf, eigene Ziele und Benachrichtigungsaktionen werden nicht an den Entwickler übertragen. Alle im Quellcode festgelegten App-Anfragen verwenden HTTPS; die Speicherfristen externer Serverprotokolle werden jedoch nicht von SalahTrack kontrolliert.',
+            'Externe Verarbeitung beschränkt sich auf die AlAdhan-Gebetszeiten-API, die Städtesuche Photon/OpenStreetMap, Geokodierungsdienste des Betriebssystems, eine optionale Bewertungsabfrage über App Store oder Google Play sowie E-Mail-Anbieter nur dann, wenn du einen Problembericht sendest. Diese Anbieter können technische Verbindungsprotokolle nach ihren eigenen Bedingungen verarbeiten. SalahTrack enthält keine Analyse-, Absturzbericht-, Werbe-, Tracking- oder Social-Login-SDKs.',
+            'Gebets- oder Ramadan-Verlauf, eigene Ziele und Benachrichtigungsaktionen werden nicht an den Entwickler übertragen. Ein Problembericht erreicht das Support-Postfach erst, nachdem du in der E-Mail-App auf „Senden“ gedrückt hast; er kann die angezeigten Bericht- und technischen Angaben sowie übliche E-Mail-Metadaten enthalten. Alle App-Anfragen verwenden HTTPS; externe Speicherfristen kontrolliert SalahTrack nicht.',
           ],
         ),
         LegalSection(
@@ -162,20 +164,20 @@ abstract final class PrivacyLegalDocuments {
     ),
     'ar': LegalDocument(
       title: 'سياسة الخصوصية',
-      lastUpdated: '16 سبتمبر 2026',
+      lastUpdated: '21 سبتمبر 2026',
       introduction: 'تصف هذه السياسة معالجة البيانات في الإصدار الحالي من تطبيق SalahTrack، ولا تشمل ميزات مستقبلية مثل الحسابات أو المزامنة السحابية أو التحليلات أو الإعلانات لأنها غير موجودة حاليًا.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. المسؤول ونطاق السياسة',
           paragraphs: <String>[
-            'المسؤول عن SalahTrack هو {controller}، {location}. التواصل: {email}. لينكدإن: {linkedin}. لا توجد حسابات مستخدمين ولا خادم حسابات أو مزامنة يديره المطور.',
+            'المسؤول عن SalahTrack هو {controller}، {location}. التواصل: {email}. لا توجد حسابات مستخدمين ولا خادم حسابات أو مزامنة يديره المطور.',
           ],
         ),
         LegalSection(
           title: '2. الموقع والترميز الجغرافي',
           paragraphs: <String>[
             'عند اختيار الموقع التلقائي يطلب التطبيق الموقع الدقيق أثناء الاستخدام، ويحفظ خط العرض والطول والمدينة والدولة والمنطقة الزمنية وطريقة اختيار الموقع. وأثناء تشغيل التطبيق يتابع تغيّرات الموقع بمرشح مسافة يقارب كيلومترًا واحدًا لتحديث بيانات الصلاة.',
-            'لا يطلب الإصدار الحالي موقع الخلفية في Android ولا إذن «دائمًا» أو وضع موقع في الخلفية في iOS. ويمكن إدخال مدينة ودولة يدويًا. قد ترسل خدمة الترميز الجغرافي التابعة للنظام المكان أو الإحداثيات واللغة وعنوان IP وبيانات الطلب العادية إلى مزود المنصة.',
+            'لا يطلب الإصدار الحالي موقع الخلفية في Android ولا إذن «دائمًا» أو وضع موقع في الخلفية في iOS. عند الاختيار اليدوي يرسل بحث المدن نص البحث ورمز الدولة المختارة ولغة التطبيق عبر HTTPS إلى خدمة Photon على photon.komoot.io التي تستخدم بيانات OpenStreetMap. وقد تستلم Photon ومشغلو الشبكة عنوان IP وبيانات الطلب المعتادة. وقد تستلم خدمة الترميز الجغرافي الأصلية في النظام أيضًا المكان أو الإحداثيات واللغة للبحث الأمامي أو العكسي.',
           ],
         ),
         LegalSection(
@@ -190,6 +192,7 @@ abstract final class PrivacyLegalDocuments {
           paragraphs: <String>[
             'تحفظ SharedPreferences الموقع والإعدادات واللغة والمظهر وحالة الإعداد الأول ووقت أول تشغيل ناجح وحالة طلب التقييم. وتحفظ SQLite أوقات الصلاة المخبأة وحالتها وأوقات التأكيد والتعديل والتأجيل وبيانات الهجري، إضافة إلى الصيام والتراويح والقيام وأسماء أهداف رمضان وإنجازها.',
             'قد تكشف سجلات الصلاة ورمضان عن ممارسة دينية ولذلك تُعد حساسة. تبقى في قاعدة بيانات التطبيق ولا تُرفع إلى المطور أو واجهة المواقيت. لا يصل التطبيق إلى جهات الاتصال أو الصور أو الميكروفون أو البيانات الصحية أو معرّفات الإعلانات أو الجهاز.',
+            'يُعد نموذج «الإبلاغ عن مشكلة» الاختياري على الجهاز الفئة والوصف وخطوات إعادة المشكلة وإصدار التطبيق ورقم البناء والمنصة وإصدار نظام التشغيل وطراز الجهاز ولغة التطبيق. يمكنك مراجعة النص أو تعديله أو إلغاؤه أو إرساله صراحةً عبر تطبيق البريد لديك. لا يُرسل شيء تلقائيًا، ولا تُرفق الإحداثيات أو سجلات الصلاة ورمضان أو النشاط الديني أو معرّفات الجهاز خفيةً.',
           ],
         ),
         LegalSection(
@@ -202,8 +205,8 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '6. الخدمات الخارجية ونقل البيانات',
           paragraphs: <String>[
-            'تقتصر المعالجة الخارجية على AlAdhan وخدمات الترميز الجغرافي في النظام ونافذة تقييم اختيارية من App Store أو Google Play. قد يعالج هؤلاء المزودون سجلات تقنية وفق شروطهم. لا يحتوي SalahTrack على تحليلات أو تقارير أعطال أو إعلانات أو تتبع أو تسجيل اجتماعي.',
-            'لا تُنقل سجلات الصلاة ورمضان أو الأهداف أو إجراءات الإشعارات إلى المطور. تستخدم طلبات التطبيق المحددة في المصدر HTTPS، لكن SalahTrack لا يتحكم في مدة احتفاظ المزودين بسجلات خوادمهم.',
+            'تقتصر المعالجة الخارجية على AlAdhan وبحث المدن Photon/OpenStreetMap وخدمات الترميز الجغرافي في النظام ونافذة تقييم اختيارية من App Store أو Google Play، وعلى مزودي البريد فقط إذا اخترت إرسال بلاغ. قد يعالج هؤلاء المزودون سجلات تقنية وفق شروطهم. لا يحتوي SalahTrack على تحليلات أو تقارير أعطال أو إعلانات أو تتبع أو تسجيل اجتماعي.',
+            'لا تُنقل سجلات الصلاة ورمضان أو الأهداف أو إجراءات الإشعارات إلى المطور. لا يصل بلاغ المشكلة إلى بريد الدعم إلا بعد ضغط «إرسال» في تطبيق البريد، وقد يتضمن بيانات البلاغ والمعلومات التقنية المعروضة وبيانات البريد المعتادة. تستخدم طلبات التطبيق HTTPS، لكن SalahTrack لا يتحكم في مدة احتفاظ المزودين بسجلاتهم.',
           ],
         ),
         LegalSection(
@@ -230,20 +233,20 @@ abstract final class PrivacyLegalDocuments {
     ),
     'fr': LegalDocument(
       title: 'Politique de confidentialité',
-      lastUpdated: '16 septembre 2026',
+      lastUpdated: '21 septembre 2026',
       introduction: 'Cette politique décrit les traitements de la version actuelle de SalahTrack. Elle ne couvre pas de futurs comptes, synchronisation cloud, analyses ou publicités, absents de cette version.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. Responsable et portée',
           paragraphs: <String>[
-            'Le responsable de SalahTrack est {controller}, {location}. Contact : {email}. LinkedIn : {linkedin}. SalahTrack ne propose aucun compte utilisateur ni serveur de compte ou de synchronisation exploité par le développeur.',
+            'Le responsable de SalahTrack est {controller}, {location}. Contact : {email}. SalahTrack ne propose aucun compte utilisateur ni serveur de compte ou de synchronisation exploité par le développeur.',
           ],
         ),
         LegalSection(
           title: '2. Localisation et géocodage',
           paragraphs: <String>[
             'Si vous choisissez la localisation automatique, l’app demande la position précise au premier plan/pendant l’utilisation et conserve latitude, longitude, ville, pays, fuseau horaire et mode de sélection. Pendant que l’app fonctionne, ce mode écoute les changements avec un filtre d’environ 1 km.',
-            'Les versions actuelles ne demandent ni localisation Android en arrière-plan, ni autorisation iOS « Toujours », et ne déclarent aucun mode iOS de localisation en arrière-plan. Vous pouvez saisir ville et pays. Le géocodage du système peut transmettre lieu ou coordonnées, langue, adresse IP et métadonnées usuelles au fournisseur de la plateforme.',
+            'Les versions actuelles ne demandent ni localisation Android en arrière-plan, ni autorisation iOS « Toujours », et ne déclarent aucun mode iOS de localisation en arrière-plan. Pour la sélection manuelle, la recherche de ville transmet le texte saisi, le code du pays choisi et la langue de l’app par HTTPS à Photon sur photon.komoot.io, qui utilise les données OpenStreetMap. Photon et les opérateurs réseau peuvent aussi recevoir l’adresse IP et les métadonnées usuelles. Le géocodage natif peut en outre recevoir un lieu ou des coordonnées et la langue pour une recherche directe ou inverse.',
           ],
         ),
         LegalSection(
@@ -258,6 +261,7 @@ abstract final class PrivacyLegalDocuments {
           paragraphs: <String>[
             'SharedPreferences conserve localisation, réglages de prière et Ramadan, langue, thème, état de l’accueil initial, premier lancement et état de demande d’avis. SQLite conserve cache des horaires, fuseau et données hégiriennes, statuts, dates de confirmation/modification/report, ajustements, jeûne, Tarawih, Qiyam, objectifs Ramadan et accomplissements.',
             'Ces données peuvent révéler une pratique religieuse et sont sensibles. Le code actuel les garde dans la base locale et ne les envoie ni au développeur ni à l’API. L’app n’accède pas aux contacts, photos, microphone, données de santé, identifiants publicitaires ou autres identifiants de l’appareil.',
+            'Le formulaire facultatif « Signaler un problème » prépare sur l’appareil la catégorie, la description, les étapes de reproduction, la version et le build de l’app, la plateforme, la version du système, le modèle d’appareil et la langue. Vous pouvez relire, modifier, annuler ou envoyer explicitement ce texte dans votre app de messagerie. Rien n’est envoyé automatiquement et aucune coordonnée, aucun historique de prière/Ramadan, activité religieuse ou identifiant d’appareil n’est joint discrètement.',
           ],
         ),
         LegalSection(
@@ -270,8 +274,8 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '6. Services tiers et transferts',
           paragraphs: <String>[
-            'Les traitements externes se limitent à AlAdhan, au géocodage du système et à une éventuelle invite d’avis App Store/Google Play. Ces fournisseurs peuvent traiter des journaux techniques selon leurs règles. Aucun SDK d’analyse, de crash, de publicité, de suivi ou de connexion sociale n’est intégré.',
-            'Historique de prière/Ramadan, objectifs et actions de notification ne sont pas transmis au développeur. Les requêtes définies dans le code utilisent HTTPS, mais SalahTrack ne contrôle pas la conservation des journaux des fournisseurs.',
+            'Les traitements externes se limitent à AlAdhan, à la recherche de villes Photon/OpenStreetMap, au géocodage du système, à une éventuelle invite d’avis App Store/Google Play et aux fournisseurs de messagerie uniquement si vous envoyez un rapport. Ces fournisseurs peuvent traiter des journaux techniques selon leurs règles. Aucun SDK d’analyse, de crash, de publicité, de suivi ou de connexion sociale n’est intégré.',
+            'Historique de prière/Ramadan, objectifs et actions de notification ne sont pas transmis au développeur. Un rapport n’atteint la boîte d’assistance qu’après votre appui sur « Envoyer » dans l’app de messagerie ; il peut contenir les informations affichées et les métadonnées courantes d’un courriel. Les requêtes de l’app utilisent HTTPS, mais SalahTrack ne contrôle pas la conservation des journaux externes.',
           ],
         ),
         LegalSection(
@@ -298,20 +302,20 @@ abstract final class PrivacyLegalDocuments {
     ),
     'es': LegalDocument(
       title: 'Política de privacidad',
-      lastUpdated: '16 de septiembre de 2026',
+      lastUpdated: '21 de septiembre de 2026',
       introduction: 'Esta política describe el tratamiento de datos de la versión actual de SalahTrack. No describe futuras cuentas, sincronización en la nube, analítica o publicidad que no existen en esta versión.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. Responsable y alcance',
           paragraphs: <String>[
-            'El responsable de SalahTrack es {controller}, {location}. Contacto: {email}. LinkedIn: {linkedin}. SalahTrack no tiene cuentas de usuario ni un servidor de cuentas o sincronización operado por el desarrollador.',
+            'El responsable de SalahTrack es {controller}, {location}. Contacto: {email}. SalahTrack no tiene cuentas de usuario ni un servidor de cuentas o sincronización operado por el desarrollador.',
           ],
         ),
         LegalSection(
           title: '2. Ubicación y geocodificación',
           paragraphs: <String>[
             'Si eliges ubicación automática, la app solicita ubicación precisa en primer plano/durante el uso y guarda latitud, longitud, ciudad, país, zona horaria y el modo de selección. Mientras se ejecuta, escucha cambios con un filtro aproximado de 1 km.',
-            'La versión actual no solicita ubicación en segundo plano de Android ni autorización «Siempre» o modo de ubicación en segundo plano de iOS. Puedes introducir ciudad y país. El geocodificador del sistema puede enviar lugar o coordenadas, idioma, IP y metadatos habituales al proveedor de la plataforma.',
+            'La versión actual no solicita ubicación en segundo plano de Android ni autorización «Siempre» o modo de ubicación en segundo plano de iOS. Para la selección manual, la búsqueda de ciudades envía el texto escrito, el código del país elegido y el idioma de la app por HTTPS a Photon en photon.komoot.io, que usa datos de OpenStreetMap. Photon y los operadores de red también pueden recibir la dirección IP y metadatos habituales. El geocodificador nativo puede recibir además un lugar o coordenadas e idioma para búsqueda directa o inversa.',
           ],
         ),
         LegalSection(
@@ -326,6 +330,7 @@ abstract final class PrivacyLegalDocuments {
           paragraphs: <String>[
             'SharedPreferences guarda ubicación, ajustes, idioma, tema, incorporación, primer inicio y estado de solicitud de reseña. SQLite guarda horarios, zona horaria y datos hiyri, estados y marcas de confirmación/edición/posposición, ajustes, ayuno, Tarawih, Qiyam, títulos de objetivos y logros.',
             'Los registros pueden revelar práctica religiosa y son sensibles. El código actual los conserva localmente y no los sube al desarrollador ni a la API. La app no accede a contactos, fotos, micrófono, salud, identificadores publicitarios ni otros identificadores del dispositivo.',
+            'El formulario opcional «Informar de un problema» prepara en el dispositivo la categoría, descripción, pasos de reproducción, versión y compilación de la app, plataforma, versión del sistema, modelo del dispositivo e idioma. Puedes revisar, editar, cancelar o enviar expresamente el texto desde tu aplicación de correo. Nada se envía automáticamente ni se adjuntan ocultamente coordenadas, historial de oración o Ramadán, actividad religiosa o identificadores del dispositivo.',
           ],
         ),
         LegalSection(
@@ -338,8 +343,8 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '6. Terceros y transferencias',
           paragraphs: <String>[
-            'El tratamiento externo se limita a AlAdhan, geocodificación del sistema y una solicitud opcional de reseña de App Store/Google Play. Pueden tratar registros técnicos según sus términos. No hay SDK de analítica, fallos, anuncios, seguimiento o acceso social.',
-            'No se transmiten al desarrollador historial, objetivos ni acciones. Las solicitudes del código usan HTTPS, pero SalahTrack no controla la retención de registros de proveedores.',
+            'El tratamiento externo se limita a AlAdhan, la búsqueda de ciudades Photon/OpenStreetMap, la geocodificación del sistema, una solicitud opcional de reseña de App Store/Google Play y proveedores de correo solo si decides enviar un informe. Pueden tratar registros técnicos según sus términos. No hay SDK de analítica, fallos, anuncios, seguimiento o acceso social.',
+            'No se transmiten al desarrollador el historial de oración/Ramadán, objetivos ni acciones de notificación. Un informe llega al buzón de soporte únicamente después de pulsar «Enviar» en la aplicación de correo y puede contener la información mostrada y los metadatos normales del correo. Las solicitudes de la app usan HTTPS, pero SalahTrack no controla la retención de registros externos.',
           ],
         ),
         LegalSection(
@@ -366,20 +371,20 @@ abstract final class PrivacyLegalDocuments {
     ),
     'tr': LegalDocument(
       title: 'Gizlilik Politikası',
-      lastUpdated: '16 Eylül 2026',
+      lastUpdated: '21 Eylül 2026',
       introduction: 'Bu politika SalahTrack’un mevcut sürümündeki veri işlemesini açıklar; bu sürümde bulunmayan gelecekteki hesap, bulut eşitleme, analiz veya reklam özelliklerini kapsamaz.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. Sorumlu ve kapsam',
           paragraphs: <String>[
-            'SalahTrack’tan sorumlu kişi {controller}, {location}. İletişim: {email}. LinkedIn: {linkedin}. Kullanıcı hesabı ve geliştiricinin işlettiği hesap/eşitleme sunucusu yoktur.',
+            'SalahTrack’tan sorumlu kişi {controller}, {location}. İletişim: {email}. Kullanıcı hesabı ve geliştiricinin işlettiği hesap/eşitleme sunucusu yoktur.',
           ],
         ),
         LegalSection(
           title: '2. Konum ve coğrafi kodlama',
           paragraphs: <String>[
             'Otomatik konumu seçerseniz uygulama kullanım sırasında hassas konum ister; enlem, boylam, şehir, ülke, saat dilimi ve seçim biçimini saklar. Uygulama çalışırken yaklaşık 1 km mesafe filtresiyle değişiklikleri dinler.',
-            'Mevcut sürüm Android arka plan konumu, iOS “Her Zaman” izni veya iOS arka plan konum modu istemez. Şehir ve ülkeyi elle girebilirsiniz. Sistem coğrafi kodlama hizmeti yer/koordinat, dil, IP ve olağan istek verilerini platform sağlayıcısına gönderebilir.',
+            'Mevcut sürüm Android arka plan konumu, iOS “Her Zaman” izni veya iOS arka plan konum modu istemez. Elle seçimde şehir araması yazılan metni, seçilen ülke kodunu ve uygulama dilini HTTPS ile OpenStreetMap verilerini kullanan photon.komoot.io adresindeki Photon hizmetine gönderir. Photon ve ağ işletmecileri IP adresini ve olağan istek verilerini de alabilir. Yerel platform coğrafi kodlaması, ileri veya ters arama için ayrıca yer/koordinat ve dili alabilir.',
           ],
         ),
         LegalSection(
@@ -394,6 +399,7 @@ abstract final class PrivacyLegalDocuments {
           paragraphs: <String>[
             'SharedPreferences konum, ayarlar, dil, tema, ilk kurulum, ilk başarılı açılış ve değerlendirme isteği durumunu; SQLite önbellek vakitlerini, saat dilimi/Hicri verileri, durum ve onay/düzenleme/erteleme zamanlarını, ayarları, oruç, Teravih, Kıyam ve Ramazan hedeflerini saklar.',
             'Bu kayıtlar dini pratiği gösterebilir ve hassastır. Mevcut kod kayıtları yerel veritabanında tutar; geliştiriciye veya API’ye yüklemez. Rehber, fotoğraf, mikrofon, sağlık verisi, reklam veya cihaz kimliği erişimi yoktur.',
+            'İsteğe bağlı “Sorun bildir” formu kategori, açıklama, yeniden oluşturma adımları, uygulama sürümü ve derleme numarası, platform, işletim sistemi sürümü, cihaz modeli ve uygulama dilini cihazda hazırlar. Metni kendi e-posta uygulamanızda inceleyebilir, düzenleyebilir, iptal edebilir veya açıkça gönderebilirsiniz. Hiçbir şey otomatik gönderilmez; koordinatlar, namaz/Ramazan geçmişi, dini etkinlik veya cihaz kimlikleri gizlice eklenmez.',
           ],
         ),
         LegalSection(
@@ -406,8 +412,8 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '6. Üçüncü taraflar ve aktarımlar',
           paragraphs: <String>[
-            'Harici işleme AlAdhan, sistem coğrafi kodlaması ve isteğe bağlı App Store/Google Play değerlendirme penceresiyle sınırlıdır. Sağlayıcılar teknik günlükleri kendi koşullarına göre işleyebilir. Analiz, çökme raporu, reklam, izleme veya sosyal giriş SDK’sı yoktur.',
-            'Namaz/Ramazan geçmişi, hedefler ve bildirim eylemleri geliştiriciye aktarılmaz. Kodda tanımlı istekler HTTPS kullanır; sağlayıcı günlüklerinin saklama süresi SalahTrack’un denetiminde değildir.',
+            'Harici işleme AlAdhan, Photon/OpenStreetMap şehir araması, sistem coğrafi kodlaması, isteğe bağlı App Store/Google Play değerlendirme penceresi ve yalnızca sorun raporu göndermeyi seçerseniz e-posta sağlayıcılarıyla sınırlıdır. Sağlayıcılar teknik günlükleri kendi koşullarına göre işleyebilir. Analiz, çökme raporu, reklam, izleme veya sosyal giriş SDK’sı yoktur.',
+            'Namaz/Ramazan geçmişi, hedefler ve bildirim eylemleri geliştiriciye aktarılmaz. Bir rapor, yalnızca e-posta uygulamasında “Gönder”e bastıktan sonra destek posta kutusuna ulaşır ve gösterilen rapor/teknik bilgiler ile olağan e-posta üst verilerini içerebilir. Uygulama istekleri HTTPS kullanır; dış günlüklerin saklanması SalahTrack’un denetiminde değildir.',
           ],
         ),
         LegalSection(
@@ -434,20 +440,20 @@ abstract final class PrivacyLegalDocuments {
     ),
     'id': LegalDocument(
       title: 'Kebijakan Privasi',
-      lastUpdated: '16 September 2026',
+      lastUpdated: '21 September 2026',
       introduction: 'Kebijakan ini menjelaskan pemrosesan data dalam SalahTrack versi saat ini. Fitur akun, sinkronisasi awan, analitik, atau iklan yang belum ada tidak tercakup.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. Pengendali dan cakupan',
           paragraphs: <String>[
-            'Penanggung jawab SalahTrack adalah {controller}, {location}. Kontak: {email}. LinkedIn: {linkedin}. Tidak ada akun pengguna atau server akun/sinkronisasi yang dioperasikan pengembang.',
+            'Penanggung jawab SalahTrack adalah {controller}, {location}. Kontak: {email}. Tidak ada akun pengguna atau server akun/sinkronisasi yang dioperasikan pengembang.',
           ],
         ),
         LegalSection(
           title: '2. Lokasi dan geocoding',
           paragraphs: <String>[
             'Jika memilih lokasi otomatis, aplikasi meminta lokasi presisi saat digunakan dan menyimpan lintang, bujur, kota, negara, zona waktu, serta cara lokasi dipilih. Saat aplikasi berjalan, mode otomatis mendengarkan perubahan dengan filter jarak sekitar 1 km.',
-            'Versi saat ini tidak meminta lokasi latar belakang Android, izin iOS “Selalu”, atau mode lokasi latar belakang iOS. Anda dapat memasukkan kota dan negara. Geocoding sistem dapat mengirim tempat/koordinat, bahasa, alamat IP, dan metadata permintaan biasa kepada penyedia platform.',
+            'Versi saat ini tidak meminta lokasi latar belakang Android, izin iOS “Selalu”, atau mode lokasi latar belakang iOS. Untuk pilihan manual, pencarian kota mengirim teks yang diketik, kode negara terpilih, dan bahasa aplikasi melalui HTTPS ke Photon di photon.komoot.io, yang menggunakan data OpenStreetMap. Photon dan operator jaringan juga dapat menerima alamat IP dan metadata permintaan biasa. Geocoding bawaan platform dapat pula menerima tempat atau koordinat dan bahasa untuk pencarian maju atau balik.',
           ],
         ),
         LegalSection(
@@ -462,6 +468,7 @@ abstract final class PrivacyLegalDocuments {
           paragraphs: <String>[
             'SharedPreferences menyimpan lokasi, pengaturan, bahasa, tema, status orientasi awal, waktu peluncuran pertama, dan status permintaan ulasan. SQLite menyimpan cache waktu salat, zona waktu/Hijriah, status dan waktu konfirmasi/edit/tunda, penyesuaian, puasa, Tarawih, Qiyam, judul sasaran Ramadan, dan penyelesaiannya.',
             'Catatan ini dapat mengungkap praktik agama dan bersifat sensitif. Kode saat ini menyimpannya secara lokal dan tidak mengunggahnya kepada pengembang atau API. Aplikasi tidak mengakses kontak, foto, mikrofon, data kesehatan, ID iklan, atau ID perangkat lainnya.',
+            'Formulir opsional “Laporkan masalah” menyiapkan kategori, uraian, langkah reproduksi, versi dan nomor build aplikasi, platform, versi sistem operasi, model perangkat, serta bahasa aplikasi di perangkat. Anda dapat meninjau, menyunting, membatalkan, atau secara tegas mengirim teks melalui aplikasi email sendiri. Tidak ada yang dikirim otomatis dan koordinat, riwayat salat/Ramadan, aktivitas keagamaan, atau ID perangkat tidak dilampirkan secara tersembunyi.',
           ],
         ),
         LegalSection(
@@ -474,8 +481,8 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '6. Pihak ketiga dan transfer',
           paragraphs: <String>[
-            'Pemrosesan eksternal terbatas pada AlAdhan, geocoding sistem, dan dialog ulasan App Store/Google Play opsional. Penyedia dapat memproses log teknis berdasarkan ketentuan mereka. Tidak ada SDK analitik, laporan crash, iklan, pelacakan, atau login sosial.',
-            'Riwayat salat/Ramadan, sasaran, dan tindakan notifikasi tidak dikirim kepada pengembang. Permintaan dalam kode memakai HTTPS, tetapi retensi log penyedia tidak dikendalikan SalahTrack.',
+            'Pemrosesan eksternal terbatas pada AlAdhan, pencarian kota Photon/OpenStreetMap, geocoding sistem, dialog ulasan App Store/Google Play opsional, dan penyedia email hanya jika Anda memilih mengirim laporan. Penyedia dapat memproses log teknis berdasarkan ketentuan mereka. Tidak ada SDK analitik, laporan crash, iklan, pelacakan, atau login sosial.',
+            'Riwayat salat/Ramadan, sasaran, dan tindakan notifikasi tidak dikirim kepada pengembang. Laporan baru mencapai kotak masuk dukungan setelah Anda menekan “Kirim” di aplikasi email dan dapat memuat informasi laporan/teknis yang ditampilkan serta metadata email biasa. Permintaan aplikasi memakai HTTPS, tetapi retensi log eksternal tidak dikendalikan SalahTrack.',
           ],
         ),
         LegalSection(
@@ -502,20 +509,20 @@ abstract final class PrivacyLegalDocuments {
     ),
     'ms': LegalDocument(
       title: 'Dasar Privasi',
-      lastUpdated: '16 September 2026',
+      lastUpdated: '21 September 2026',
       introduction: 'Dasar ini menerangkan pemprosesan data dalam versi semasa SalahTrack. Ia tidak meliputi akaun, penyegerakan awan, analitik atau pengiklanan masa hadapan yang belum wujud.',
       sections: <LegalSection>[
         LegalSection(
           title: '1. Pengawal dan skop',
           paragraphs: <String>[
-            'Orang yang bertanggungjawab terhadap SalahTrack ialah {controller}, {location}. Hubungan: {email}. LinkedIn: {linkedin}. Tiada akaun pengguna atau pelayan akaun/penyegerakan yang dikendalikan pembangun.',
+            'Orang yang bertanggungjawab terhadap SalahTrack ialah {controller}, {location}. Hubungan: {email}. Tiada akaun pengguna atau pelayan akaun/penyegerakan yang dikendalikan pembangun.',
           ],
         ),
         LegalSection(
           title: '2. Lokasi dan pengekodan geo',
           paragraphs: <String>[
             'Jika lokasi automatik dipilih, aplikasi meminta lokasi tepat semasa digunakan dan menyimpan latitud, longitud, bandar, negara, zon waktu serta cara lokasi dipilih. Semasa aplikasi berjalan, perubahan didengar dengan penapis jarak kira-kira 1 km.',
-            'Versi semasa tidak meminta lokasi latar Android, kebenaran iOS “Sentiasa” atau mod lokasi latar iOS. Anda boleh memasukkan bandar dan negara. Perkhidmatan geo sistem boleh menghantar tempat/koordinat, bahasa, IP dan metadata biasa kepada penyedia platform.',
+            'Versi semasa tidak meminta lokasi latar Android, kebenaran iOS “Sentiasa” atau mod lokasi latar iOS. Bagi pilihan manual, carian bandar menghantar teks carian, kod negara dipilih dan bahasa aplikasi melalui HTTPS kepada Photon di photon.komoot.io yang menggunakan data OpenStreetMap. Photon dan pengendali rangkaian juga boleh menerima alamat IP dan metadata biasa. Pengekodan geo asli platform boleh menerima tempat atau koordinat dan bahasa bagi carian hadapan atau songsang.',
           ],
         ),
         LegalSection(
@@ -530,6 +537,7 @@ abstract final class PrivacyLegalDocuments {
           paragraphs: <String>[
             'SharedPreferences menyimpan lokasi, tetapan, bahasa, tema, status pengenalan, masa pelancaran pertama dan status permintaan ulasan. SQLite menyimpan cache waktu, zon waktu/Hijri, status serta masa pengesahan/sunting/tunda, pelarasan, puasa, Tarawih, Qiyam, tajuk matlamat Ramadan dan penyelesaian.',
             'Rekod ini boleh mendedahkan amalan agama dan bersifat sensitif. Kod semasa menyimpannya secara setempat dan tidak memuat naik kepada pembangun atau API. Aplikasi tidak mengakses kenalan, foto, mikrofon, data kesihatan, ID iklan atau ID peranti lain.',
+            'Borang pilihan “Laporkan masalah” menyediakan kategori, penerangan, langkah menghasilkan semula, versi dan binaan aplikasi, platform, versi sistem operasi, model peranti serta bahasa aplikasi pada peranti. Anda boleh menyemak, menyunting, membatalkan atau menghantar teks secara nyata melalui aplikasi e-mel sendiri. Tiada apa-apa dihantar secara automatik dan koordinat, sejarah solat/Ramadan, aktiviti agama atau ID peranti tidak dilampirkan secara senyap.',
           ],
         ),
         LegalSection(
@@ -542,8 +550,8 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '6. Pihak ketiga dan pemindahan',
           paragraphs: <String>[
-            'Pemprosesan luar terhad kepada AlAdhan, geokod sistem dan gesaan ulasan App Store/Google Play pilihan. Penyedia boleh memproses log teknikal mengikut syarat mereka. Tiada SDK analitik, laporan ranap, iklan, penjejakan atau log masuk sosial.',
-            'Sejarah solat/Ramadan, matlamat dan tindakan pemberitahuan tidak dihantar kepada pembangun. Permintaan kod menggunakan HTTPS, tetapi pengekalan log penyedia bukan di bawah kawalan SalahTrack.',
+            'Pemprosesan luar terhad kepada AlAdhan, carian bandar Photon/OpenStreetMap, pengekodan geo sistem, gesaan ulasan App Store/Google Play pilihan dan penyedia e-mel hanya jika anda memilih menghantar laporan. Penyedia boleh memproses log teknikal mengikut syarat mereka. Tiada SDK analitik, laporan ranap, iklan, penjejakan atau log masuk sosial.',
+            'Sejarah solat/Ramadan, matlamat dan tindakan pemberitahuan tidak dihantar kepada pembangun. Laporan hanya sampai ke peti sokongan selepas anda menekan “Hantar” dalam aplikasi e-mel dan boleh mengandungi maklumat laporan/teknikal yang dipaparkan serta metadata e-mel biasa. Permintaan aplikasi menggunakan HTTPS, tetapi pengekalan log luar bukan di bawah kawalan SalahTrack.',
           ],
         ),
         LegalSection(
@@ -570,20 +578,20 @@ abstract final class PrivacyLegalDocuments {
     ),
     'bn': LegalDocument(
       title: 'গোপনীয়তা নীতি',
-      lastUpdated: '১৬ সেপ্টেম্বর ২০২৬',
+      lastUpdated: '২১ সেপ্টেম্বর ২০২৬',
       introduction: 'এই নীতি SalahTrack-এর বর্তমান সংস্করণে ডেটা প্রক্রিয়াকরণ ব্যাখ্যা করে। এই সংস্করণে না থাকা ভবিষ্যৎ অ্যাকাউন্ট, ক্লাউড সিঙ্ক, অ্যানালিটিক্স বা বিজ্ঞাপন এতে অন্তর্ভুক্ত নয়।',
       sections: <LegalSection>[
         LegalSection(
           title: '১. নিয়ন্ত্রক ও পরিধি',
           paragraphs: <String>[
-            'SalahTrack-এর দায়িত্বপ্রাপ্ত ব্যক্তি {controller}, {location}। যোগাযোগ: {email}। LinkedIn: {linkedin}। কোনো ব্যবহারকারী অ্যাকাউন্ট বা ডেভেলপার-চালিত অ্যাকাউন্ট/সিঙ্ক সার্ভার নেই।',
+            'SalahTrack-এর দায়িত্বপ্রাপ্ত ব্যক্তি {controller}, {location}। যোগাযোগ: {email}। কোনো ব্যবহারকারী অ্যাকাউন্ট বা ডেভেলপার-চালিত অ্যাকাউন্ট/সিঙ্ক সার্ভার নেই।',
           ],
         ),
         LegalSection(
           title: '২. অবস্থান ও জিওকোডিং',
           paragraphs: <String>[
             'স্বয়ংক্রিয় অবস্থান নিলে অ্যাপ ব্যবহারের সময় নির্ভুল অবস্থান চায় এবং অক্ষাংশ, দ্রাঘিমাংশ, শহর, দেশ, সময় অঞ্চল ও নির্বাচনের ধরন সংরক্ষণ করে। অ্যাপ চলাকালে প্রায় ১ কিমি দূরত্ব ফিল্টারে পরিবর্তন শোনা হয়।',
-            'বর্তমান সংস্করণ Android ব্যাকগ্রাউন্ড লোকেশন, iOS “Always” অনুমতি বা iOS ব্যাকগ্রাউন্ড লোকেশন মোড চায় না। শহর ও দেশ হাতে দেওয়া যায়। সিস্টেম জিওকোডিং স্থান/স্থানাঙ্ক, ভাষা, IP ও সাধারণ অনুরোধ তথ্য প্ল্যাটফর্ম সরবরাহকারীর কাছে পাঠাতে পারে।',
+            'বর্তমান সংস্করণ Android ব্যাকগ্রাউন্ড লোকেশন, iOS “Always” অনুমতি বা iOS ব্যাকগ্রাউন্ড লোকেশন মোড চায় না। হাতে বাছাইয়ের সময় শহর অনুসন্ধান লেখা শব্দ, নির্বাচিত দেশের কোড ও অ্যাপের ভাষা HTTPS-এর মাধ্যমে photon.komoot.io-এর Photon সেবায় পাঠায়; এটি OpenStreetMap ডেটা ব্যবহার করে। Photon ও নেটওয়ার্ক অপারেটর IP ঠিকানা ও সাধারণ অনুরোধ তথ্যও পেতে পারে। সামনের বা বিপরীত অনুসন্ধানের জন্য প্ল্যাটফর্মের নিজস্ব জিওকোডিং স্থান বা স্থানাঙ্ক ও ভাষাও পেতে পারে।',
           ],
         ),
         LegalSection(
@@ -598,6 +606,7 @@ abstract final class PrivacyLegalDocuments {
           paragraphs: <String>[
             'SharedPreferences অবস্থান, সেটিংস, ভাষা, থিম, অনবোর্ডিং, প্রথম চালুর সময় ও রিভিউ অনুরোধের অবস্থা রাখে। SQLite সময়ের ক্যাশ, সময় অঞ্চল/হিজরি তথ্য, অবস্থা ও নিশ্চিত/সম্পাদনা/স্নুজ সময়, সমন্বয়, রোজা, তারাবিহ, কিয়াম, রমজান লক্ষ্য ও সম্পন্ন হওয়া রাখে।',
             'এসব রেকর্ড ধর্মীয় অনুশীলন প্রকাশ করতে পারে এবং সংবেদনশীল। বর্তমান কোড এগুলো স্থানীয়ভাবে রাখে; ডেভেলপার বা API-তে আপলোড করে না। অ্যাপ পরিচিতি, ছবি, মাইক্রোফোন, স্বাস্থ্য তথ্য, বিজ্ঞাপন বা অন্য ডিভাইস ID ব্যবহার করে না।',
+            'ঐচ্ছিক “সমস্যা জানান” ফর্মটি ডিভাইসে বিভাগ, বিবরণ, পুনরুৎপাদনের ধাপ, অ্যাপের সংস্করণ ও বিল্ড, প্ল্যাটফর্ম, অপারেটিং সিস্টেমের সংস্করণ, ডিভাইসের মডেল ও অ্যাপের ভাষা প্রস্তুত করে। নিজের ইমেইল অ্যাপে লেখা দেখে, সম্পাদনা করে, বাতিল করে বা স্পষ্টভাবে পাঠাতে পারেন। কিছুই স্বয়ংক্রিয়ভাবে পাঠানো হয় না; স্থানাঙ্ক, নামাজ/রমজানের ইতিহাস, ধর্মীয় কার্যকলাপ বা ডিভাইস ID গোপনে যুক্ত হয় না।',
           ],
         ),
         LegalSection(
@@ -610,8 +619,8 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '৬. তৃতীয় পক্ষ ও স্থানান্তর',
           paragraphs: <String>[
-            'বাহ্যিক প্রক্রিয়াকরণ AlAdhan, সিস্টেম জিওকোডিং এবং ঐচ্ছিক App Store/Google Play রিভিউ প্রম্পটে সীমিত। সরবরাহকারীরা নিজ শর্তে প্রযুক্তিগত লগ রাখতে পারে। কোনো অ্যানালিটিক্স, ক্র্যাশ, বিজ্ঞাপন, ট্র্যাকিং বা সামাজিক লগইন SDK নেই।',
-            'নামাজ/রমজান ইতিহাস, লক্ষ্য বা নোটিফিকেশন কাজ ডেভেলপারের কাছে যায় না। কোডের অনুরোধ HTTPS ব্যবহার করে, তবে সরবরাহকারীর লগ ধরে রাখা SalahTrack নিয়ন্ত্রণ করে না।',
+            'বাহ্যিক প্রক্রিয়াকরণ AlAdhan, Photon/OpenStreetMap শহর অনুসন্ধান, সিস্টেম জিওকোডিং, ঐচ্ছিক App Store/Google Play রিভিউ প্রম্পট এবং কেবল প্রতিবেদন পাঠালে ইমেইল সরবরাহকারীদের মধ্যে সীমিত। তারা নিজ শর্তে প্রযুক্তিগত লগ রাখতে পারে। কোনো অ্যানালিটিক্স, ক্র্যাশ, বিজ্ঞাপন, ট্র্যাকিং বা সামাজিক লগইন SDK নেই।',
+            'নামাজ/রমজানের ইতিহাস, লক্ষ্য বা নোটিফিকেশন কাজ ডেভেলপারের কাছে যায় না। ইমেইল অ্যাপে “পাঠান” চাপার পরেই প্রতিবেদন সহায়তা ইনবক্সে পৌঁছায় এবং দেখানো প্রতিবেদন/প্রযুক্তিগত তথ্য ও সাধারণ ইমেইল মেটাডেটা থাকতে পারে। অ্যাপের অনুরোধ HTTPS ব্যবহার করে, তবে বাহ্যিক লগ রাখা SalahTrack নিয়ন্ত্রণ করে না।',
           ],
         ),
         LegalSection(
@@ -638,20 +647,20 @@ abstract final class PrivacyLegalDocuments {
     ),
     'fa': LegalDocument(
       title: 'سیاست حریم خصوصی',
-      lastUpdated: '۱۶ سپتامبر ۲۰۲۶',
+      lastUpdated: '۲۱ سپتامبر ۲۰۲۶',
       introduction: 'این سیاست پردازش داده در نسخهٔ فعلی SalahTrack را توضیح می‌دهد و شامل حساب، همگام‌سازی ابری، تحلیل یا تبلیغات آینده که اکنون وجود ندارند نیست.',
       sections: <LegalSection>[
         LegalSection(
           title: '۱. مسئول و دامنه',
           paragraphs: <String>[
-            'مسئول SalahTrack، {controller}، {location} است. تماس: {email}. لینکدین: {linkedin}. حساب کاربری یا سرور حساب/همگام‌سازی تحت ادارهٔ توسعه‌دهنده وجود ندارد.',
+            'مسئول SalahTrack، {controller}، {location} است. تماس: {email}. حساب کاربری یا سرور حساب/همگام‌سازی تحت ادارهٔ توسعه‌دهنده وجود ندارد.',
           ],
         ),
         LegalSection(
           title: '۲. مکان و ژئوکدینگ',
           paragraphs: <String>[
             'با انتخاب مکان خودکار، برنامه هنگام استفاده مکان دقیق را می‌خواهد و عرض و طول جغرافیایی، شهر، کشور، منطقهٔ زمانی و نوع انتخاب را ذخیره می‌کند. هنگام اجرای برنامه تغییرات با فیلتر حدود یک کیلومتر شنیده می‌شود.',
-            'نسخهٔ فعلی مکان پس‌زمینهٔ Android، مجوز «همیشه» iOS یا حالت مکان پس‌زمینهٔ iOS را درخواست نمی‌کند. می‌توانید شهر و کشور را دستی وارد کنید. ژئوکدینگ سیستم ممکن است مکان/مختصات، زبان، IP و فرادادهٔ معمول را به ارائه‌دهندهٔ پلتفرم بفرستد.',
+            'نسخهٔ فعلی مکان پس‌زمینهٔ Android، مجوز «همیشه» iOS یا حالت مکان پس‌زمینهٔ iOS را درخواست نمی‌کند. در انتخاب دستی، جست‌وجوی شهر متن واردشده، کد کشور انتخابی و زبان برنامه را با HTTPS به سرویس Photon در photon.komoot.io می‌فرستد که از داده‌های OpenStreetMap استفاده می‌کند. Photon و اپراتورهای شبکه ممکن است نشانی IP و فرادادهٔ معمول درخواست را نیز دریافت کنند. ژئوکدینگ بومی پلتفرم هم ممکن است برای جست‌وجوی مستقیم یا معکوس، مکان یا مختصات و زبان را دریافت کند.',
           ],
         ),
         LegalSection(
@@ -666,6 +675,7 @@ abstract final class PrivacyLegalDocuments {
           paragraphs: <String>[
             'SharedPreferences مکان، تنظیمات، زبان، پوسته، راه‌اندازی اولیه، زمان نخستین اجرا و وضعیت درخواست امتیاز را نگه می‌دارد. SQLite کش اوقات، منطقهٔ زمانی/هجری، وضعیت و زمان تأیید/ویرایش/تعویق، تنظیمات دقیقه‌ای، روزه، تراویح، قیام، عنوان اهداف رمضان و تکمیل آن‌ها را ذخیره می‌کند.',
             'این سوابق ممکن است عمل دینی را نشان دهند و حساس‌اند. کد فعلی آن‌ها را محلی نگه می‌دارد و برای توسعه‌دهنده یا API بارگذاری نمی‌کند. مخاطبان، عکس، میکروفن، سلامت، شناسهٔ تبلیغاتی یا سایر شناسه‌های دستگاه خوانده نمی‌شوند.',
+            'فرم اختیاری «گزارش مشکل» روی دستگاه، دسته‌بندی، توضیح، مراحل بازتولید، نسخه و شمارهٔ ساخت برنامه، پلتفرم، نسخهٔ سیستم‌عامل، مدل دستگاه و زبان برنامه را آماده می‌کند. می‌توانید متن را در برنامهٔ ایمیل خود مرور، ویرایش، لغو یا صریحاً ارسال کنید. هیچ چیز خودکار ارسال نمی‌شود و مختصات، سابقهٔ نماز یا رمضان، فعالیت دینی یا شناسه‌های دستگاه پنهانی پیوست نمی‌شوند.',
           ],
         ),
         LegalSection(
@@ -678,8 +688,8 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '۶. اشخاص ثالث و انتقال',
           paragraphs: <String>[
-            'پردازش خارجی به AlAdhan، ژئوکدینگ سیستم و درخواست اختیاری امتیاز App Store/Google Play محدود است. ارائه‌دهندگان ممکن است طبق شرایط خود گزارش فنی پردازش کنند. SDK تحلیل، خرابی، تبلیغ، ردیابی یا ورود اجتماعی وجود ندارد.',
-            'سابقهٔ نماز/رمضان، اهداف و اقدامات اعلان برای توسعه‌دهنده ارسال نمی‌شود. درخواست‌های کد HTTPS هستند، اما نگهداری گزارش ارائه‌دهندگان در کنترل SalahTrack نیست.',
+            'پردازش خارجی به AlAdhan، جست‌وجوی شهر Photon/OpenStreetMap، ژئوکدینگ سیستم، درخواست اختیاری امتیاز App Store/Google Play و فقط در صورت انتخاب ارسال گزارش به ارائه‌دهندگان ایمیل محدود است. ارائه‌دهندگان ممکن است طبق شرایط خود گزارش فنی پردازش کنند. SDK تحلیل، خرابی، تبلیغ، ردیابی یا ورود اجتماعی وجود ندارد.',
+            'سابقهٔ نماز/رمضان، اهداف و اقدامات اعلان برای توسعه‌دهنده ارسال نمی‌شود. گزارش تنها پس از فشردن «ارسال» در برنامهٔ ایمیل به صندوق پشتیبانی می‌رسد و ممکن است شامل اطلاعات گزارش و فنی نمایش‌داده‌شده و فرادادهٔ معمول ایمیل باشد. درخواست‌های برنامه HTTPS هستند، اما نگهداری گزارش‌های خارجی در کنترل SalahTrack نیست.',
           ],
         ),
         LegalSection(
@@ -706,20 +716,20 @@ abstract final class PrivacyLegalDocuments {
     ),
     'pa': LegalDocument(
       title: 'رازداری پالیسی',
-      lastUpdated: '۱۶ ستمبر ۲۰۲۶',
+      lastUpdated: '۲۱ ستمبر ۲۰۲۶',
       introduction: 'ایہہ پالیسی SalahTrack دے موجودہ ورژن وچ ڈیٹا پراسیسنگ دسدے اے۔ مستقبل دے اکاؤنٹ، کلاؤڈ سنک، تجزیے یا اشتہار جیہڑے ہن موجود نئیں، ایس وچ شامل نئیں۔',
       sections: <LegalSection>[
         LegalSection(
           title: '۱. ذمہ وار تے دائرہ',
           paragraphs: <String>[
-            'SalahTrack دا ذمہ وار {controller}، {location} اے۔ رابطہ: {email}۔ LinkedIn: {linkedin}۔ صارف اکاؤنٹ یا ڈویلپر دا اکاؤنٹ/سنک سرور نئیں۔',
+            'SalahTrack دا ذمہ وار {controller}، {location} اے۔ رابطہ: {email}۔ صارف اکاؤنٹ یا ڈویلپر دا اکاؤنٹ/سنک سرور نئیں۔',
           ],
         ),
         LegalSection(
           title: '۲. تھاں تے جیوکوڈنگ',
           paragraphs: <String>[
             'خودکار تھاں چنّن تے ایپ ورتدیاں درست تھاں منگدی تے عرض، طول، شہر، ملک، وقت دا علاقہ تے انتخاب دا طریقہ محفوظ کردی اے۔ ایپ چلدی ہووے تے لگ بھگ ۱ کلومیٹر فلٹر نال تبدیلیاں سن دی اے۔',
-            'موجودہ ورژن Android پس منظر تھاں، iOS “Always” اجازت یا iOS پس منظر موڈ نئیں منگدا۔ شہر تے ملک ہتھ نال دِتے جا سکدے نیں۔ سسٹم جیوکوڈنگ تھاں/مختصات، زبان، IP تے عام میٹاڈیٹا پلیٹ فارم نوں بھیج سکدی اے۔',
+            'موجودہ ورژن Android پس منظر تھاں، iOS “Always” اجازت یا iOS پس منظر موڈ نئیں منگدا۔ ہتھ نال انتخاب ویلے شہر دی کھوج لکھیا متن، چنے ملک دا کوڈ تے ایپ دی زبان HTTPS راہیں photon.komoot.io دے Photon نوں بھیج دی اے، جہڑا OpenStreetMap ڈیٹا ورتدا اے۔ Photon تے نیٹ ورک آپریٹر IP پتا تے عام درخواست ڈیٹا وی لے سکدے نیں۔ پلیٹ فارم دی اپنی جیوکوڈنگ اگلی یا الٹی کھوج لئی تھاں یا مختصات تے زبان وی لے سکدی اے۔',
           ],
         ),
         LegalSection(
@@ -734,6 +744,7 @@ abstract final class PrivacyLegalDocuments {
           paragraphs: <String>[
             'SharedPreferences تھاں، ترتیباں، زبان، تھیم، شروعات، پہلی کامیاب شروعات تے ریویو حالت رکھدا اے۔ SQLite نماز ویلے، ٹائم زون/ہجری، حالت، تصدیق/ترمیم/سنوز وقت، ایڈجسٹمنٹ، روزہ، تراویح، قیام، رمضان مقصد تے تکمیل رکھدا اے۔',
             'ایہہ ریکارڈ مذہبی عمل ظاہر کر سکدے تے حساس نیں۔ موجودہ کوڈ انہاں نوں مقامی رکھدا تے ڈویلپر یا API نوں اپلوڈ نئیں کردا۔ رابطے، تصویراں، مائک، صحت، اشتہاری یا ہور ڈیوائس ID نئیں ورتے جاندے۔',
+            'اختیاری «مسئلہ رپورٹ کرو» فارم ڈیوائس تے قسم، تفصیل، مسئلہ دوبارہ بناون دے قدم، ایپ ورژن تے بلڈ، پلیٹ فارم، آپریٹنگ سسٹم ورژن، ڈیوائس ماڈل تے ایپ زبان تیار کردا اے۔ تسی اپنی ای میل ایپ وچ متن ویکھ، بدل، منسوخ یا صاف طور تے بھیج سکدے او۔ کجھ وی خودکار نئیں بھیجیا جاندا تے مختصات، نماز/رمضان تاریخ، مذہبی سرگرمی یا ڈیوائس ID چپکے نال نئیں لگدے۔',
           ],
         ),
         LegalSection(
@@ -746,8 +757,8 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '۶. تیجی دھراں تے منتقلی',
           paragraphs: <String>[
-            'باہرلی پراسیسنگ AlAdhan، سسٹم جیوکوڈنگ تے اختیاری App Store/Google Play ریویو تک محدود اے۔ فراہم کنندے اپنے شرطاں نال تکنیکی لاگ رکھ سکدے نیں۔ تجزیہ، کریش، اشتہار، ٹریکنگ یا سماجی لاگ اِن SDK نئیں۔',
-            'نماز/رمضان تاریخ، مقصد تے اطلاع عمل ڈویلپر نوں نئیں جاندا۔ کوڈ دیاں درخواستاں HTTPS نیں، پر فراہم کنندے دے لاگ دی مدت SalahTrack دے قابو وچ نئیں۔',
+            'باہرلی پراسیسنگ AlAdhan، Photon/OpenStreetMap شہر کھوج، سسٹم جیوکوڈنگ، اختیاری App Store/Google Play ریویو تے صرف رپورٹ بھیجن دی صورت وچ ای میل فراہم کنندیاں تک محدود اے۔ اوہ اپنے شرطاں نال تکنیکی لاگ رکھ سکدے نیں۔ تجزیہ، کریش، اشتہار، ٹریکنگ یا سماجی لاگ اِن SDK نئیں۔',
+            'نماز/رمضان تاریخ، مقصد تے اطلاع عمل ڈویلپر نوں نئیں جاندا۔ رپورٹ ای میل ایپ وچ «بھیجو» دباؤن توں بعد ای سپورٹ میل تک پہنچدی تے دکھائی رپورٹ/تکنیکی معلومات نال عام ای میل میٹاڈیٹا رکھ سکدی اے۔ ایپ درخواستاں HTTPS نیں، پر باہرلے لاگ دی مدت SalahTrack دے قابو وچ نئیں۔',
           ],
         ),
         LegalSection(
@@ -774,20 +785,20 @@ abstract final class PrivacyLegalDocuments {
     ),
     'ps': LegalDocument(
       title: 'د محرمیت تګلاره',
-      lastUpdated: '۱۶ سپتمبر ۲۰۲۶',
+      lastUpdated: '۲۱ سپتمبر ۲۰۲۶',
       introduction: 'دا تګلاره د SalahTrack په اوسنۍ نسخه کې د معلوماتو پروسس بیانوي. راتلونکي حسابونه، کلاوډ همغږي، شننه یا اعلانونه چې اوس نشته پکې نه شاملېږي.',
       sections: <LegalSection>[
         LegalSection(
           title: '۱. مسؤول او ساحه',
           paragraphs: <String>[
-            'د SalahTrack مسؤول {controller}، {location} دی. اړیکه: {email}. LinkedIn: {linkedin}. د کارن حساب یا د جوړوونکي حساب/همغږي سرور نشته.',
+            'د SalahTrack مسؤول {controller}، {location} دی. اړیکه: {email}. د کارن حساب یا د جوړوونکي حساب/همغږي سرور نشته.',
           ],
         ),
         LegalSection(
           title: '۲. ځای او جیوکوډنګ',
           paragraphs: <String>[
             'د اتومات ځای په ټاکلو اپ د کارونې پر مهال دقیق ځای غواړي او عرض، طول، ښار، هېواد، وخت زون او د ټاکنې ډول ساتي. د اپ د چلولو پر مهال بدلونونه د نږدې ۱ کیلومتر فلټر سره اوري.',
-            'اوسنۍ نسخه د Android شالید ځای، د iOS «تل» اجازه یا د iOS شالید ځای حالت نه غواړي. ښار او هېواد لاسي ټاکل کېدای شي. د سیستم جیوکوډنګ ځای/مختصات، ژبه، IP او عادي معلومات د پلاتفورم برابرونکي ته لېږلی شي.',
+            'اوسنۍ نسخه د Android شالید ځای، د iOS «تل» اجازه یا د iOS شالید ځای حالت نه غواړي. په لاسي ټاکنه کې د ښار لټون لیکل شوی متن، د ټاکلي هېواد کوډ او د اپ ژبه د HTTPS له لارې photon.komoot.io د Photon خدمت ته لېږي چې د OpenStreetMap معلومات کاروي. Photon او شبکيز چلونکي IP پته او عادي غوښتنې معلومات هم ترلاسه کولی شي. د پلاتفورم اصلي جیوکوډنګ د مخکې یا برعکس لټون لپاره ځای یا مختصات او ژبه هم ترلاسه کولی شي.',
           ],
         ),
         LegalSection(
@@ -802,6 +813,7 @@ abstract final class PrivacyLegalDocuments {
           paragraphs: <String>[
             'SharedPreferences ځای، امستنې، ژبه، بڼه، پیل، د لومړي چلولو وخت او د ارزونې غوښتنې حالت ساتي. SQLite د وختونو زېرمه، وخت زون/هجري، حالت، تایید/سمون/ځنډ وختونه، تعدیلات، روژه، تراویح، قیام، رمضان موخې او بشپړونه ساتي.',
             'دا ریکارډونه مذهبي عمل ښودلی شي او حساس دي. اوسنی کوډ یې محلي ساتي او جوړوونکي یا API ته یې نه پورته کوي. اړیکې، انځورونه، مایکروفون، روغتیا، اعلاني یا نور وسیله پېژندونه نه کارول کېږي.',
+            'اختیاري «ستونزه راپور کړئ» فورمه په وسیله کې کټګوري، تشریح، د ستونزې د بیا جوړولو ګامونه، د اپ نسخه او جوړښت، پلاتفورم، د عامل سیستم نسخه، د وسیلې ماډل او د اپ ژبه چمتو کوي. تاسو متن په خپل برېښنالیک اپ کې کتلی، سمولی، لغوه کولی یا په ښکاره لېږلی شئ. هېڅ شی په اتومات ډول نه لېږل کېږي او مختصات، د لمانځه/رمضان تاریخ، مذهبي فعالیت یا د وسیلې پېژندونه په پټه نه نښلول کېږي.',
           ],
         ),
         LegalSection(
@@ -814,8 +826,8 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '۶. درېیم خدمتونه او لېږد',
           paragraphs: <String>[
-            'بهرنی پروسس AlAdhan، د سیستم جیوکوډنګ او اختیاري App Store/Google Play ارزونې ته محدود دی. برابرونکي تخنیکي ثبتونه د خپلو شرطونو له مخې پروسس کولی شي. د شننې، خرابۍ، اعلان، تعقیب یا ټولنیز ننوتلو SDK نشته.',
-            'د لمانځه/رمضان تاریخ، موخې او د خبرتیا عمل جوړوونکي ته نه ځي. د کوډ غوښتنې HTTPS دي، خو د برابرونکي د ثبتونو ساتنه د SalahTrack تر کنټرول لاندې نه ده.',
+            'بهرنی پروسس AlAdhan، د Photon/OpenStreetMap ښار لټون، د سیستم جیوکوډنګ، اختیاري App Store/Google Play ارزونه او یوازې د راپور د لېږلو په صورت کې د برېښنالیک برابرونکي رانغاړي. برابرونکي تخنیکي ثبتونه د خپلو شرطونو له مخې پروسس کولی شي. د شننې، خرابۍ، اعلان، تعقیب یا ټولنیز ننوتلو SDK نشته.',
+            'د لمانځه/رمضان تاریخ، موخې او د خبرتیا عمل جوړوونکي ته نه ځي. راپور یوازې هغه وخت د ملاتړ صندوق ته رسېږي چې په برېښنالیک اپ کې «ولېږئ» کېکاږئ؛ ښودل شوي راپور/تخنیکي معلومات او د برېښنالیک عادي فراداده لرلی شي. د اپ غوښتنې HTTPS دي، خو د بهرنیو ثبتونو ساتنه د SalahTrack تر کنټرول لاندې نه ده.',
           ],
         ),
         LegalSection(
@@ -842,20 +854,20 @@ abstract final class PrivacyLegalDocuments {
     ),
     'ur': LegalDocument(
       title: 'رازداری کی پالیسی',
-      lastUpdated: '۱۶ ستمبر ۲۰۲۶',
+      lastUpdated: '۲۱ ستمبر ۲۰۲۶',
       introduction: 'یہ پالیسی SalahTrack کے موجودہ ورژن میں ڈیٹا پراسیسنگ بیان کرتی ہے۔ مستقبل کے اکاؤنٹس، کلاؤڈ سنک، تجزیات یا اشتہارات جو اس ورژن میں نہیں ہیں، اس میں شامل نہیں۔',
       sections: <LegalSection>[
         LegalSection(
           title: '۱. ذمہ دار اور دائرہ',
           paragraphs: <String>[
-            'SalahTrack کے ذمہ دار {controller}، {location} ہیں۔ رابطہ: {email}۔ LinkedIn: {linkedin}۔ صارف اکاؤنٹ یا ڈویلپر کا اکاؤنٹ/سنک سرور موجود نہیں۔',
+            'SalahTrack کے ذمہ دار {controller}، {location} ہیں۔ رابطہ: {email}۔ صارف اکاؤنٹ یا ڈویلپر کا اکاؤنٹ/سنک سرور موجود نہیں۔',
           ],
         ),
         LegalSection(
           title: '۲. مقام اور جیوکوڈنگ',
           paragraphs: <String>[
             'خودکار مقام منتخب کرنے پر ایپ استعمال کے دوران درست مقام مانگتی اور عرض، طول، شہر، ملک، ٹائم زون اور انتخاب کا طریقہ محفوظ کرتی ہے۔ ایپ چلتے وقت تقریباً ۱ کلومیٹر فلٹر کے ساتھ تبدیلیاں سنتی ہے۔',
-            'موجودہ ورژن Android پس منظر مقام، iOS “Always” اجازت یا iOS پس منظر مقام موڈ نہیں مانگتا۔ شہر اور ملک دستی دیا جا سکتا ہے۔ سسٹم جیوکوڈنگ مقام/مختصات، زبان، IP اور عام درخواست معلومات پلیٹ فارم فراہم کنندہ کو بھیج سکتی ہے۔',
+            'موجودہ ورژن Android پس منظر مقام، iOS “Always” اجازت یا iOS پس منظر مقام موڈ نہیں مانگتا۔ دستی انتخاب میں شہر کی تلاش لکھا ہوا متن، منتخب ملک کا کوڈ اور ایپ کی زبان HTTPS کے ذریعے photon.komoot.io کی Photon سروس کو بھیجتی ہے، جو OpenStreetMap ڈیٹا استعمال کرتی ہے۔ Photon اور نیٹ ورک آپریٹر IP پتہ اور عام درخواست معلومات بھی لے سکتے ہیں۔ پلیٹ فارم کی مقامی جیوکوڈنگ آگے یا الٹی تلاش کے لیے مقام یا مختصات اور زبان بھی لے سکتی ہے۔',
           ],
         ),
         LegalSection(
@@ -870,6 +882,7 @@ abstract final class PrivacyLegalDocuments {
           paragraphs: <String>[
             'SharedPreferences مقام، ترتیبات، زبان، تھیم، آن بورڈنگ، پہلی کامیاب شروعات اور ریویو درخواست کی حالت رکھتا ہے۔ SQLite اوقات کی کیش، ٹائم زون/ہجری، حالت، تصدیق/ترمیم/سنوز وقت، ایڈجسٹمنٹ، روزہ، تراویح، قیام، رمضان اہداف اور تکمیل رکھتا ہے۔',
             'یہ ریکارڈ مذہبی عمل ظاہر کر سکتے اور حساس ہیں۔ موجودہ کوڈ انہیں مقامی رکھتا اور ڈویلپر یا API کو اپلوڈ نہیں کرتا۔ رابطے، تصاویر، مائیک، صحت، اشتہاری یا دیگر ڈیوائس ID استعمال نہیں ہوتے۔',
+            'اختیاری «مسئلہ رپورٹ کریں» فارم ڈیوائس پر زمرہ، تفصیل، مسئلہ دوبارہ پیدا کرنے کے مراحل، ایپ ورژن اور بلڈ، پلیٹ فارم، آپریٹنگ سسٹم ورژن، ڈیوائس ماڈل اور ایپ زبان تیار کرتا ہے۔ آپ اپنی ای میل ایپ میں متن کا جائزہ لے، ترمیم، منسوخ یا واضح طور پر بھیج سکتے ہیں۔ کچھ بھی خودکار نہیں بھیجا جاتا اور مختصات، نماز/رمضان تاریخ، مذہبی سرگرمی یا ڈیوائس ID خاموشی سے منسلک نہیں ہوتے۔',
           ],
         ),
         LegalSection(
@@ -882,8 +895,8 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '۶. تیسرے فریق اور منتقلی',
           paragraphs: <String>[
-            'بیرونی پراسیسنگ AlAdhan، سسٹم جیوکوڈنگ اور اختیاری App Store/Google Play ریویو تک محدود ہے۔ فراہم کنندے اپنی شرائط کے تحت تکنیکی لاگ رکھ سکتے ہیں۔ تجزیات، کریش، اشتہار، ٹریکنگ یا سوشل لاگ اِن SDK نہیں۔',
-            'نماز/رمضان تاریخ، اہداف اور اطلاع عمل ڈویلپر کو نہیں جاتے۔ کوڈ کی درخواستیں HTTPS ہیں، مگر فراہم کنندے کے لاگ کی مدت SalahTrack کے قابو میں نہیں۔',
+            'بیرونی پراسیسنگ AlAdhan، Photon/OpenStreetMap شہر تلاش، سسٹم جیوکوڈنگ، اختیاری App Store/Google Play ریویو اور صرف رپورٹ بھیجنے کی صورت میں ای میل فراہم کنندوں تک محدود ہے۔ وہ اپنی شرائط کے تحت تکنیکی لاگ رکھ سکتے ہیں۔ تجزیات، کریش، اشتہار، ٹریکنگ یا سوشل لاگ اِن SDK نہیں۔',
+            'نماز/رمضان تاریخ، اہداف اور اطلاع عمل ڈویلپر کو نہیں جاتے۔ رپورٹ صرف ای میل ایپ میں «بھیجیں» دبانے کے بعد سپورٹ میل باکس تک پہنچتی ہے اور دکھائی گئی رپورٹ/تکنیکی معلومات اور عام ای میل میٹاڈیٹا رکھ سکتی ہے۔ ایپ کی درخواستیں HTTPS ہیں، مگر بیرونی لاگ کی مدت SalahTrack کے قابو میں نہیں۔',
           ],
         ),
         LegalSection(
@@ -913,15 +926,12 @@ abstract final class PrivacyLegalDocuments {
   static const Map<String, LegalDocument> _legalNotices = {
     'en': LegalDocument(
       title: 'Legal Notice / Impressum',
-      lastUpdated: '16 September 2026',
+      lastUpdated: '21 September 2026',
       introduction: 'Provider information prepared for SalahTrack. Only information supplied by the developer is stated.',
       sections: <LegalSection>[
         LegalSection(
           title: 'Provider',
-          paragraphs: <String>[
-            '{controller}\n{location}\nEmail: {email}\nLinkedIn: {linkedin}',
-            'A complete street/service address has not been supplied. Before a public release, add it here if a service address is legally required under German law.',
-          ],
+          paragraphs: <String>['{controller}\n{location}\nEmail: {email}'],
         ),
         LegalSection(
           title: 'Responsible for content',
@@ -945,14 +955,12 @@ abstract final class PrivacyLegalDocuments {
     ),
     'de': LegalDocument(
       title: 'Impressum / Rechtliche Hinweise',
-      lastUpdated: '16. September 2026',
+      lastUpdated: '21. September 2026',
       introduction: 'Anbieterangaben für SalahTrack. Es werden ausschließlich die vom Entwickler mitgeteilten Angaben verwendet.',
       sections: <LegalSection>[
         LegalSection(
           title: 'Anbieter',
-          paragraphs: <String>[
-            '{controller}\n{location}\nE-Mail: {email}\nLinkedIn: {linkedin}',
-          ],
+          paragraphs: <String>['{controller}\n{location}\nE-Mail: {email}'],
         ),
         LegalSection(
           title: 'Inhaltlich verantwortlich',
@@ -976,14 +984,13 @@ abstract final class PrivacyLegalDocuments {
     ),
     'ar': LegalDocument(
       title: 'الإشعار القانوني / بيانات الناشر',
-      lastUpdated: '16 سبتمبر 2026',
+      lastUpdated: '21 سبتمبر 2026',
       introduction: 'بيانات مقدم SalahTrack كما زودنا بها المطور فقط.',
       sections: <LegalSection>[
         LegalSection(
           title: 'مقدم التطبيق',
           paragraphs: <String>[
-            '{controller}\n{location}\nالبريد الإلكتروني: {email}\nلينكدإن: {linkedin}',
-            'لم يُقدَّم عنوان شارع كامل صالح للتبليغ. يجب إضافته قبل النشر إذا كان القانون الألماني يوجبه.',
+            '{controller}\n{location}\nالبريد الإلكتروني: {email}',
           ],
         ),
         LegalSection(
@@ -1008,15 +1015,12 @@ abstract final class PrivacyLegalDocuments {
     ),
     'fr': LegalDocument(
       title: 'Mentions légales / Impressum',
-      lastUpdated: '16 septembre 2026',
+      lastUpdated: '21 septembre 2026',
       introduction: 'Informations du fournisseur de SalahTrack, limitées à celles communiquées par le développeur.',
       sections: <LegalSection>[
         LegalSection(
           title: 'Éditeur',
-          paragraphs: <String>[
-            '{controller}\n{location}\nE-mail : {email}\nLinkedIn : {linkedin}',
-            'Aucune adresse de rue complète permettant une signification n’a été fournie. Elle doit être ajoutée avant publication si le droit allemand l’exige.',
-          ],
+          paragraphs: <String>['{controller}\n{location}\nE-mail : {email}'],
         ),
         LegalSection(
           title: 'Responsable du contenu',
@@ -1040,15 +1044,12 @@ abstract final class PrivacyLegalDocuments {
     ),
     'es': LegalDocument(
       title: 'Aviso legal / Impressum',
-      lastUpdated: '16 de septiembre de 2026',
+      lastUpdated: '21 de septiembre de 2026',
       introduction: 'Datos del proveedor de SalahTrack, limitados a la información facilitada.',
       sections: <LegalSection>[
         LegalSection(
           title: 'Proveedor',
-          paragraphs: <String>[
-            '{controller}\n{location}\nCorreo: {email}\nLinkedIn: {linkedin}',
-            'No se ha facilitado una dirección postal completa para notificaciones. Añádela antes de publicar si la exige la legislación alemana.',
-          ],
+          paragraphs: <String>['{controller}\n{location}\nCorreo: {email}'],
         ),
         LegalSection(
           title: 'Responsable del contenido',
@@ -1072,15 +1073,12 @@ abstract final class PrivacyLegalDocuments {
     ),
     'tr': LegalDocument(
       title: 'Yasal Bildirim / Künye',
-      lastUpdated: '16 Eylül 2026',
+      lastUpdated: '21 Eylül 2026',
       introduction: 'SalahTrack sağlayıcı bilgileri yalnızca geliştiricinin verdiği bilgilerle hazırlanmıştır.',
       sections: <LegalSection>[
         LegalSection(
           title: 'Sağlayıcı',
-          paragraphs: <String>[
-            '{controller}\n{location}\nE-posta: {email}\nLinkedIn: {linkedin}',
-            'Tam ve tebligata elverişli sokak adresi verilmemiştir. Alman hukuku gerektiriyorsa yayımdan önce ekleyin.',
-          ],
+          paragraphs: <String>['{controller}\n{location}\nE-posta: {email}'],
         ),
         LegalSection(
           title: 'İçerikten sorumlu',
@@ -1104,15 +1102,12 @@ abstract final class PrivacyLegalDocuments {
     ),
     'id': LegalDocument(
       title: 'Pemberitahuan Hukum / Impressum',
-      lastUpdated: '16 September 2026',
+      lastUpdated: '21 September 2026',
       introduction: 'Informasi penyedia SalahTrack hanya menggunakan data yang diberikan pengembang.',
       sections: <LegalSection>[
         LegalSection(
           title: 'Penyedia',
-          paragraphs: <String>[
-            '{controller}\n{location}\nEmail: {email}\nLinkedIn: {linkedin}',
-            'Alamat jalan lengkap untuk layanan hukum belum diberikan. Tambahkan sebelum rilis jika diwajibkan hukum Jerman.',
-          ],
+          paragraphs: <String>['{controller}\n{location}\nEmail: {email}'],
         ),
         LegalSection(
           title: 'Penanggung jawab konten',
@@ -1136,15 +1131,12 @@ abstract final class PrivacyLegalDocuments {
     ),
     'ms': LegalDocument(
       title: 'Notis Undang-undang / Impressum',
-      lastUpdated: '16 September 2026',
+      lastUpdated: '21 September 2026',
       introduction: 'Maklumat penyedia SalahTrack menggunakan hanya maklumat yang diberikan pembangun.',
       sections: <LegalSection>[
         LegalSection(
           title: 'Penyedia',
-          paragraphs: <String>[
-            '{controller}\n{location}\nE-mel: {email}\nLinkedIn: {linkedin}',
-            'Alamat jalan lengkap untuk penyampaian undang-undang belum diberikan. Tambah sebelum penerbitan jika diwajibkan undang-undang Jerman.',
-          ],
+          paragraphs: <String>['{controller}\n{location}\nE-mel: {email}'],
         ),
         LegalSection(
           title: 'Bertanggungjawab atas kandungan',
@@ -1168,16 +1160,13 @@ abstract final class PrivacyLegalDocuments {
     ),
     'bn': LegalDocument(
       title: 'আইনি বিজ্ঞপ্তি / ইমপ্রেসুম',
-      lastUpdated: '১৬ সেপ্টেম্বর ২০২৬',
+      lastUpdated: '২১ সেপ্টেম্বর ২০২৬',
       introduction:
           'SalahTrack প্রদানকারীর তথ্য শুধু ডেভেলপার-প্রদত্ত তথ্য দিয়ে তৈরি।',
       sections: <LegalSection>[
         LegalSection(
           title: 'প্রদানকারী',
-          paragraphs: <String>[
-            '{controller}\n{location}\nইমেইল: {email}\nLinkedIn: {linkedin}',
-            'আইনি নোটিশের জন্য পূর্ণ রাস্তার ঠিকানা দেওয়া হয়নি। জার্মান আইন চাইলে প্রকাশের আগে যোগ করুন।',
-          ],
+          paragraphs: <String>['{controller}\n{location}\nইমেইল: {email}'],
         ),
         LegalSection(
           title: 'বিষয়বস্তুর দায়িত্ব',
@@ -1201,15 +1190,12 @@ abstract final class PrivacyLegalDocuments {
     ),
     'fa': LegalDocument(
       title: 'اطلاعیهٔ حقوقی / Impressum',
-      lastUpdated: '۱۶ سپتامبر ۲۰۲۶',
+      lastUpdated: '۲۱ سپتامبر ۲۰۲۶',
       introduction: 'اطلاعات ارائه‌دهندهٔ SalahTrack فقط بر اساس داده‌های ارائه‌شده تنظیم شده است.',
       sections: <LegalSection>[
         LegalSection(
           title: 'ارائه‌دهنده',
-          paragraphs: <String>[
-            '{controller}\n{location}\nایمیل: {email}\nلینکدین: {linkedin}',
-            'نشانی کامل خیابان برای ابلاغ ارائه نشده است. اگر قانون آلمان لازم می‌داند پیش از انتشار اضافه شود.',
-          ],
+          paragraphs: <String>['{controller}\n{location}\nایمیل: {email}'],
         ),
         LegalSection(
           title: 'مسئول محتوا',
@@ -1233,16 +1219,13 @@ abstract final class PrivacyLegalDocuments {
     ),
     'pa': LegalDocument(
       title: 'قانونی نوٹس / امپریسم',
-      lastUpdated: '۱۶ ستمبر ۲۰۲۶',
+      lastUpdated: '۲۱ ستمبر ۲۰۲۶',
       introduction:
           'SalahTrack فراہم کنندے دی معلومات صرف ڈویلپر دے دِتے ڈیٹا تے اے۔',
       sections: <LegalSection>[
         LegalSection(
           title: 'فراہم کنندہ',
-          paragraphs: <String>[
-            '{controller}\n{location}\nای میل: {email}\nLinkedIn: {linkedin}',
-            'قانونی نوٹس لئی پوری گلی دی پتی نئیں دِتی گئی۔ جرمن قانون منگے تے اشاعت توں پہلاں شامل کرو۔',
-          ],
+          paragraphs: <String>['{controller}\n{location}\nای میل: {email}'],
         ),
         LegalSection(
           title: 'مواد دا ذمہ وار',
@@ -1266,15 +1249,12 @@ abstract final class PrivacyLegalDocuments {
     ),
     'ps': LegalDocument(
       title: 'حقوقي خبرتیا / امپریسوم',
-      lastUpdated: '۱۶ سپتمبر ۲۰۲۶',
+      lastUpdated: '۲۱ سپتمبر ۲۰۲۶',
       introduction: 'د SalahTrack د برابرونکي معلومات یوازې د جوړوونکي له ورکړل شوو معلوماتو جوړ دي.',
       sections: <LegalSection>[
         LegalSection(
           title: 'برابرونکی',
-          paragraphs: <String>[
-            '{controller}\n{location}\nبرېښنالیک: {email}\nLinkedIn: {linkedin}',
-            'د قانوني ابلاغ لپاره بشپړه کوڅه پته نه ده ورکړل شوې. که د جرمني قانون یې غواړي له خپرېدو مخکې یې زیاته کړئ.',
-          ],
+          paragraphs: <String>['{controller}\n{location}\nبرېښنالیک: {email}'],
         ),
         LegalSection(
           title: 'د منځپانګې مسؤول',
@@ -1298,15 +1278,12 @@ abstract final class PrivacyLegalDocuments {
     ),
     'ur': LegalDocument(
       title: 'قانونی نوٹس / امپریسم',
-      lastUpdated: '۱۶ ستمبر ۲۰۲۶',
+      lastUpdated: '۲۱ ستمبر ۲۰۲۶',
       introduction: 'SalahTrack فراہم کنندہ معلومات صرف ڈویلپر کی فراہم کردہ معلومات پر مبنی ہیں۔',
       sections: <LegalSection>[
         LegalSection(
           title: 'فراہم کنندہ',
-          paragraphs: <String>[
-            '{controller}\n{location}\nای میل: {email}\nLinkedIn: {linkedin}',
-            'قانونی نوٹس کے لیے مکمل گلی کا پتہ فراہم نہیں کیا گیا۔ جرمن قانون مانگے تو اشاعت سے پہلے شامل کریں۔',
-          ],
+          paragraphs: <String>['{controller}\n{location}\nای میل: {email}'],
         ),
         LegalSection(
           title: 'مواد کا ذمہ دار',

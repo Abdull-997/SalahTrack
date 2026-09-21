@@ -43,6 +43,11 @@ void main() {
       final privacy = PrivacyLegalDocuments.privacyPolicy(language.code);
       final notice = PrivacyLegalDocuments.legalNotice(language.code);
       expect(privacy.sections, hasLength(9), reason: language.code);
+      expect(
+        privacy.sections[3].paragraphs,
+        hasLength(3),
+        reason: language.code,
+      );
       expect(notice.sections, hasLength(4), reason: language.code);
       expect(privacy.title, isNotEmpty);
       expect(notice.title, isNotEmpty);
@@ -59,18 +64,23 @@ void main() {
       expect(allText, isNot(contains('{controller}')), reason: language.code);
       expect(allText, isNot(contains('{location}')), reason: language.code);
       expect(allText, contains(PrivacyLegalConfig.controllerName));
+      expect(allText, contains(PrivacyLegalConfig.controllerLocation));
       expect(allText, contains(PrivacyLegalConfig.contactEmail));
+      expect(allText, contains('photon.komoot.io'), reason: language.code);
+      expect(allText, contains('OpenStreetMap'), reason: language.code);
+      expect(allText, contains('api.aladhan.com'), reason: language.code);
+      expect(allText, isNot(contains('SalahFocus')), reason: language.code);
     }
   });
 
   test('hosted policy uses the published HTTPS URL by default', () {
     expect(
       PrivacyLegalConfig.privacyPolicyUrl,
-      'https://abalh101.github.io/privacy-policy-salah/',
+      'https://abalh101.github.io/salahtrack-privacy/index.html',
     );
     expect(
       PrivacyLegalConfig.privacyPolicyUri,
-      Uri.parse('https://abalh101.github.io/privacy-policy-salah/'),
+      Uri.parse('https://abalh101.github.io/salahtrack-privacy/index.html'),
     );
   });
 

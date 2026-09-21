@@ -1,15 +1,16 @@
-﻿name: Build iOS (Salaty)
+name: Build iOS (SalahTrack)
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
   workflow_dispatch:
 
 jobs:
   build-ios:
-    runs-on: macos-14
+    # App Store Connect requires Xcode 26 / the iOS 26 SDK for submissions.
+    runs-on: macos-26
 
     steps:
       - name: Quellcode auschecken
@@ -18,42 +19,28 @@ jobs:
       - name: Flutter SDK einrichten
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          flutter-version: '3.47.4'
+          channel: stable
           cache: true
 
-      - name: Flutter & Umgebung prüfen
-        run: flutter doctor -v
-
-      - name: Salaty Bootstrap ausführen
+      - name: Flutter-, Xcode- und SDK-Versionen prüfen
         run: |
-          chmod +x tool/bootstrap.sh
-          ./tool/bootstrap.sh
+          flutter --version
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
 
-      - name: iOS App kompilieren (Release, Unsigned)
+      - name: Abhängigkeiten laden und prüfen
         run: |
-          # 1. Automatisches Signieren im Xcode-Projekt deaktivieren
-          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
-          
-          # 2. Strikte "Kein Signieren"-Regeln in die Flutter Config zwingen
-          echo "CODE_SIGNING_ALLOWED=NO" >> ios/Flutter/Release.xcconfig
-          echo "CODE_SIGNING_REQUIRED=NO" >> ios/Flutter/Release.xcconfig
-          echo "CODE_SIGN_IDENTITY=-" >> ios/Flutter/Release.xcconfig
-          echo "EXPANDED_CODE_SIGN_IDENTITY=-" >> ios/Flutter/Release.xcconfig
-          
-          # 3. Flutter Build starten
-          flutter build ios --release --no-codesign
+          flutter pub get
+          flutter analyze
+          flutter test
 
-      - name: In .ipa packen (für Sideloading via Sideloadly/AltStore)
-        run: |
-          cd build/ios/iphoneos
-          mkdir Payload
-          cp -r Runner.app Payload/
-          zip -r -q Salaty.ipa Payload
-          echo "IPA erfolgreich erstellt."
+      - name: iOS App kompilieren (Release, nicht signiert)
+        run: flutter build ios --release --no-codesign
 
-      - name: IPA als GitHub-Artefakt hochladen
+      - name: Nicht signierten Build als Artefakt hochladen
         uses: actions/upload-artifact@v4
         with:
-          name: Salaty-iOS
-          path: build/ios/iphoneos/Salaty.ipa
+          name: SalahTrack-iOS-unsigned
+          path: build/ios/iphoneos/Runner.app
           retention-days: 7

@@ -79,6 +79,13 @@ def patch_android() -> None:
         text,
         count=1,
     )
+    if 'android:enableOnBackInvokedCallback=' not in text:
+        text = re.sub(
+            r'(<application\b[^>]*)(>)',
+            r'\1\n        android:enableOnBackInvokedCallback="true"\2',
+            text,
+            count=1,
+        )
     manifest.write_text(text, encoding="utf-8")
 
     native_resources = ROOT / "native/android/res"
