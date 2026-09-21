@@ -291,8 +291,8 @@ void main() {
       );
       final String hijriMonth = switch (code) {
         'tr' => 'Rebiülevvel',
-        'fr' => 'Rabia al awal',
-        'es' => 'Rabi al-awwal',
+        'fr' => 'Rabia al-Awwal',
+        'es' => 'Rabi al-Awwal',
         'id' || 'ms' => 'Rabiulawal',
         'bn' => 'রবিউল আউয়াল',
         'pa' => 'ربیع الاول',

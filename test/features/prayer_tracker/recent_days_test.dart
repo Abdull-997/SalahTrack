@@ -401,7 +401,7 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.text('Gebet bestätigen?'), findsOneWidget);
           final String localizedDate = AppStrings(const Locale('de'))
-              .date(DateTime.parse(date), pattern: 'd MMMM y');
+              .mediumDate(DateTime.parse(date));
           expect(
             find.text('Fajr am $localizedDate als gebetet markieren?'),
             findsOneWidget,

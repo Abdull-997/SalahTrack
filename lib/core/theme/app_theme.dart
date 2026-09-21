@@ -6,6 +6,19 @@ class AppTheme {
   static const Color seed = Color(0xFF276749);
   static const Color warm = Color(0xFFF5F0E7);
 
+  /// Platform font families with full Arabic-script and Bengali coverage.
+  /// Flutter/Skia continues to system fallback if a family is unavailable.
+  static const List<String> scriptFontFallback = <String>[
+    'Noto Sans Arabic',
+    'Noto Naskh Arabic',
+    'Noto Nastaliq Urdu',
+    'Noto Sans Bengali',
+    'Nirmala UI',
+    'Geeza Pro',
+    'Kohinoor Bangla',
+    'Segoe UI',
+  ];
+
   static ThemeData light() {
     final ColorScheme scheme = ColorScheme.fromSeed(
       seedColor: seed,
@@ -14,6 +27,7 @@ class AppTheme {
     );
     return ThemeData(
       useMaterial3: true,
+      fontFamilyFallback: scriptFontFallback,
       colorScheme: scheme,
       scaffoldBackgroundColor: const Color(0xFFFAF7F1),
       cardTheme: CardThemeData(
@@ -64,6 +78,7 @@ class AppTheme {
     );
     return ThemeData(
       useMaterial3: true,
+      fontFamilyFallback: scriptFontFallback,
       colorScheme: scheme,
       scaffoldBackgroundColor: const Color(0xFF0F1411),
       cardTheme: CardThemeData(

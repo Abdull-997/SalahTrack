@@ -400,10 +400,7 @@ class _DayCardState extends ConsumerState<_DayCard> {
                     prayed ? 'confirmPrayerRecordBody' : 'undoPrayerRecordBody',
                     params: {
                       'prayer': entry.type.localizedName(s.locale.languageCode),
-                      'date': s.date(
-                        DateTime.parse(entry.localDate),
-                        pattern: 'd MMMM y',
-                      ),
+                      'date': s.mediumDate(DateTime.parse(entry.localDate)),
                     },
                   ),
                 ),
@@ -447,7 +444,7 @@ class _DayCardState extends ConsumerState<_DayCard> {
     final int prayed = widget.entries
         .where((PrayerEntry entry) => entry.status == PrayerStatus.prayed)
         .length;
-    final String title = s.date(parsed, pattern: 'EEEE, d MMMM y');
+    final String title = s.fullDate(parsed);
     final ColorScheme scheme = Theme.of(context).colorScheme;
 
     return Card(

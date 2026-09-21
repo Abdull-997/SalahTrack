@@ -1,40 +1,165 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
+import 'package:salah_focus/app/localization/localized_date_data.dart';
+import 'package:salah_focus/app/localization/manual_location_translations.dart';
+import 'package:salah_focus/app/localization/privacy_legal_translations.dart';
+import 'package:salah_focus/core/theme/app_theme.dart';
 
 void main() {
   setUpAll(initializeDateFormatting);
 
-  test('Arabic Gregorian dates use Levantine month names', () {
-    final AppStrings strings = AppStrings(const Locale('ar'));
+  const Map<String, String> gregorianExamples = <String, String>{
+    'ar': 'الاثنين، ٢١ سبتمبر ٢٠٢٦',
+    'bn': 'সোমবার, ২১ সেপ্টেম্বর ২০২৬',
+    'de': 'Montag, 21. September 2026',
+    'en': 'Monday, 21 September 2026',
+    'es': 'lunes, 21 de septiembre de 2026',
+    'fa': 'دوشنبه، ۲۱ سپتامبر ۲۰۲۶',
+    'fr': 'lundi 21 septembre 2026',
+    'id': 'Senin, 21 September 2026',
+    'ms': 'Isnin, 21 September 2026',
+    'pa': 'سوموار، ۲۱ ستمبر ۲۰۲۶',
+    'ps': 'دونۍ، ۲۱ سېپتمبر ۲۰۲۶',
+    'tr': '21 Eylül 2026 Pazartesi',
+    'ur': 'پیر، ۲۱ ستمبر ۲۰۲۶',
+  };
 
-    final String date = strings.date(
-      DateTime(2026, 9, 7),
-      pattern: 'EEEE, d MMMM y',
-    );
+  const Map<String, String> hijriExamples = <String, String>{
+    'ar': '٧ ربيع الآخر ١٤٤٨',
+    'bn': '৭ রবিউস সানি ১৪৪৮',
+    'de': '7 Rabi al-Thani 1448',
+    'en': '7 Rabi al-Thani 1448',
+    'es': '7 Rabi al-Thani 1448',
+    'fa': '۷ ربیع‌الثانی ۱۴۴۸',
+    'fr': '7 Rabia ath-Thani 1448',
+    'id': '7 Rabiulakhir 1448',
+    'ms': '7 Rabiulakhir 1448',
+    'pa': '۷ ربیع الثانی ۱۴۴۸',
+    'ps': '۷ ربیع الثاني ۱۴۴۸',
+    'tr': '7 Rebiülahir 1448',
+    'ur': '۷ ربیع الثانی ۱۴۴۸',
+  };
 
-    expect(date, contains('أيلول'));
-    expect(date, isNot(contains('سبتمبر')));
-    expect(date, contains('الاثنين'));
-  });
-
-  for (final String localeCode in <String>['ar', 'ur', 'ps']) {
-    test('$localeCode Hijri dates use shared Arabic month names', () {
-      final AppStrings strings = AppStrings(Locale(localeCode));
-      final String date = strings.hijriDate('7 Rabīʿ al-awwal 1448');
-
-      expect(date, contains('ربيع الأول'));
-      expect(date, isNot(contains('Rab')));
+  for (final MapEntry<String, String> example in gregorianExamples.entries) {
+    test('${example.key} renders a fully localized Gregorian date', () {
+      final AppStrings strings = AppStrings(Locale(example.key));
+      expect(strings.fullDate(DateTime(2026, 9, 21)), example.value);
     });
   }
 
-  test('German dates retain their localized Gregorian month names', () {
-    final AppStrings strings = AppStrings(const Locale('de'));
+  for (final MapEntry<String, String> example in hijriExamples.entries) {
+    test('${example.key} renders a natural localized Hijri date', () {
+      final AppStrings strings = AppStrings(Locale(example.key));
+      expect(
+        strings.hijriDate(
+          '7 Rabīʿ al-thānī 1448',
+          day: 7,
+          month: 4,
+          year: 1448,
+        ),
+        example.value,
+      );
+      expect(strings.hijriDate('7 Rabīʿ al-thānī 1448'), example.value);
+    });
+  }
 
-    expect(
-      strings.date(DateTime(2026, 9, 7), pattern: 'd MMMM y'),
-      contains('September'),
-    );
+  test('native numeral systems are used consistently', () {
+    expect(AppStrings(const Locale('ar')).number(2026), '٢٬٠٢٦');
+    expect(AppStrings(const Locale('ar')).number(12.5), '١٢٫٥');
+    expect(AppStrings(const Locale('fa')).number(2026), '۲٬۰۲۶');
+    expect(AppStrings(const Locale('ur')).number(2), '۲');
+    expect(AppStrings(const Locale('ps')).number(5), '۵');
+    expect(AppStrings(const Locale('pa')).number(25), '۲۵');
+    expect(AppStrings(const Locale('bn')).number(2026), '২,০২৬');
+  });
+
+  test('native date data is stored as literal valid UTF-8', () async {
+    final List<int> bytes = await File(
+      'lib/app/localization/localized_date_data.dart',
+    ).readAsBytes();
+    final String source = utf8.decode(bytes, allowMalformed: false);
+
+    for (final String literal in <String>[
+      'محرم',
+      'ربيع الآخر',
+      'ذو الحجة',
+      'ربیع‌الثانی',
+      'ذی‌الحجه',
+      'ربیع الثانی',
+      'سوموار',
+      'ربیع الثاني',
+      'মুহাররম',
+      'রবিউস সানি',
+    ]) {
+      expect(source, contains(literal), reason: literal);
+    }
+    expect(source, isNot(contains('Arabic:')));
+    expect(source, isNot(contains('Persian:')));
+    expect(source, isNot(contains('Urdu:')));
+    expect(source, isNot(contains('Pashto:')));
+    expect(source, isNot(contains('Bengali:')));
+  });
+
+  test('all Hijri calendars contain twelve non-empty native month names', () {
+    expect(localizedHijriMonths.keys, containsAll(gregorianExamples.keys));
+    for (final MapEntry<String, List<String>> locale
+        in localizedHijriMonths.entries) {
+      expect(locale.value, hasLength(12), reason: locale.key);
+      expect(
+        locale.value.every((String month) => month.trim().isNotEmpty),
+        isTrue,
+        reason: locale.key,
+      );
+    }
+  });
+
+  test('themes retain Arabic-script and Bengali font fallbacks', () {
+    for (final ThemeData theme in <ThemeData>[
+      AppTheme.light(),
+      AppTheme.dark(),
+    ]) {
+      final List<String>? fallbacks =
+          theme.textTheme.bodyMedium?.fontFamilyFallback;
+      expect(fallbacks, contains('Noto Sans Arabic'));
+      expect(fallbacks, contains('Noto Nastaliq Urdu'));
+      expect(fallbacks, contains('Noto Sans Bengali'));
+      expect(fallbacks, contains('Nirmala UI'));
+    }
+  });
+
+  test('native-script catalogs contain no Latin-only prose fallbacks', () {
+    const Map<String, String> scripts = <String, String>{
+      'ar': r'[\u0600-\u06ff]',
+      'fa': r'[\u0600-\u06ff]',
+      'pa': r'[\u0600-\u06ff]',
+      'ps': r'[\u0600-\u06ff]',
+      'ur': r'[\u0600-\u06ff]',
+      'bn': r'[\u0980-\u09ff]',
+    };
+    final RegExp prose = RegExp(r'[A-Za-zÄÖÜäöüß]{4,}');
+
+    for (final MapEntry<String, String> locale in scripts.entries) {
+      final RegExp nativeScript = RegExp(locale.value);
+      final List<Map<String, String>> catalogs = <Map<String, String>>[
+        AppStrings.translations[locale.key]!,
+        manualLocationTranslations[locale.key]!,
+        privacyLegalUiTranslations[locale.key]!,
+      ];
+      for (final Map<String, String> catalog in catalogs) {
+        for (final MapEntry<String, String> value in catalog.entries) {
+          if (<String>{'appName', 'linkedin'}.contains(value.key)) continue;
+          expect(
+            prose.hasMatch(value.value) && !nativeScript.hasMatch(value.value),
+            isFalse,
+            reason: '${locale.key}/${value.key}: ${value.value}',
+          );
+        }
+      }
+    }
   });
 }

@@ -22,43 +22,25 @@ class ManualLocationDialog extends StatefulWidget {
 }
 
 class _ManualLocationDialogState extends State<ManualLocationDialog> {
-  final TextEditingController _cityController = TextEditingController();
-  Timer? _debounce;
-  int _generation = 0;
+  late final ManualLocationLookup _lookup;
   String? _countryCode;
   String? _languageCode;
-  List<ManualLocationCandidate> _suggestions = const [];
   ManualLocationCandidate? _selected;
-  String? _messageKey;
-  bool _searching = false;
-  bool _validating = false;
 
-  ManualLocationLookup get _lookup => widget.lookup ?? ManualLocationLookup();
+  @override
+  void initState() {
+    super.initState();
+    _lookup = widget.lookup ?? ManualLocationLookup();
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final String language = AppStrings.of(context).locale.languageCode;
     if (_languageCode != null && _languageCode != language) {
-      _generation++;
-      _debounce?.cancel();
-      _suggestions = const [];
       _selected = null;
-      _searching = false;
-      _validating = false;
-      if (_countryCode != null && _cityController.text.trim().isNotEmpty) {
-        _scheduleSearch();
-      }
     }
     _languageCode = language;
-  }
-
-  @override
-  void dispose() {
-    _generation++;
-    _debounce?.cancel();
-    _cityController.dispose();
-    super.dispose();
   }
 
   String _countryName(String code) =>
@@ -67,65 +49,235 @@ class _ManualLocationDialogState extends State<ManualLocationDialog> {
   Future<void> _chooseCountry() async {
     final String? code = await showDialog<String>(
       context: context,
-      builder: (context) => const _CountryPicker(),
+      builder: (BuildContext context) => const _CountryPicker(),
     );
     if (!mounted || code == null || code == _countryCode) return;
-    _generation++;
-    _debounce?.cancel();
-    _cityController.clear();
     setState(() {
       _countryCode = code;
-      _suggestions = const [];
       _selected = null;
-      _messageKey = null;
-      _searching = false;
-      _validating = false;
     });
   }
 
-  void _cityChanged(String value) {
+  Future<void> _chooseCity() async {
+    final String? countryCode = _countryCode;
+    final String? languageCode = _languageCode;
+    if (countryCode == null || languageCode == null) return;
+    final ManualLocationCandidate? candidate =
+        await showDialog<ManualLocationCandidate>(
+          context: context,
+          builder: (BuildContext context) => _CityPicker(
+            lookup: _lookup,
+            countryCode: countryCode,
+            countryName: _countryName(countryCode),
+            timezoneId: widget.timezoneId,
+            languageCode: languageCode,
+            initialCity: _selected?.location.city,
+            onEdited: () {
+              if (mounted && _selected != null) {
+                setState(() => _selected = null);
+              }
+            },
+          ),
+        );
+    if (!mounted || candidate == null || countryCode != _countryCode) return;
+    setState(() => _selected = candidate);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final AppStrings s = AppStrings.of(context);
+    return AlertDialog(
+      scrollable: true,
+      title: Text(s.t('selectLocation')),
+      content: SizedBox(
+        width: 400,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(s.t('country')),
+            const SizedBox(height: 6),
+            _DropdownButton(
+              key: const Key('manual-country-dropdown'),
+              onPressed: _chooseCountry,
+              text: _countryCode == null
+                  ? s.t('searchCountry')
+                  : _countryName(_countryCode!),
+            ),
+            const SizedBox(height: 16),
+            Text(s.t('city')),
+            const SizedBox(height: 6),
+            _DropdownButton(
+              key: const Key('manual-city-dropdown'),
+              onPressed: _countryCode == null ? null : _chooseCity,
+              text: _selected?.location.city ?? s.t('searchCity'),
+            ),
+            const SizedBox(height: 16),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        s.t('automaticLocationRecommended'),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          key: const Key('manual-location-cancel'),
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(s.t('cancel')),
+        ),
+        FilledButton(
+          onPressed: _selected == null
+              ? null
+              : () =>
+                    Navigator.of(context)
+                        .pop<UserLocation>(_selected!.location),
+          child: Text(s.t('save')),
+        ),
+      ],
+    );
+  }
+}
+
+class _DropdownButton extends StatelessWidget {
+  const _DropdownButton({
+    required this.onPressed,
+    required this.text,
+    super.key,
+  });
+
+  final VoidCallback? onPressed;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => OutlinedButton(
+    onPressed: onPressed,
+    style: OutlinedButton.styleFrom(
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 10, 14),
+      alignment: AlignmentDirectional.centerStart,
+    ),
+    child: Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.start,
+          ),
+        ),
+        const SizedBox(width: 8),
+        const Icon(Icons.arrow_drop_down),
+      ],
+    ),
+  );
+}
+
+class _CityPicker extends StatefulWidget {
+  const _CityPicker({
+    required this.lookup,
+    required this.countryCode,
+    required this.countryName,
+    required this.timezoneId,
+    required this.languageCode,
+    required this.onEdited,
+    this.initialCity,
+  });
+
+  final ManualLocationLookup lookup;
+  final String countryCode;
+  final String countryName;
+  final String timezoneId;
+  final String languageCode;
+  final String? initialCity;
+  final VoidCallback onEdited;
+
+  @override
+  State<_CityPicker> createState() => _CityPickerState();
+}
+
+class _CityPickerState extends State<_CityPicker> {
+  late final TextEditingController _controller;
+  final FocusNode _focusNode = FocusNode();
+  Timer? _debounce;
+  int _generation = 0;
+  List<ManualLocationCandidate> _suggestions = const [];
+  String? _messageKey;
+  bool _searching = false;
+  bool _notifiedEdit = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialCity ?? '');
+  }
+
+  @override
+  void dispose() {
     _generation++;
     _debounce?.cancel();
+    _focusNode.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _queryChanged(String value) {
+    _generation++;
+    _debounce?.cancel();
+    if (!_notifiedEdit && value != (widget.initialCity ?? '')) {
+      _notifiedEdit = true;
+      widget.onEdited();
+    }
     setState(() {
-      _selected = null;
       _suggestions = const [];
       _messageKey = null;
       _searching = false;
     });
-    _scheduleSearch();
-  }
-
-  void _scheduleSearch() {
-    if (_countryCode == null || _cityController.text.trim().isEmpty) return;
-    _debounce = Timer(const Duration(milliseconds: 350), _search);
+    if (value.trim().length < 2) return;
+    _debounce = Timer(const Duration(milliseconds: 400), _search);
   }
 
   Future<void> _search() async {
-    final String? code = _countryCode;
-    if (code == null) return;
+    final String query = _controller.text.trim();
+    if (query.length < 2) return;
     final int request = ++_generation;
-    final String language = _languageCode!;
-    final String query = _cityController.text.trim();
     setState(() {
       _searching = true;
       _messageKey = null;
     });
     try {
-      final List<ManualLocationCandidate> results = await _lookup
+      final List<ManualLocationCandidate> results = await widget.lookup
           .search(
             query: query,
-            countryCode: code,
-            countryName: _countryName(code),
+            countryCode: widget.countryCode,
+            countryName: widget.countryName,
             timezoneId: widget.timezoneId,
-            languageCode: language,
+            languageCode: widget.languageCode,
           )
           .timeout(const Duration(seconds: 12));
-      if (!mounted ||
-          request != _generation ||
-          language != _languageCode ||
-          code != _countryCode) {
-        return;
-      }
+      if (!mounted || request != _generation) return;
       setState(() {
         _suggestions = results;
         _searching = false;
@@ -141,103 +293,9 @@ class _ManualLocationDialogState extends State<ManualLocationDialog> {
   void _searchFailed(int request, String key) {
     if (!mounted || request != _generation) return;
     setState(() {
-      _searching = false;
-      _messageKey = key;
-    });
-  }
-
-  Future<void> _validate() async {
-    final String? code = _countryCode;
-    if (code == null || _cityController.text.trim().isEmpty) return;
-    _debounce?.cancel();
-    final int request = ++_generation;
-    final String language = _languageCode!;
-    final String query = _cityController.text.trim();
-    setState(() {
-      _validating = true;
-      _searching = false;
-      _messageKey = null;
-    });
-    try {
-      final ManualLocationCandidate? candidate = await _lookup
-          .nearby(
-            query: query,
-            countryCode: code,
-            countryName: _countryName(code),
-            timezoneId: widget.timezoneId,
-            languageCode: language,
-          )
-          .timeout(const Duration(seconds: 12));
-      if (!mounted ||
-          request != _generation ||
-          language != _languageCode ||
-          code != _countryCode) {
-        return;
-      }
-      if (candidate == null) {
-        setState(() {
-          _validating = false;
-          _messageKey = 'placeNotFound';
-        });
-        return;
-      }
-      if (normalizedLocationText(candidate.location.city) ==
-          normalizedLocationText(query)) {
-        _select(candidate);
-        return;
-      }
-      setState(() => _validating = false);
-      final bool? accepted = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) {
-          final AppStrings s = AppStrings.of(dialogContext);
-          final String city = candidate.location.label;
-          return AlertDialog(
-            title: Text(s.t('selectLocation')),
-            content: Text(s.t('nearbyPlace', params: {'city': city})),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: Text(s.t('chooseAnother')),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: Text(
-                  s.t('useNearby', params: {'city': candidate.location.city}),
-                ),
-              ),
-            ],
-          );
-        },
-      );
-      if (mounted && request == _generation && accepted == true) {
-        _select(candidate);
-      }
-    } on TimeoutException {
-      _validationFailed(request, 'placeTimeout');
-    } on Object {
-      _validationFailed(request, 'placeError');
-    }
-  }
-
-  void _validationFailed(int request, String key) {
-    if (!mounted || request != _generation) return;
-    setState(() {
-      _validating = false;
-      _messageKey = key;
-    });
-  }
-
-  void _select(ManualLocationCandidate candidate) {
-    _generation++;
-    _debounce?.cancel();
-    _cityController.text = candidate.location.city;
-    setState(() {
-      _selected = candidate;
       _suggestions = const [];
       _searching = false;
-      _validating = false;
-      _messageKey = null;
+      _messageKey = key;
     });
   }
 
@@ -248,94 +306,97 @@ class _ManualLocationDialogState extends State<ManualLocationDialog> {
         MediaQuery.sizeOf(context).height -
         MediaQuery.viewInsetsOf(context).bottom -
         MediaQuery.paddingOf(context).vertical;
-    final double maxHeight = math.max(
-      80,
-      math.min(availableHeight * 0.45, availableHeight - 180),
+    final double contentHeight = math.max(
+      96,
+      math.min(380, availableHeight - 205),
     );
     return AlertDialog(
       scrollable: true,
-      title: Text(s.t('selectLocation')),
+      title: Text(s.t('city')),
       content: SizedBox(
         width: 400,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: maxHeight),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(s.t('country')),
-                const SizedBox(height: 6),
-                OutlinedButton.icon(
-                  onPressed: _chooseCountry,
-                  icon: const Icon(Icons.arrow_drop_down),
-                  label: Text(
-                    _countryCode == null
-                        ? s.t('searchCountry')
-                        : _countryName(_countryCode!),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  key: const Key('manual-city-field'),
-                  controller: _cityController,
-                  enabled: _countryCode != null,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: InputDecoration(
-                    labelText: s.t('city'),
-                    hintText: s.t('searchCity'),
-                    suffixIcon: _searching || _validating
-                        ? const Padding(
-                            padding: EdgeInsets.all(12),
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : null,
-                  ),
-                  onChanged: _cityChanged,
-                  onSubmitted: (_) => _validate(),
-                ),
-                if (_searching)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(s.t('searchingPlace')),
-                  ),
-                if (_messageKey != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(s.t(_messageKey!)),
-                  ),
-                for (final ManualLocationCandidate candidate in _suggestions)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(candidate.location.city),
-                    subtitle: Text(candidate.subtitle),
-                    onTap: () => _select(candidate),
-                  ),
-                if (_countryCode != null &&
-                    _cityController.text.trim().isNotEmpty &&
-                    _selected == null &&
-                    !_validating)
-                  TextButton(
-                    onPressed: _validate,
-                    child: Text(s.t('validatePlace')),
-                  ),
-              ],
+        height: contentHeight,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            TextField(
+              key: const Key('manual-city-search-field'),
+              controller: _controller,
+              focusNode: _focusNode,
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(
+                hintText: s.t('searchCity'),
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searching
+                    ? const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : null,
+              ),
+              onChanged: _queryChanged,
+              onSubmitted: (_) {
+                _debounce?.cancel();
+                _search();
+              },
             ),
-          ),
+            const SizedBox(height: 6),
+            if (_searching)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Text(s.t('searchingPlace')),
+              ),
+            Expanded(
+              child: _messageKey != null
+                  ? Center(
+                      child: Text(
+                        s.t(_messageKey!),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  : _suggestions.isEmpty
+                  ? const SizedBox.shrink()
+                  : ListView.separated(
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      itemCount: _suggestions.length,
+                      separatorBuilder: (_, _) => const Divider(height: 1),
+                      itemBuilder: (BuildContext context, int index) {
+                        final ManualLocationCandidate candidate =
+                            _suggestions[index];
+                        return ListTile(
+                          key: ValueKey<String>(
+                            'city-suggestion-${candidate.location.latitude}-'
+                            '${candidate.location.longitude}',
+                          ),
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(candidate.location.city),
+                          subtitle: candidate.subtitle.isEmpty
+                              ? null
+                              : Text(candidate.subtitle),
+                          onTap: () => Navigator.of(context).pop(candidate),
+                        );
+                      },
+                    ),
+            ),
+            const Divider(height: 1),
+            const Padding(
+              padding: EdgeInsets.only(top: 6),
+              child: Text(
+                '© OpenStreetMap contributors',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 11),
+              ),
+            ),
+          ],
         ),
       ),
-      actions: [
+      actions: <Widget>[
         TextButton(
+          key: const Key('manual-city-cancel'),
           onPressed: () => Navigator.of(context).pop(),
           child: Text(s.t('cancel')),
-        ),
-        FilledButton(
-          onPressed: _selected == null
-              ? null
-              : () =>
-                    Navigator.of(context)
-                        .pop<UserLocation>(_selected!.location),
-          child: Text(s.t('save')),
         ),
       ],
     );
@@ -383,7 +444,7 @@ class _CountryPickerState extends State<_CountryPicker> {
           math.min(availableHeight * 0.55, availableHeight - 160),
         ),
         child: Column(
-          children: [
+          children: <Widget>[
             TextField(
               key: const Key('country-search-field'),
               controller: _searchController,
@@ -399,8 +460,8 @@ class _CountryPickerState extends State<_CountryPicker> {
                   ? Center(child: Text(s.t('noPlaces')))
                   : ListView.builder(
                       itemCount: matches.length,
-                      itemBuilder: (context, index) {
-                        final entry = matches[index];
+                      itemBuilder: (BuildContext context, int index) {
+                        final MapEntry<String, String> entry = matches[index];
                         return ListTile(
                           title: Text(entry.value),
                           onTap: () => Navigator.of(context).pop(entry.key),
@@ -411,8 +472,9 @@ class _CountryPickerState extends State<_CountryPicker> {
           ],
         ),
       ),
-      actions: [
+      actions: <Widget>[
         TextButton(
+          key: const Key('manual-country-cancel'),
           onPressed: () => Navigator.of(context).pop(),
           child: Text(s.t('cancel')),
         ),

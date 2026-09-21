@@ -1,6 +1,7 @@
 const Map<String, Map<String, String>> manualLocationTranslations = {
   'de': {
     'selectLocation': 'Standort auswählen',
+    'automaticLocationRecommended': 'Die automatische Standortbestimmung ist genauer und wird für zuverlässige Gebetszeiten empfohlen.',
     'searchCountry': 'Land suchen',
     'searchCity': 'Stadt oder Ort suchen',
     'searchingPlace': 'Suche läuft…',
@@ -16,6 +17,7 @@ const Map<String, Map<String, String>> manualLocationTranslations = {
   },
   'en': {
     'selectLocation': 'Select location',
+    'automaticLocationRecommended': 'Automatic location detection is more precise and recommended for accurate prayer times.',
     'searchCountry': 'Search country',
     'searchCity': 'Search city or place',
     'searchingPlace': 'Searching…',
@@ -30,6 +32,7 @@ const Map<String, Map<String, String>> manualLocationTranslations = {
   },
   'ar': {
     'selectLocation': 'اختر الموقع',
+    'automaticLocationRecommended': 'تحديد الموقع تلقائيًا أكثر دقة ويُنصح به للحصول على مواقيت صلاة دقيقة.',
     'searchCountry': 'ابحث عن بلد',
     'searchCity': 'ابحث عن مدينة أو مكان',
     'searchingPlace': 'جارٍ البحث…',
@@ -45,6 +48,7 @@ const Map<String, Map<String, String>> manualLocationTranslations = {
   },
   'bn': {
     'selectLocation': 'অবস্থান নির্বাচন করুন',
+    'automaticLocationRecommended': 'সঠিক নামাজের সময়ের জন্য স্বয়ংক্রিয় অবস্থান শনাক্তকরণ বেশি নির্ভুল এবং সুপারিশ করা হয়।',
     'searchCountry': 'দেশ খুঁজুন',
     'searchCity': 'শহর বা স্থান খুঁজুন',
     'searchingPlace': 'খোঁজা হচ্ছে…',
@@ -60,6 +64,7 @@ const Map<String, Map<String, String>> manualLocationTranslations = {
   },
   'es': {
     'selectLocation': 'Seleccionar ubicación',
+    'automaticLocationRecommended': 'La detección automática es más precisa y se recomienda para obtener horarios de oración exactos.',
     'searchCountry': 'Buscar país',
     'searchCity': 'Buscar ciudad o lugar',
     'searchingPlace': 'Buscando…',
@@ -75,6 +80,8 @@ const Map<String, Map<String, String>> manualLocationTranslations = {
   },
   'fa': {
     'selectLocation': 'انتخاب مکان',
+    'automaticLocationRecommended':
+        'تشخیص خودکار مکان دقیق‌تر است و برای اوقات دقیق نماز توصیه می‌شود.',
     'searchCountry': 'جستجوی کشور',
     'searchCity': 'جستجوی شهر یا مکان',
     'searchingPlace': 'در حال جستجو…',
@@ -90,6 +97,7 @@ const Map<String, Map<String, String>> manualLocationTranslations = {
   },
   'fr': {
     'selectLocation': 'Choisir un lieu',
+    'automaticLocationRecommended': 'La détection automatique est plus précise et recommandée pour des horaires de prière fiables.',
     'searchCountry': 'Rechercher un pays',
     'searchCity': 'Rechercher une ville ou un lieu',
     'searchingPlace': 'Recherche…',
@@ -104,6 +112,7 @@ const Map<String, Map<String, String>> manualLocationTranslations = {
   },
   'id': {
     'selectLocation': 'Pilih lokasi',
+    'automaticLocationRecommended': 'Deteksi lokasi otomatis lebih akurat dan disarankan untuk waktu salat yang tepat.',
     'searchCountry': 'Cari negara',
     'searchCity': 'Cari kota atau tempat',
     'searchingPlace': 'Mencari…',
@@ -119,6 +128,7 @@ const Map<String, Map<String, String>> manualLocationTranslations = {
   },
   'ms': {
     'selectLocation': 'Pilih lokasi',
+    'automaticLocationRecommended': 'Pengesanan lokasi automatik lebih tepat dan disyorkan untuk waktu solat yang tepat.',
     'searchCountry': 'Cari negara',
     'searchCity': 'Cari bandar atau tempat',
     'searchingPlace': 'Mencari…',
@@ -134,6 +144,7 @@ const Map<String, Map<String, String>> manualLocationTranslations = {
   },
   'pa': {
     'selectLocation': 'ٹکانا چنو',
+    'automaticLocationRecommended': 'نماز دے صحیح ویلیاں لئی خودکار ٹکانا لبھنا زیادہ درست تے سفارش کیتا جاندا اے۔',
     'searchCountry': 'ملک لبھو',
     'searchCity': 'شہر یا تھان لبھو',
     'searchingPlace': 'لبھیا جا رہیا اے…',
@@ -148,6 +159,7 @@ const Map<String, Map<String, String>> manualLocationTranslations = {
   },
   'ps': {
     'selectLocation': 'ځای وټاکئ',
+    'automaticLocationRecommended': 'د لمانځه د کره وختونو لپاره د ځای اتومات پېژندنه ډېره دقیقه او سپارښتنه شوې ده.',
     'searchCountry': 'هېواد ولټوئ',
     'searchCity': 'ښار یا ځای ولټوئ',
     'searchingPlace': 'لټون روان دی…',
@@ -162,6 +174,7 @@ const Map<String, Map<String, String>> manualLocationTranslations = {
   },
   'tr': {
     'selectLocation': 'Konum seç',
+    'automaticLocationRecommended': 'Otomatik konum algılama daha hassastır ve doğru namaz vakitleri için önerilir.',
     'searchCountry': 'Ülke ara',
     'searchCity': 'Şehir veya yer ara',
     'searchingPlace': 'Aranıyor…',
@@ -177,6 +190,7 @@ const Map<String, Map<String, String>> manualLocationTranslations = {
   },
   'ur': {
     'selectLocation': 'مقام منتخب کریں',
+    'automaticLocationRecommended': 'درست نماز کے اوقات کے لیے خودکار مقام کی شناخت زیادہ درست اور تجویز کردہ ہے۔',
     'searchCountry': 'ملک تلاش کریں',
     'searchCity': 'شہر یا جگہ تلاش کریں',
     'searchingPlace': 'تلاش جاری ہے…',

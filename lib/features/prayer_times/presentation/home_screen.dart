@@ -198,7 +198,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   children: <Widget>[
                     if (day.hijriDate != null) ...<Widget>[
                       Text(
-                        s.hijriDate(day.hijriDate!),
+                        s.hijriDate(
+                          day.hijriDate!,
+                          day: day.hijriDay,
+                          month: day.hijriMonth,
+                          year: day.hijriYear,
+                        ),
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -207,9 +212,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(height: 4),
                     ],
                     Text(
-                      s.date(
+                      s.fullDate(
                         TimezoneService.toLocal(_nowUtc, day.timezoneId),
-                        pattern: 'EEEE, d MMMM y',
                       ),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleMedium

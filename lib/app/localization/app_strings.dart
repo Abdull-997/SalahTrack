@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/additional_translations.dart';
+import 'package:salah_focus/app/localization/localized_date_data.dart';
 import 'package:salah_focus/app/localization/new_language_translations.dart';
 import 'package:salah_focus/app/localization/manual_location_translations.dart';
 import 'package:salah_focus/app/localization/privacy_legal_translations.dart';
@@ -950,59 +951,13 @@ class AppStrings {
   }
 
   /// Formats every user-visible number using the active app language.
-  ///
-  /// `intl` localizes punctuation, while languages with their own familiar
-  /// digit shapes use them consistently throughout the interface.
   String number(num value) {
-    final String formatted = NumberFormat.decimalPattern(locale.languageCode)
+    String formatted = NumberFormat.decimalPattern(locale.languageCode)
         .format(value);
-    const Map<String, String> western = <String, String>{
-      '0': '٠',
-      '1': '١',
-      '2': '٢',
-      '3': '٣',
-      '4': '٤',
-      '5': '٥',
-      '6': '٦',
-      '7': '٧',
-      '8': '٨',
-      '9': '٩',
-    };
-    const Map<String, String> eastern = <String, String>{
-      '0': '۰',
-      '1': '۱',
-      '2': '۲',
-      '3': '۳',
-      '4': '۴',
-      '5': '۵',
-      '6': '۶',
-      '7': '۷',
-      '8': '۸',
-      '9': '۹',
-    };
-    const Map<String, String> bengali = <String, String>{
-      '0': '০',
-      '1': '১',
-      '2': '২',
-      '3': '৩',
-      '4': '৪',
-      '5': '৫',
-      '6': '৬',
-      '7': '৭',
-      '8': '৮',
-      '9': '৯',
-    };
-    final Map<String, String>? digits = switch (locale.languageCode) {
-      'ar' => western,
-      'bn' => bengali,
-      'fa' || 'pa' || 'ur' || 'ps' => eastern,
-      _ => null,
-    };
-    if (digits == null) return formatted;
-    return formatted.splitMapJoin(
-      RegExp('[0-9]'),
-      onMatch: (Match match) => digits[match.group(0)]!,
-    );
+    if (locale.languageCode == 'ar') {
+      formatted = formatted.replaceAll(',', '٬').replaceAll('.', '٫');
+    }
+    return _localizeDigits(formatted);
   }
 
   String minutes(num value) =>
@@ -1013,187 +968,53 @@ class AppStrings {
     return _localizeDigits(_localizeGregorianDateWords(formatted));
   }
 
+  String fullDate(DateTime value) => date(
+    value,
+    pattern: localizedFullDatePatterns[locale.languageCode] ?? 'EEEE, d MMMM y',
+  );
+
+  String mediumDate(DateTime value) => date(
+    value,
+    pattern: localizedMediumDatePatterns[locale.languageCode] ?? 'd MMMM y',
+  );
+
   String time(DateTime value) =>
       _localizeDigits(DateFormat.Hm(_intlLocaleName).format(value));
 
   String get _intlLocaleName =>
       locale.languageCode == 'pa' ? 'en' : locale.languageCode;
 
-  String hijriDate(String value) {
-    if (!const <String>{
-      'ar',
-      'bn',
-      'fa',
-      'id',
-      'ms',
-      'pa',
-      'ur',
-      'ps',
-      'tr',
-      'fr',
-      'es',
-    }.contains(locale.languageCode)) {
-      return _localizeDigits(value);
+  String hijriDate(String value, {int? day, int? month, int? year}) {
+    final ({int day, int month, int year})? parsed = _parseHijriDate(value);
+    final int? resolvedDay = day ?? parsed?.day;
+    final int? resolvedMonth = month ?? parsed?.month;
+    final int? resolvedYear = year ?? parsed?.year;
+    final List<String>? months = localizedHijriMonths[locale.languageCode];
+    if (resolvedDay != null &&
+        resolvedMonth != null &&
+        resolvedMonth >= 1 &&
+        resolvedMonth <= 12 &&
+        resolvedYear != null &&
+        months != null) {
+      return '${_localizeDigits(resolvedDay.toString())} '
+          '${months[resolvedMonth - 1]} '
+          '${_localizeDigits(resolvedYear.toString())}';
     }
+    return _localizeDigits(value);
+  }
 
-    const Map<String, String> arabicMonths = <String, String>{
-      'Muharram': 'محرم',
-      'Safar': 'صفر',
-      'Rabi al-Awwal': 'ربيع الأول',
-      'Rabi al-awwal': 'ربيع الأول',
-      "Rabi' al-awwal": 'ربيع الأول',
-      'Rabīʿ al-awwal': 'ربيع الأول',
-      'Rabi al-Thani': 'ربيع الثاني',
-      'Rabi al-thani': 'ربيع الثاني',
-      "Rabi' al-thani": 'ربيع الثاني',
-      'Rabīʿ al-thānī': 'ربيع الثاني',
-      'Jumada al-Awwal': 'جمادى الأولى',
-      'Jumada al-awwal': 'جمادى الأولى',
-      'Jumada al-ula': 'جمادى الأولى',
-      'Jumādá al-ūlá': 'جمادى الأولى',
-      'Jumada al-Thani': 'جمادى الآخرة',
-      'Jumada al-thani': 'جمادى الآخرة',
-      'Jumada al-akhirah': 'جمادى الآخرة',
-      'Jumādá al-ākhirah': 'جمادى الآخرة',
-      'Rajab': 'رجب',
-      'Shaban': 'شعبان',
-      'Shaʿbān': 'شعبان',
-      'Ramadan': 'رمضان',
-      'Ramaḍān': 'رمضان',
-      'Shawwal': 'شوال',
-      'Shawwāl': 'شوال',
-      'Dhul Qadah': 'ذو القعدة',
-      'Dhu al-Qidah': 'ذو القعدة',
-      'Dhū al-Qaʿdah': 'ذو القعدة',
-      'Dhul Hijjah': 'ذو الحجة',
-      'Dhu al-Hijjah': 'ذو الحجة',
-      'Dhū al-Ḥijjah': 'ذو الحجة',
-    };
-
-    const Map<String, List<String>> monthNames = {
-      'tr': [
-        'Muharrem',
-        'Safer',
-        'Rebiülevvel',
-        'Rebiülahir',
-        'Cemaziyelevvel',
-        'Cemaziyelahir',
-        'Recep',
-        'Şaban',
-        'Ramazan',
-        'Şevval',
-        'Zilkade',
-        'Zilhicce',
-      ],
-      'fr': [
-        'Mouharram',
-        'Safar',
-        'Rabia al awal',
-        'Rabia ath-thani',
-        'Joumada al oula',
-        'Joumada ath-thania',
-        'Rajab',
-        'Chaabane',
-        'Ramadan',
-        'Chawwal',
-        'Dhou al qi`da',
-        'Dhou al hijja',
-      ],
-      'es': [
-        'Muharram',
-        'Safar',
-        'Rabi al-awwal',
-        'Rabi al-thani',
-        'Yumada al-ula',
-        'Yumada al-ajira',
-        'Rayab',
-        'Shaabán',
-        'Ramadán',
-        'Shawwal',
-        'Dhu al-qada',
-        'Dhu al-hiyya',
-      ],
-      'id': [
-        'Muharam',
-        'Safar',
-        'Rabiulawal',
-        'Rabiulakhir',
-        'Jumadilawal',
-        'Jumadilakhir',
-        'Rajab',
-        'Syakban',
-        'Ramadan',
-        'Syawal',
-        'Zulkaidah',
-        'Zulhijah',
-      ],
-      'bn': [
-        'মুহাররম',
-        'সফর',
-        'রবিউল আউয়াল',
-        'রবিউস সানি',
-        'জমাদিউল আউয়াল',
-        'জমাদিউস সানি',
-        'রজব',
-        'শাবান',
-        'রমজান',
-        'শাওয়াল',
-        'জিলকদ',
-        'জিলহজ',
-      ],
-      'pa': [
-        'محرم',
-        'صفر',
-        'ربیع الاول',
-        'ربیع الثانی',
-        'جمادی الاول',
-        'جمادی الثانی',
-        'رجب',
-        'شعبان',
-        'رمضان',
-        'شوال',
-        'ذوالقعدہ',
-        'ذوالحجہ',
-      ],
-      'fa': [
-        'محرم',
-        'صفر',
-        'ربیع‌الاول',
-        'ربیع‌الثانی',
-        'جمادی‌الاول',
-        'جمادی‌الثانی',
-        'رجب',
-        'شعبان',
-        'رمضان',
-        'شوال',
-        'ذی‌القعده',
-        'ذی‌الحجه',
-      ],
-      'ms': [
-        'Muharam',
-        'Safar',
-        'Rabiulawal',
-        'Rabiulakhir',
-        'Jamadilawal',
-        'Jamadilakhir',
-        'Rejab',
-        'Syaaban',
-        'Ramadan',
-        'Syawal',
-        'Zulkaedah',
-        'Zulhijah',
-      ],
-    };
-    final List<String> sourceMonths = arabicMonths.values.toSet().toList();
-    final List<String>? targetMonths = monthNames[locale.languageCode];
-    String localized = value;
-    for (final MapEntry<String, String> entry in arabicMonths.entries) {
-      final String name = targetMonths == null
-          ? entry.value
-          : targetMonths[sourceMonths.indexOf(entry.value)];
-      localized = localized.replaceAll(entry.key, name);
-    }
-    return _localizeDigits(localized);
+  ({int day, int month, int year})? _parseHijriDate(String value) {
+    final RegExpMatch? parts = RegExp(
+      r'^\s*(\d{1,2})\s+(.+?)\s+(\d{3,4})\s*$',
+      caseSensitive: false,
+    ).firstMatch(value);
+    if (parts == null) return null;
+    final String sourceMonth = parts.group(2)!.toLowerCase();
+    final int? month = hijriMonthAliases[sourceMonth];
+    final int? day = int.tryParse(parts.group(1)!);
+    final int? year = int.tryParse(parts.group(3)!);
+    if (day == null || month == null || year == null) return null;
+    return (day: day, month: month, year: year);
   }
 
   /// Physical compass positions are independent of the interface direction.
@@ -1220,12 +1041,15 @@ class AppStrings {
   }
 
   String _localizeDigits(String value) {
-    if (locale.languageCode == 'de' || locale.languageCode == 'en') {
-      return value;
-    }
+    final String? digits = switch (locale.languageCode) {
+      'ar' => '٠١٢٣٤٥٦٧٨٩',
+      'bn' => '০১২৩৪৫৬৭৮৯',
+      'fa' || 'pa' || 'ps' || 'ur' => '۰۱۲۳۴۵۶۷۸۹',
+      _ => null,
+    };
+    if (digits == null) return value;
     return value.replaceAllMapped(RegExp('[0-9]'), (Match match) {
-      final String digit = match.group(0)!;
-      return number(int.parse(digit));
+      return digits[int.parse(match.group(0)!)];
     });
   }
 
@@ -1233,76 +1057,14 @@ class AppStrings {
   /// when a platform's date-symbol fallback returns English names.
   String _localizeGregorianDateWords(String value) {
     if (locale.languageCode == 'pa') {
-      const Map<String, String> punjabiWords = <String, String>{
-        'Monday': 'سوموار',
-        'Tuesday': 'منگل',
-        'Wednesday': 'بدھ',
-        'Thursday': 'جمعرات',
-        'Friday': 'جمعہ',
-        'Saturday': 'ہفتہ',
-        'Sunday': 'اتوار',
-        'January': 'جنوری',
-        'February': 'فروری',
-        'March': 'مارچ',
-        'April': 'اپریل',
-        'May': 'مئی',
-        'June': 'جون',
-        'July': 'جولائی',
-        'August': 'اگست',
-        'September': 'ستمبر',
-        'October': 'اکتوبر',
-        'November': 'نومبر',
-        'December': 'دسمبر',
-      };
       String localized = value;
-      for (final MapEntry<String, String> entry in punjabiWords.entries) {
+      for (final MapEntry<String, String> entry
+          in shahmukhiGregorianWords.entries) {
         localized = localized.replaceAll(entry.key, entry.value);
       }
       return localized;
     }
-    if (locale.languageCode != 'ar') return value;
-
-    const Map<String, String> arabicWords = <String, String>{
-      'Monday': 'الاثنين',
-      'Tuesday': 'الثلاثاء',
-      'Wednesday': 'الأربعاء',
-      'Thursday': 'الخميس',
-      'Friday': 'الجمعة',
-      'Saturday': 'السبت',
-      'Sunday': 'الأحد',
-      'January': 'كانون الثاني',
-      'February': 'شباط',
-      'March': 'آذار',
-      'April': 'نيسان',
-      'May': 'أيار',
-      'June': 'حزيران',
-      'July': 'تموز',
-      'August': 'آب',
-      'September': 'أيلول',
-      'October': 'تشرين الأول',
-      'November': 'تشرين الثاني',
-      'December': 'كانون الأول',
-      // Arabic CLDR data normally uses these international Arabic names.
-      // Replace them with the requested Levantine Gregorian month names.
-      'يناير': 'كانون الثاني',
-      'فبراير': 'شباط',
-      'مارس': 'آذار',
-      'أبريل': 'نيسان',
-      'مايو': 'أيار',
-      'يونيو': 'حزيران',
-      'يوليو': 'تموز',
-      'أغسطس': 'آب',
-      'سبتمبر': 'أيلول',
-      'أكتوبر': 'تشرين الأول',
-      'نوفمبر': 'تشرين الثاني',
-      'ديسمبر': 'كانون الأول',
-    };
-
-    String localized = value;
-    for (final MapEntry<String, String> entry in arabicWords.entries) {
-      localized = localized.replaceAll(entry.key, entry.value);
-    }
-    return localized;
+    return value;
   }
 }
 
