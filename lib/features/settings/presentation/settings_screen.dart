@@ -18,13 +18,17 @@ import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 import 'package:salah_focus/features/ramadan/domain/ramadan_settings.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
+import 'package:salah_focus/features/settings/data/problem_report_service.dart';
 import 'package:salah_focus/features/settings/presentation/language_selection_screen.dart';
 import 'package:salah_focus/features/settings/presentation/notification_settings_screen.dart';
 import 'package:salah_focus/features/settings/presentation/privacy_legal_screen.dart';
+import 'package:salah_focus/features/settings/presentation/report_problem_screen.dart';
 import 'package:salah_focus/shared/errors/user_error_message.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({this.problemReportService, super.key});
+
+  final ProblemReportService? problemReportService;
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -494,6 +498,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         builder: (_) => const LanguageSelectionScreen(),
                       ),
                     ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          _PlainSectionTitle(
+            title: s.t('reportHelpSupport'),
+            icon: Icons.help_outline_rounded,
+          ),
+          Card(
+            child: ListTile(
+              key: const ValueKey<String>('report-problem-settings-tile'),
+              leading: const Icon(Icons.bug_report_outlined),
+              title: Text(s.t('reportProblem')),
+              subtitle: Text(s.t('reportProblemSettingsSubtitle')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) =>
+                      ReportProblemScreen(service: widget.problemReportService),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 18),
@@ -1441,6 +1465,31 @@ class _SectionTitle extends StatelessWidget {
           tooltip: infoTooltip,
           onPressed: onInfo,
           icon: const Icon(Icons.info_outline_rounded),
+        ),
+      ],
+    ),
+  );
+}
+
+class _PlainSectionTitle extends StatelessWidget {
+  const _PlainSectionTitle({required this.title, required this.icon});
+
+  final String title;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
+    child: Row(
+      children: <Widget>[
+        Icon(icon, size: 20),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.w900),
+          ),
         ),
       ],
     ),

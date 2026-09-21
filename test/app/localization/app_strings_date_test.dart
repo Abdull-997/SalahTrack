@@ -8,6 +8,7 @@ import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/app/localization/localized_date_data.dart';
 import 'package:salah_focus/app/localization/manual_location_translations.dart';
 import 'package:salah_focus/app/localization/privacy_legal_translations.dart';
+import 'package:salah_focus/app/localization/report_problem_translations.dart';
 import 'package:salah_focus/core/theme/app_theme.dart';
 
 void main() {
@@ -188,6 +189,7 @@ void main() {
         AppStrings.translations[locale.key]!,
         manualLocationTranslations[locale.key]!,
         privacyLegalUiTranslations[locale.key]!,
+        reportProblemTranslations[locale.key]!,
       ];
       for (final Map<String, String> catalog in catalogs) {
         for (final MapEntry<String, String> value in catalog.entries) {

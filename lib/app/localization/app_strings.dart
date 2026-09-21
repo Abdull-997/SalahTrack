@@ -8,6 +8,7 @@ import 'package:salah_focus/app/localization/new_language_translations.dart';
 import 'package:salah_focus/app/localization/manual_location_translations.dart';
 import 'package:salah_focus/app/localization/privacy_legal_translations.dart';
 import 'package:salah_focus/app/localization/ramadan_translations.dart';
+import 'package:salah_focus/app/localization/report_problem_translations.dart';
 import 'package:salah_focus/app/localization/tracker_today_translations.dart';
 
 class AppStrings {
@@ -938,6 +939,8 @@ class AppStrings {
       return 'SalahTrack';
     }
     String value =
+        reportProblemTranslations[locale.languageCode]?[key] ??
+        reportProblemTranslations['en']?[key] ??
         trackerTodayTranslations[locale.languageCode]?[key] ??
         trackerTodayTranslations['en']?[key] ??
         manualLocationTranslations[locale.languageCode]?[key] ??
