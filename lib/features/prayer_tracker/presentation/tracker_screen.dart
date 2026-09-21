@@ -138,6 +138,23 @@ Future<void> _showTrackerInfo(BuildContext context) => showDialog<void>(
   },
 );
 
+Future<void> _showTodayInfo(BuildContext context) => showDialog<void>(
+  context: context,
+  builder: (BuildContext dialogContext) {
+    final AppStrings s = AppStrings.of(dialogContext);
+    return AlertDialog(
+      title: Text(s.t('todayInfoTitle')),
+      content: Text(s.t('todayInfoBody')),
+      actions: <Widget>[
+        FilledButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: Text(s.t('close')),
+        ),
+      ],
+    );
+  },
+);
+
 class _StatusExplanation extends StatelessWidget {
   const _StatusExplanation({required this.status});
 
@@ -225,13 +242,42 @@ class _TrackerContent extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(18, 10, 18, 28),
         children: <Widget>[
-          Text(
-            s.t('today'),
-            style: Theme.of(context).textTheme.titleLarge
-                ?.copyWith(fontWeight: FontWeight.w800),
+          Row(
+            key: const ValueKey<String>('tracker-today-heading'),
+            children: <Widget>[
+              Flexible(
+                child: Text(
+                  s.t('today'),
+                  style: Theme.of(context).textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.w800),
+                ),
+              ),
+              const SizedBox(width: 2),
+              IconButton(
+                key: const ValueKey<String>('today-info-button'),
+                tooltip: s.t('todayInfoTitle'),
+                onPressed: () => _showTodayInfo(context),
+                icon: const Icon(Icons.info_outline_rounded),
+              ),
+            ],
           ),
           const SizedBox(height: 10),
           _StatsCard(prayed: prayed, ratio: ratio),
+          if (prayed == 5)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(top: 8, start: 4),
+              child: Semantics(
+                liveRegion: true,
+                child: Text(
+                  key: const ValueKey<String>('today-completion-message'),
+                  s.t('todayAllPrayersCompleted'),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
           const SizedBox(height: 24),
           Row(
             key: const ValueKey<String>('tracker-week-heading'),
@@ -309,6 +355,7 @@ class _StatsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppStrings s = AppStrings.of(context);
     return Card(
+      key: const ValueKey<String>('today-stats-card'),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Row(
@@ -337,11 +384,6 @@ class _StatsCard extends StatelessWidget {
                   const SizedBox(height: 5),
                   Text(
                     '${s.number(prayed)}/${s.number(5)}',
-                    style: Theme.of(context).textTheme.headlineSmall
-                        ?.copyWith(fontWeight: FontWeight.w900),
-                  ),
-                  Text(
-                    '${s.number((ratio * 100).round())} %',
                     style: Theme.of(context).textTheme.headlineSmall
                         ?.copyWith(fontWeight: FontWeight.w900),
                   ),

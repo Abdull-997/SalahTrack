@@ -6,6 +6,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
+import 'package:salah_focus/app/localization/tracker_today_translations.dart';
 import 'package:salah_focus/core/theme/app_theme.dart';
 import 'package:salah_focus/core/time/clock_service.dart';
 import 'package:salah_focus/features/prayer_times/application/prayer_coordinator.dart';
@@ -132,6 +133,72 @@ Widget _app(
 
 void main() {
   setUpAll(initializeDateFormatting);
+
+  test('Today tracker text is complete for every supported language', () {
+    const Set<String> expectedKeys = <String>{
+      'todayInfoTitle',
+      'todayInfoBody',
+      'todayAllPrayersCompleted',
+    };
+    for (final Locale locale in AppStrings.supportedLocales) {
+      final Map<String, String>? translations =
+          trackerTodayTranslations[locale.languageCode];
+      expect(translations, isNotNull, reason: locale.languageCode);
+      expect(
+        translations!.keys.toSet(),
+        expectedKeys,
+        reason: locale.languageCode,
+      );
+      expect(
+        translations['todayAllPrayersCompleted'],
+        contains('🤲🏼'),
+        reason: locale.languageCode,
+      );
+    }
+    expect(
+      trackerTodayTranslations['de']?['todayAllPrayersCompleted'],
+      'Alhamdulillah 🤲🏼 Heute alle Gebete gebetet.',
+    );
+    expect(
+      trackerTodayTranslations['en']?['todayAllPrayersCompleted'],
+      'Alhamdulillah 🤲🏼 All prayers completed today.',
+    );
+  });
+
+  testWidgets('Today card shows only the prayer count below five', (
+    tester,
+  ) async {
+    final DateTime now = DateTime.utc(2026, 9, 13, 12);
+    final _Coordinator coordinator = _Coordinator(now);
+    for (int index = 0; index < coordinator.entries.length; index++) {
+      final PrayerEntry entry = coordinator.entries[index];
+      if (entry.localDate == _iso(now) && entry.type.index < 3) {
+        coordinator.entries[index] = entry.copyWith(
+          status: PrayerStatus.prayed,
+        );
+      }
+    }
+    await tester.pumpWidget(_app(coordinator, now));
+    await tester.pumpAndSettle();
+
+    final Finder statsCard = find.byKey(
+      const ValueKey<String>('today-stats-card'),
+    );
+    expect(
+      find.descendant(of: statsCard, matching: find.text('3/5')),
+      findsOneWidget,
+    );
+    final Iterable<String> cardText = tester
+        .widgetList<Text>(
+          find.descendant(of: statsCard, matching: find.byType(Text)),
+        )
+        .map((Text widget) => widget.data ?? '');
+    expect(cardText.any((String value) => value.contains('%')), isFalse);
+    expect(
+      find.byKey(const ValueKey<String>('today-completion-message')),
+      findsNothing,
+    );
+  });
 
   testWidgets('info button explains every tracker status', (tester) async {
     tester.view.physicalSize = const Size(430, 932);
@@ -274,13 +341,52 @@ void main() {
           tester.binding.platformDispatcher.clearTextScaleFactorTestValue,
         );
         final DateTime now = DateTime.utc(2026, 9, 13, 12);
-        await tester.pumpWidget(_app(_Coordinator(now), now, locale: locale));
+        final _Coordinator coordinator = _Coordinator(now);
+        for (int index = 0; index < coordinator.entries.length; index++) {
+          final PrayerEntry entry = coordinator.entries[index];
+          if (entry.localDate == _iso(now)) {
+            coordinator.entries[index] = entry.copyWith(
+              status: PrayerStatus.prayed,
+            );
+          }
+        }
+        await tester.pumpWidget(_app(coordinator, now, locale: locale));
         await tester.pumpAndSettle();
 
         final AppStrings s = AppStrings(locale);
         final TextDirection expectedDirection = textDirectionForLanguage(
           locale.languageCode,
         );
+        expect(
+          find.text(s.t('todayAllPrayersCompleted')),
+          findsOneWidget,
+          reason: locale.languageCode,
+        );
+        expect(find.textContaining('%'), findsNothing);
+        final Finder todayInfo = find.byKey(
+          const ValueKey<String>('today-info-button'),
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(const ValueKey<String>('tracker-today-heading')),
+            matching: todayInfo,
+          ),
+          findsOneWidget,
+        );
+        final Size todayTouchSize = tester.getSize(todayInfo);
+        expect(todayTouchSize.width, greaterThanOrEqualTo(48));
+        expect(todayTouchSize.height, greaterThanOrEqualTo(48));
+        await tester.tap(todayInfo);
+        await tester.pumpAndSettle();
+        expect(find.text(s.t('todayInfoTitle')), findsOneWidget);
+        expect(find.text(s.t('todayInfoBody')), findsOneWidget);
+        expect(
+          Directionality.of(tester.element(find.byType(AlertDialog))),
+          expectedDirection,
+        );
+        await tester.tap(find.text(s.t('close')).hitTestable());
+        await tester.pumpAndSettle();
+
         final Finder trackerInfo = find.byKey(
           const ValueKey<String>('tracker-info-button'),
         );
