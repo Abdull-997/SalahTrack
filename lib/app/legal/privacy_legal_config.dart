@@ -2,7 +2,7 @@ abstract final class PrivacyLegalConfig {
   static const String controllerName = 'Abdulrahman Al Hamidi';
   static const String controllerLocation =
       'Universitätsstr. 70\n40225 Düsseldorf\nGermany';
-  static const String contactEmail = 'ar830222@gmail.com';
+  static const String contactEmail = 'salahfoucus@gmail.com';
 
   /// Override the externally hosted policy for a future release with:
   /// `--dart-define=PRIVACY_POLICY_URL=https://your-domain.example/privacy`

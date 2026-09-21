@@ -1,3 +1,4 @@
+import 'package:salah_focus/app/legal/privacy_legal_config.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 
 enum ProblemCategory {
@@ -48,7 +49,7 @@ class ProblemReport {
     required this.technicalInfo,
   });
 
-  static const String recipient = 'ar830222@gmail.com';
+  static const String recipient = PrivacyLegalConfig.contactEmail;
   static const String subject = 'SalahTrack – Problem Report';
 
   final ProblemCategory category;

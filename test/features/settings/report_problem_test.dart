@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:salah_focus/app/legal/privacy_legal_config.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/app/localization/report_problem_translations.dart';
@@ -122,6 +123,12 @@ Future<void> _completeReport(
 }
 
 void main() {
+  test('problem reports use the official SalahTrack contact', () {
+    expect(ProblemReport.recipient, 'salahfoucus@gmail.com');
+    expect(ProblemReport.recipient, PrivacyLegalConfig.contactEmail);
+    expect(ProblemReport.recipient, isNot('ar830222@gmail.com'));
+  });
+
   test('report localization is complete for all supported locales', () {
     final Set<String> expected = reportProblemTranslations['en']!.keys.toSet();
     expect(
@@ -179,7 +186,7 @@ void main() {
 
     final Uri uri = report.emailUri(strings);
     expect(uri.scheme, 'mailto');
-    expect(uri.path, ProblemReport.recipient);
+    expect(uri.path, 'salahfoucus@gmail.com');
     expect(uri.queryParameters['subject'], ProblemReport.subject);
     expect(uri.queryParameters['body'], body);
   });

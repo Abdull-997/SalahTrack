@@ -9,6 +9,11 @@ import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/features/settings/presentation/privacy_legal_screen.dart';
 
 void main() {
+  test('official in-app privacy and legal contact is current', () {
+    expect(PrivacyLegalConfig.contactEmail, 'salahfoucus@gmail.com');
+    expect(PrivacyLegalConfig.contactEmail, isNot('ar830222@gmail.com'));
+  });
+
   test('privacy and legal UI catalogs are complete for every app language', () {
     final Map<String, Map<String, String>> catalogs =
         AppStrings.privacyLegalTranslations;
@@ -66,6 +71,8 @@ void main() {
       expect(allText, contains(PrivacyLegalConfig.controllerName));
       expect(allText, contains(PrivacyLegalConfig.controllerLocation));
       expect(allText, contains(PrivacyLegalConfig.contactEmail));
+      expect(allText, contains('salahfoucus@gmail.com'));
+      expect(allText, isNot(contains('ar830222@gmail.com')));
       expect(allText, contains('photon.komoot.io'), reason: language.code);
       expect(allText, contains('OpenStreetMap'), reason: language.code);
       expect(allText, contains('api.aladhan.com'), reason: language.code);
