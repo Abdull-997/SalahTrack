@@ -38,6 +38,25 @@ jobs:
       - name: iOS App kompilieren (Release, nicht signiert)
         run: flutter build ios --release --no-codesign
 
+      - name: Nicht signierte IPA erstellen
+        shell: bash
+        run: |
+          set -euo pipefail
+          ipa_staging="$RUNNER_TEMP/SalahTrack-ipa"
+          mkdir -p "$ipa_staging/Payload"
+          ditto build/ios/iphoneos/Runner.app "$ipa_staging/Payload/Runner.app"
+          ditto -c -k --sequesterRsrc --keepParent \
+            "$ipa_staging/Payload" SalahTrack.ipa
+          unzip -Z1 SalahTrack.ipa | grep '^Payload/Runner\.app/' > /dev/null
+
+      - name: Nicht signierte IPA als Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: SalahTrack-iOS-IPA
+          path: SalahTrack.ipa
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Nicht signierten Build als Artefakt hochladen
         uses: actions/upload-artifact@v4
         with:
