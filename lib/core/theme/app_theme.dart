@@ -6,20 +6,32 @@ class AppTheme {
   static const Color seed = Color(0xFF276749);
   static const Color warm = Color(0xFFF5F0E7);
 
-  /// Platform font families with full Arabic-script and Bengali coverage.
+  /// Platform font families with broad Arabic-script coverage.
   /// Flutter/Skia continues to system fallback if a family is unavailable.
-  static const List<String> scriptFontFallback = <String>[
+  static const List<String> arabicScriptFontFallback = <String>[
     'Noto Sans Arabic',
     'Noto Naskh Arabic',
     'Noto Nastaliq Urdu',
-    'Noto Sans Bengali',
     'Nirmala UI',
     'Geeza Pro',
+    'Segoe UI',
+  ];
+
+  static const List<String> bengaliFontFallback = <String>[
+    'Noto Sans Bengali',
+    'Nirmala UI',
     'Kohinoor Bangla',
     'Segoe UI',
   ];
 
-  static ThemeData light() {
+  static List<String>? _fontFallbackFor(String? languageCode) =>
+      switch (languageCode) {
+        'ar' || 'fa' || 'pa' || 'ps' || 'ur' => arabicScriptFontFallback,
+        'bn' => bengaliFontFallback,
+        _ => null,
+      };
+
+  static ThemeData light({String? languageCode}) {
     final ColorScheme scheme = ColorScheme.fromSeed(
       seedColor: seed,
       brightness: Brightness.light,
@@ -27,7 +39,7 @@ class AppTheme {
     );
     return ThemeData(
       useMaterial3: true,
-      fontFamilyFallback: scriptFontFallback,
+      fontFamilyFallback: _fontFallbackFor(languageCode),
       colorScheme: scheme,
       scaffoldBackgroundColor: const Color(0xFFFAF7F1),
       cardTheme: CardThemeData(
@@ -70,7 +82,7 @@ class AppTheme {
     );
   }
 
-  static ThemeData dark() {
+  static ThemeData dark({String? languageCode}) {
     final ColorScheme scheme = ColorScheme.fromSeed(
       seedColor: const Color(0xFF68B88A),
       brightness: Brightness.dark,
@@ -78,7 +90,7 @@ class AppTheme {
     );
     return ThemeData(
       useMaterial3: true,
-      fontFamilyFallback: scriptFontFallback,
+      fontFamilyFallback: _fontFallbackFor(languageCode),
       colorScheme: scheme,
       scaffoldBackgroundColor: const Color(0xFF0F1411),
       cardTheme: CardThemeData(

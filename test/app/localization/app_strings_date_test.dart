@@ -118,17 +118,56 @@ void main() {
     }
   });
 
-  test('themes retain Arabic-script and Bengali font fallbacks', () {
+  test('Latin locales retain the original platform typography', () {
+    final ThemeData originalLight = AppTheme.light();
+    final ThemeData originalDark = AppTheme.dark();
+    for (final String languageCode in <String>[
+      'de',
+      'en',
+      'es',
+      'fr',
+      'id',
+      'ms',
+      'tr',
+    ]) {
+      final List<(ThemeData, ThemeData)> themes = <(ThemeData, ThemeData)>[
+        (AppTheme.light(languageCode: languageCode), originalLight),
+        (AppTheme.dark(languageCode: languageCode), originalDark),
+      ];
+      for (final (ThemeData theme, ThemeData original) in themes) {
+        expect(
+          theme.textTheme.bodyMedium?.fontFamily,
+          original.textTheme.bodyMedium?.fontFamily,
+        );
+        expect(theme.textTheme.bodyMedium?.fontFamilyFallback, isNull);
+      }
+    }
+  });
+
+  test('native-script locales retain targeted font fallbacks', () {
+    for (final String languageCode in <String>['ar', 'fa', 'pa', 'ps', 'ur']) {
+      for (final ThemeData theme in <ThemeData>[
+        AppTheme.light(languageCode: languageCode),
+        AppTheme.dark(languageCode: languageCode),
+      ]) {
+        final List<String>? fallbacks =
+            theme.textTheme.bodyMedium?.fontFamilyFallback;
+        expect(fallbacks, contains('Noto Sans Arabic'));
+        expect(fallbacks, contains('Noto Nastaliq Urdu'));
+        expect(fallbacks, contains('Nirmala UI'));
+        expect(fallbacks, isNot(contains('Noto Sans Bengali')));
+      }
+    }
+
     for (final ThemeData theme in <ThemeData>[
-      AppTheme.light(),
-      AppTheme.dark(),
+      AppTheme.light(languageCode: 'bn'),
+      AppTheme.dark(languageCode: 'bn'),
     ]) {
       final List<String>? fallbacks =
           theme.textTheme.bodyMedium?.fontFamilyFallback;
-      expect(fallbacks, contains('Noto Sans Arabic'));
-      expect(fallbacks, contains('Noto Nastaliq Urdu'));
       expect(fallbacks, contains('Noto Sans Bengali'));
       expect(fallbacks, contains('Nirmala UI'));
+      expect(fallbacks, isNot(contains('Noto Sans Arabic')));
     }
   });
 

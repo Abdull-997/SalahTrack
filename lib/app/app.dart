@@ -109,8 +109,8 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       onGenerateTitle: (context) => AppStrings.of(context).t('appName'),
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: AppTheme.light(languageCode: preferences.localeCode),
+      darkTheme: AppTheme.dark(languageCode: preferences.localeCode),
       themeMode: themeMode,
       locale: appLocaleFor(preferences.localeCode),
       supportedLocales: AppStrings.supportedLocales,
