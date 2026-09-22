@@ -51,6 +51,7 @@ Widget _app({
   required bool enabled,
   Locale locale = const Locale('en'),
   ThemeData? theme,
+  bool use24HourFormat = true,
 }) => ProviderScope(
   overrides: [
     initialPreferencesProvider.overrideWithValue(
@@ -79,6 +80,11 @@ Widget _app({
       AppStrings.cupertinoFallbackDelegate,
       GlobalCupertinoLocalizations.delegate,
     ],
+    builder: (BuildContext context, Widget? child) => MediaQuery(
+      data: MediaQuery.of(context)
+          .copyWith(alwaysUse24HourFormat: use24HourFormat),
+      child: child!,
+    ),
     home: const Scaffold(body: HomeScreen()),
   ),
 );
@@ -98,7 +104,8 @@ void main() {
 
     expect(find.text("Friday Prayer / Jumu'ah"), findsOneWidget);
     expect(find.text('Reminder only · no confirmation'), findsOneWidget);
-    expect(find.text('13:30'), findsOneWidget);
+    // Automatic mode deliberately mirrors the Friday Dhuhr entry.
+    expect(find.text('13:28'), findsNWidgets(2));
     expect(
       tester.getTopLeft(find.text('Dhuhr')).dy,
       lessThan(tester.getTopLeft(find.text("Friday Prayer / Jumu'ah")).dy),
@@ -122,6 +129,21 @@ void main() {
       expect(find.text("Friday Prayer / Jumu'ah"), findsNothing);
     },
   );
+
+  testWidgets('Home and Friday Prayer use the system 12-hour format', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      _app(date: '2026-09-18', enabled: true, use24HourFormat: false),
+    );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('1:28'), findsNWidgets(2));
+    expect(find.textContaining('PM'), findsWidgets);
+  });
 
   testWidgets('Friday Prayer tile fits RTL and dark mode on a narrow screen', (
     WidgetTester tester,

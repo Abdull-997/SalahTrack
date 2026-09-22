@@ -23,12 +23,6 @@ abstract interface class NotificationService {
 
   Future<bool> canScheduleExactly();
 
-  Future<bool> canUseFullScreenIntent();
-
-  Future<bool> requestFullScreenIntentPermission();
-
-  Future<void> openFullScreenIntentSettings();
-
   Future<void> schedulePrayer(
     PrayerEntry prayer,
     String prayerName, {
@@ -62,11 +56,11 @@ abstract interface class NotificationService {
     required String languageCode,
   });
 
-  /// Schedules one action-free reminder that repeats every Friday.
+  /// Schedules one action-free reminder for a specific Friday.
   Future<void> scheduleFridayPrayerReminder({
-    required DateTime firstReminderAtUtc,
+    required String localDate,
+    required DateTime reminderAtUtc,
     required String timezoneId,
-    required int hoursBefore,
     required String languageCode,
   });
 

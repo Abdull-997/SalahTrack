@@ -211,15 +211,6 @@ class FakeNotificationService implements NotificationService {
   Future<bool> canScheduleExactly() async => true;
 
   @override
-  Future<bool> canUseFullScreenIntent() async => true;
-
-  @override
-  Future<bool> requestFullScreenIntentPermission() async => true;
-
-  @override
-  Future<void> openFullScreenIntentSettings() async {}
-
-  @override
   Future<String?> takeInitialPayload() async => null;
 
   @override
@@ -300,9 +291,9 @@ class FakeNotificationService implements NotificationService {
 
   @override
   Future<void> scheduleFridayPrayerReminder({
-    required DateTime firstReminderAtUtc,
+    required String localDate,
+    required DateTime reminderAtUtc,
     required String timezoneId,
-    required int hoursBefore,
     required String languageCode,
   }) async {}
 

@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:salah_focus/app/app_providers.dart';
@@ -34,21 +32,14 @@ class PrayerReminderScreen extends ConsumerStatefulWidget {
 }
 
 class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
-  static const MethodChannel _alarmChannel = MethodChannel(
-    'salah_focus/prayer_alarm',
-  );
   PrayerEntry? _prayer;
   Object? _loadError;
   String? _actionError;
   bool _loaded = false;
   bool _working = false;
   bool _confirmed = false;
-  bool? _alarmActive;
   int _generation = 0;
   Timer? _snoozeDeadline;
-
-  bool get _android =>
-      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
   @override
   void initState() {
@@ -70,7 +61,6 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
   @override
   void dispose() {
     _snoozeDeadline?.cancel();
-    _setAlarmActive(false);
     super.dispose();
   }
 
@@ -93,17 +83,6 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
             .isBefore(prayer.trackingEndsAtUtc);
   }
 
-  // If a snooze limit or expired window removes the alternative, allow a safe
-  // exit. A reminder must never force somebody to record a prayer they did not pray.
-  bool get _mustChoose =>
-      _android &&
-      _loaded &&
-      _loadError == null &&
-      _actionError == null &&
-      !_confirmed &&
-      !_alreadySnoozed &&
-      _canSnooze;
-
   Future<void> _loadPrayer() async {
     final int generation = ++_generation;
     _snoozeDeadline?.cancel();
@@ -124,7 +103,7 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
         _prayer = entry;
         _loaded = true;
       });
-      _updateAlarmAndDeadline();
+      _updateSnoozeDeadline();
       // Let the destination render before showing the action result.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || generation != _generation || entry == null) return;
@@ -143,12 +122,10 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
         _loaded = true;
         _loadError = error;
       });
-      _setAlarmActive(false);
     }
   }
 
-  void _updateAlarmAndDeadline() {
-    _setAlarmActive(_mustChoose);
+  void _updateSnoozeDeadline() {
     _snoozeDeadline?.cancel();
     if (!_canSnooze || _prayer == null) return;
     final int minutes = ref
@@ -162,37 +139,18 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
     _snoozeDeadline = Timer(remaining, () {
       if (!mounted) return;
       setState(() {});
-      _setAlarmActive(_mustChoose);
     });
-  }
-
-  void _setAlarmActive(bool active) {
-    if (!_android || _alarmActive == active) return;
-    _alarmActive = active;
-    unawaited(_sendAlarmState(active));
-  }
-
-  Future<void> _sendAlarmState(bool active) async {
-    try {
-      await _alarmChannel.invokeMethod<void>('setAlarmActive', <String, bool>{
-        'active': active,
-      });
-    } on MissingPluginException {
-      // Widget tests and non-native hosts do not have the Android channel.
-    } on PlatformException {
-      // The actionable notification remains usable if lock-screen flags fail.
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     ref.watch(settingsControllerProvider);
-    ref.listen(settingsControllerProvider, (_, _) => _updateAlarmAndDeadline());
+    ref.listen(settingsControllerProvider, (_, _) => _updateSnoozeDeadline());
     final bool completed =
         _prayer != null &&
         (_confirmed || _prayer!.status == PrayerStatus.prayed);
     return PopScope<void>(
-      canPop: !_mustChoose && !_working,
+      canPop: !_working,
       child: Scaffold(
         appBar: completed ? null : AppBar(automaticallyImplyLeading: false),
         body: !_loaded
@@ -299,13 +257,11 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
                 const SizedBox(height: 16),
                 const CircularProgressIndicator(),
               ],
-              if (!_mustChoose) ...<Widget>[
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: _working ? null : _close,
-                  child: Text(s.t('home')),
-                ),
-              ],
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: _working ? null : _close,
+                child: Text(s.t('home')),
+              ),
             ],
           ),
         ),
@@ -314,7 +270,6 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
   }
 
   void _close() {
-    _setAlarmActive(false);
     context.go('/home');
   }
 
@@ -335,7 +290,6 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
       if (!mounted || generation != _generation) return;
       if (current == null) {
         setState(() => _prayer = null);
-        _setAlarmActive(false);
         return;
       }
       final PrayerEntry updated;
@@ -362,7 +316,6 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
         _prayer = updated;
         _confirmed = !snooze;
       });
-      _setAlarmActive(false);
       if (snooze) _close();
     } catch (error) {
       if (!mounted || generation != _generation) return;
@@ -371,11 +324,10 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
             ? AppStrings.of(context).t('snoozeUnavailable')
             : userErrorMessage(context, error),
       );
-      _setAlarmActive(false);
     } finally {
       if (mounted && generation == _generation) {
         setState(() => _working = false);
-        _updateAlarmAndDeadline();
+        _updateSnoozeDeadline();
       }
     }
   }

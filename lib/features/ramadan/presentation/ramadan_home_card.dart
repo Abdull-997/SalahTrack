@@ -124,7 +124,9 @@ class _RamadanCardContent extends ConsumerWidget {
                     label: s.t('suhur'),
                     value: s.t(
                       'suhurEndsAt',
-                      params: <String, String>{'time': s.time(localFajr)},
+                      params: <String, String>{
+                        'time': s.systemTime(context, localFajr),
+                      },
                     ),
                   ),
                 ),
@@ -135,7 +137,9 @@ class _RamadanCardContent extends ConsumerWidget {
                     label: s.t('iftar'),
                     value: s.t(
                       'iftarAt',
-                      params: <String, String>{'time': s.time(localMaghrib)},
+                      params: <String, String>{
+                        'time': s.systemTime(context, localMaghrib),
+                      },
                     ),
                   ),
                 ),

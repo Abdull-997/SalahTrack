@@ -10,7 +10,7 @@ class PrayerSettings {
     this.calculationMethodId = 3,
     this.madhhab = AsrMadhhab.standard,
     this.highLatitudeRule = HighLatitudeRule.angleBased,
-    this.gracePeriodMinutes = 60,
+    this.gracePeriodMinutes = 15,
     this.snoozeMinutes = 20,
     this.maxSnoozes = 2,
     this.softReminderAfterSkip = true,
@@ -128,7 +128,7 @@ class PrayerSettings {
       }
     }
     final int rawMethod = (json['calculationMethodId'] as num?)?.toInt() ?? 3;
-    final int rawGrace = (json['gracePeriodMinutes'] as num?)?.toInt() ?? 60;
+    final int rawGrace = (json['gracePeriodMinutes'] as num?)?.toInt() ?? 15;
     final int rawSnooze = (json['snoozeMinutes'] as num?)?.toInt() ?? 20;
     final int? rawMaxSnoozes = (json['maxSnoozes'] as num?)?.toInt();
     final String rawConfirmation =

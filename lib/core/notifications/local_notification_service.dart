@@ -33,7 +33,7 @@ class LocalNotificationService implements NotificationService {
   final String Function() _languageCode;
   String? _channelLanguage;
   static const MethodChannel _settingsChannel = MethodChannel(
-    'salah_focus/system_settings',
+    'salahtrack/system_settings',
   );
   final StreamController<String> _payloadController =
       StreamController<String>.broadcast();
@@ -49,25 +49,19 @@ class LocalNotificationService implements NotificationService {
     String languageCode, {
     bool reminder = false,
     bool soft = false,
-    bool fullScreenAllowed = true,
   }) {
     final AppStrings s = AppStrings(Locale(languageCode));
     return AndroidNotificationDetails(
-      soft ? 'prayer_reminders' : 'prayer_alarms_v2',
-      s.t(reminder ? 'prayerReminders' : 'prayerTimes'),
+      'salahtrack_prayer_reminders_v1',
+      s.t('prayerReminders'),
       channelDescription: s.t('reminderBody'),
       importance: Importance.high,
       priority: Priority.high,
-      category: soft
-          ? AndroidNotificationCategory.reminder
-          : AndroidNotificationCategory.alarm,
-      fullScreenIntent: !soft && fullScreenAllowed,
-      ongoing: !soft,
-      autoCancel: soft,
+      category: AndroidNotificationCategory.reminder,
+      ongoing: reminder && !soft,
+      autoCancel: !reminder || soft,
       visibility: NotificationVisibility.public,
-      audioAttributesUsage: soft
-          ? AudioAttributesUsage.notification
-          : AudioAttributesUsage.alarm,
+      audioAttributesUsage: AudioAttributesUsage.notification,
       actions: <AndroidNotificationAction>[
         AndroidNotificationAction(
           'mark_prayed',
@@ -87,23 +81,7 @@ class LocalNotificationService implements NotificationService {
 
   static AndroidNotificationDetails _fridayPrayerAndroidDetails(
     String languageCode,
-  ) {
-    final AppStrings s = AppStrings(Locale(languageCode));
-    return AndroidNotificationDetails(
-      'friday_prayer_reminders',
-      s.t('fridayPrayer'),
-      channelDescription: s.t('fridayPrayerHelp'),
-      importance: Importance.high,
-      priority: Priority.high,
-      category: AndroidNotificationCategory.reminder,
-      fullScreenIntent: false,
-      ongoing: false,
-      autoCancel: true,
-      visibility: NotificationVisibility.public,
-      audioAttributesUsage: AudioAttributesUsage.notification,
-      actions: const <AndroidNotificationAction>[],
-    );
-  }
+  ) => _actionFreePrayerReminderAndroidDetails(languageCode);
 
   static AndroidNotificationDetails _ramadanAndroidDetails(
     String languageCode,
@@ -116,7 +94,6 @@ class LocalNotificationService implements NotificationService {
       importance: Importance.high,
       priority: Priority.high,
       category: AndroidNotificationCategory.reminder,
-      fullScreenIntent: false,
       ongoing: false,
       autoCancel: true,
       visibility: NotificationVisibility.public,
@@ -130,13 +107,12 @@ class LocalNotificationService implements NotificationService {
   ) {
     final AppStrings s = AppStrings(Locale(languageCode));
     return AndroidNotificationDetails(
-      'prayer_reminders',
+      'salahtrack_prayer_reminders_v1',
       s.t('prayerReminders'),
       channelDescription: s.t('reminderBody'),
       importance: Importance.high,
       priority: Priority.high,
       category: AndroidNotificationCategory.reminder,
-      fullScreenIntent: false,
       ongoing: false,
       autoCancel: true,
       visibility: NotificationVisibility.public,
@@ -253,31 +229,27 @@ class LocalNotificationService implements NotificationService {
           .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin
           >();
-      for (final bool soft in <bool>[false, true]) {
-        final AndroidNotificationDetails details = _androidDetails(
-          languageCode,
-          reminder: true,
-          soft: soft,
-        );
-        await android?.createNotificationChannel(
-          AndroidNotificationChannel(
-            details.channelId,
-            details.channelName,
-            description: details.channelDescription,
-            importance: Importance.high,
-            audioAttributesUsage: details.audioAttributesUsage,
-          ),
-        );
+      // These pre-release channels belonged to the retired alarm-style
+      // presentation. Android persists channel settings, so never reuse them
+      // for the production standard-notification architecture.
+      for (final String obsoleteChannelId in <String>[
+        'prayer_alarms_v2',
+        'prayer_reminders',
+        'friday_prayer_reminders',
+      ]) {
+        await android?.deleteNotificationChannel(channelId: obsoleteChannelId);
       }
-      final AndroidNotificationDetails fridayDetails =
-          _fridayPrayerAndroidDetails(languageCode);
+      final AndroidNotificationDetails prayerDetails = _androidDetails(
+        languageCode,
+      );
       await android?.createNotificationChannel(
         AndroidNotificationChannel(
-          fridayDetails.channelId,
-          fridayDetails.channelName,
-          description: fridayDetails.channelDescription,
+          prayerDetails.channelId,
+          prayerDetails.channelName,
+          description: prayerDetails.channelDescription,
           importance: Importance.high,
-          audioAttributesUsage: fridayDetails.audioAttributesUsage,
+          audioAttributesUsage: prayerDetails.audioAttributesUsage,
+          enableVibration: true,
         ),
       );
       final AndroidNotificationDetails ramadanDetails = _ramadanAndroidDetails(
@@ -369,36 +341,6 @@ class LocalNotificationService implements NotificationService {
   Future<void> openExactAlarmSettings() =>
       _openSettings('openExactAlarmSettings');
 
-  @override
-  Future<void> openFullScreenIntentSettings() =>
-      _openSettings('openFullScreenIntentSettings');
-
-  @override
-  Future<bool> canUseFullScreenIntent() async {
-    if (defaultTargetPlatform != TargetPlatform.android) return true;
-    try {
-      return await _settingsChannel.invokeMethod<bool>(
-            'canUseFullScreenIntent',
-          ) ??
-          false;
-    } on MissingPluginException {
-      return false;
-    } on PlatformException {
-      return false;
-    }
-  }
-
-  @override
-  Future<bool> requestFullScreenIntentPermission() async {
-    await initialize();
-    if (!Platform.isAndroid) return true;
-    final android = _plugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
-    return await android?.requestFullScreenIntentPermission() ?? false;
-  }
-
   Future<void> _openSettings(String method) async {
     if (defaultTargetPlatform == TargetPlatform.android) {
       try {
@@ -438,7 +380,6 @@ class LocalNotificationService implements NotificationService {
     String prayerName, {
     required String languageCode,
   }) async {
-    final bool fullScreenAllowed = await canUseFullScreenIntent();
     await _schedule(
       id: NotificationIds.prayer(prayer),
       whenUtc: prayer.scheduledAtUtc,
@@ -446,10 +387,7 @@ class LocalNotificationService implements NotificationService {
       title: _text(languageCode, 'prayerTitle', prayerName),
       body: _text(languageCode, 'prayerBody', prayerName),
       details: NotificationDetails(
-        android: _androidDetails(
-          languageCode,
-          fullScreenAllowed: fullScreenAllowed,
-        ),
+        android: _androidDetails(languageCode),
         iOS: _darwinDetails(languageCode),
       ),
       payload: PrayerNotificationPayload(prayerId: prayer.id).encode(),
@@ -462,7 +400,6 @@ class LocalNotificationService implements NotificationService {
     String prayerName, {
     required String languageCode,
   }) async {
-    final bool fullScreenAllowed = await canUseFullScreenIntent();
     await _schedule(
       id: NotificationIds.grace(prayer),
       whenUtc: prayer.graceEndsAtUtc,
@@ -470,11 +407,7 @@ class LocalNotificationService implements NotificationService {
       title: _text(languageCode, 'graceTitle', prayerName),
       body: _text(languageCode, 'graceBody', prayerName),
       details: NotificationDetails(
-        android: _androidDetails(
-          languageCode,
-          reminder: true,
-          fullScreenAllowed: fullScreenAllowed,
-        ),
+        android: _androidDetails(languageCode, reminder: true),
         iOS: _darwinDetails(languageCode),
       ),
       payload: PrayerNotificationPayload(
@@ -494,7 +427,6 @@ class LocalNotificationService implements NotificationService {
     if (when == null) {
       return;
     }
-    final bool fullScreenAllowed = await canUseFullScreenIntent();
     final bool scheduled = await _schedule(
       id: NotificationIds.snooze(prayer),
       whenUtc: when,
@@ -502,11 +434,7 @@ class LocalNotificationService implements NotificationService {
       title: _text(languageCode, 'snoozeTitle', prayerName),
       body: _text(languageCode, 'snoozeBody', prayerName),
       details: NotificationDetails(
-        android: _androidDetails(
-          languageCode,
-          reminder: true,
-          fullScreenAllowed: fullScreenAllowed,
-        ),
+        android: _androidDetails(languageCode, reminder: true),
         iOS: _darwinDetails(languageCode),
       ),
       payload: PrayerNotificationPayload(
@@ -587,36 +515,26 @@ class LocalNotificationService implements NotificationService {
 
   @override
   Future<void> scheduleFridayPrayerReminder({
-    required DateTime firstReminderAtUtc,
+    required String localDate,
+    required DateTime reminderAtUtc,
     required String timezoneId,
-    required int hoursBefore,
     required String languageCode,
   }) async {
-    if (hoursBefore != 1 && hoursBefore != 2) {
-      throw ArgumentError.value(
-        hoursBefore,
-        'hoursBefore',
-        'Friday Prayer reminders must be one or two hours early.',
-      );
-    }
     final AppStrings s = AppStrings(Locale(languageCode));
     await _schedule(
-      id: NotificationIds.fridayPrayer(hoursBefore),
-      whenUtc: firstReminderAtUtc,
+      id: NotificationIds.fridayPrayer(localDate),
+      whenUtc: reminderAtUtc,
       timezoneId: timezoneId,
       title: s.t('fridayPrayer'),
-      body: s.t(
-        hoursBefore == 2 ? 'fridayPrayerInTwoHours' : 'fridayPrayerInOneHour',
-      ),
+      body: s.t('fridayPrayerInOneHour'),
       details: NotificationDetails(
         android: _fridayPrayerAndroidDetails(languageCode),
         iOS: _actionFreeDarwinDetails,
       ),
       payload: PrayerNotificationPayload(
-        prayerId: 'friday-prayer-$hoursBefore-hours',
+        prayerId: 'friday-prayer-$localDate',
         kind: 'fridayPrayer',
       ).encode(),
-      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
   }
 
@@ -893,8 +811,8 @@ class LocalNotificationService implements NotificationService {
     }
     // Fixed IDs also replace/cancel notifications created by older payload
     // versions or already delivered by the operating system.
-    await _plugin.cancel(id: NotificationIds.fridayPrayer(2));
-    await _plugin.cancel(id: NotificationIds.fridayPrayer(1));
+    await _plugin.cancel(id: 1800000001);
+    await _plugin.cancel(id: 1800000002);
   }
 
   @override

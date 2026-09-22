@@ -10,6 +10,7 @@ import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_state_machine.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_times_repository.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 
 class PrayerCoordinator {
@@ -118,6 +119,46 @@ class PrayerCoordinator {
 
       return updatedDay;
     });
+  }
+
+  /// Returns calculated Dhuhr entries for the upcoming Fridays. These entries
+  /// drive automatic Jumu'ah time and are never converted into separate prayer
+  /// history records.
+  Future<List<PrayerEntry>> upcomingFridayDhuhrs({
+    required UserLocation location,
+    required PrayerSettings settings,
+    DateTime? nowUtc,
+    int horizonDays = 42,
+  }) async {
+    final DateTime now = (nowUtc ?? _clock.nowUtc()).toUtc();
+    final DateTime localNow = TimezoneService.toLocal(now, location.timezoneId);
+    final DateTime start = DateTime(
+      localNow.year,
+      localNow.month,
+      localNow.day,
+    );
+    final DateTime end = start.add(Duration(days: horizonDays));
+    DateTime cursor = DateTime(start.year, start.month);
+    final DateTime endMonth = DateTime(end.year, end.month);
+    while (!cursor.isAfter(endMonth)) {
+      await _ensureMonth(
+        year: cursor.year,
+        month: cursor.month,
+        location: location,
+        settings: settings,
+      );
+      cursor = DateTime(cursor.year, cursor.month + 1);
+    }
+
+    final List<PrayerEntry> entries = await _repository.entriesBetween(
+      _isoDate(start),
+      _isoDate(end),
+    );
+    return entries.where((PrayerEntry entry) {
+      final DateTime? localDate = DateTime.tryParse(entry.localDate);
+      return entry.type == PrayerType.dhuhr &&
+          localDate?.weekday == DateTime.friday;
+    }).toList();
   }
 
   Future<PrayerDay?> _resolveCurrentDay(DateTime nowUtc) async {

@@ -1,11 +1,13 @@
 import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
 import 'package:salah_focus/features/prayer_times/domain/friday_prayer_settings.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 
-/// Owns the two weekly, reminder-only Friday Prayer notifications.
+/// Owns the action-free reminder scheduled one hour before Jumu'ah.
 ///
-/// These reminders deliberately never create a prayer database entry and
-/// therefore cannot enter the daily confirmation or tracking state machine.
+/// Each refresh replaces every pending Friday reminder. Calculated Friday
+/// Dhuhr entries are supplied by [PrayerCoordinator], so automatic mode stays
+/// tied to the current location, calculation settings and timezone.
 class FridayPrayerReminderPlanner {
   FridayPrayerReminderPlanner(this._notifications);
 
@@ -14,14 +16,14 @@ class FridayPrayerReminderPlanner {
 
   Future<void> reschedule(
     FridayPrayerSettings settings, {
-    required String timezoneId,
+    required List<PrayerEntry> fridayDhuhrEntries,
     required String languageCode,
     DateTime? nowUtc,
   }) {
     final Future<void> result = _pendingReschedule.then(
       (_) => _reschedule(
         settings,
-        timezoneId: timezoneId,
+        fridayDhuhrEntries: fridayDhuhrEntries,
         languageCode: languageCode,
         nowUtc: nowUtc,
       ),
@@ -35,75 +37,45 @@ class FridayPrayerReminderPlanner {
 
   Future<void> _reschedule(
     FridayPrayerSettings settings, {
-    required String timezoneId,
+    required List<PrayerEntry> fridayDhuhrEntries,
     required String languageCode,
     DateTime? nowUtc,
   }) async {
     await _notifications.cancelAllFridayPrayerNotifications();
-    if (!settings.enabled || !await _notifications.notificationsAllowed()) {
+    if (!settings.enabled ||
+        fridayDhuhrEntries.isEmpty ||
+        !await _notifications.notificationsAllowed()) {
       return;
     }
 
     final DateTime now = (nowUtc ?? DateTime.now()).toUtc();
-    for (final int hoursBefore in <int>[2, 1]) {
+    final Set<String> scheduledDates = <String>{};
+    for (final PrayerEntry dhuhr in fridayDhuhrEntries) {
+      if (!scheduledDates.add(dhuhr.localDate)) continue;
+      final DateTime effectiveJumuahUtc = settings.usesDhuhrTime
+          ? dhuhr.scheduledAtUtc
+          : TimezoneService.localPartsToUtc(
+              dateIso: dhuhr.localDate,
+              hhmm: _hhmm(settings.manualMinutesFromMidnight!),
+              timezoneId: dhuhr.timezoneId,
+            );
+      final DateTime reminderAtUtc = effectiveJumuahUtc.subtract(
+        const Duration(hours: 1),
+      );
+      if (!reminderAtUtc.isAfter(now)) continue;
       await _notifications.scheduleFridayPrayerReminder(
-        firstReminderAtUtc: _nextReminderUtc(
-          settings,
-          hoursBefore: hoursBefore,
-          timezoneId: timezoneId,
-          nowUtc: now,
-        ),
-        timezoneId: timezoneId,
-        hoursBefore: hoursBefore,
+        localDate: dhuhr.localDate,
+        reminderAtUtc: reminderAtUtc,
+        timezoneId: dhuhr.timezoneId,
         languageCode: languageCode,
       );
     }
   }
 
-  static DateTime _nextReminderUtc(
-    FridayPrayerSettings settings, {
-    required int hoursBefore,
-    required String timezoneId,
-    required DateTime nowUtc,
-  }) {
-    final DateTime localNow = TimezoneService.toLocal(nowUtc, timezoneId);
-    final DateTime localDate = DateTime(
-      localNow.year,
-      localNow.month,
-      localNow.day,
-    );
-    final int daysUntilFriday =
-        (DateTime.friday - localDate.weekday) % DateTime.daysPerWeek;
-    DateTime fridayDate = localDate.add(Duration(days: daysUntilFriday));
-    DateTime reminderUtc = _reminderOn(
-      fridayDate,
-      settings,
-      hoursBefore: hoursBefore,
-      timezoneId: timezoneId,
-    );
-    if (!reminderUtc.isAfter(nowUtc)) {
-      fridayDate = fridayDate.add(const Duration(days: DateTime.daysPerWeek));
-      reminderUtc = _reminderOn(
-        fridayDate,
-        settings,
-        hoursBefore: hoursBefore,
-        timezoneId: timezoneId,
-      );
-    }
-    return reminderUtc;
+  static String _hhmm(int minutesFromMidnight) {
+    final int hour = minutesFromMidnight ~/ 60;
+    final int minute = minutesFromMidnight % 60;
+    return '${hour.toString().padLeft(2, '0')}:'
+        '${minute.toString().padLeft(2, '0')}';
   }
-
-  static DateTime _reminderOn(
-    DateTime fridayDate,
-    FridayPrayerSettings settings, {
-    required int hoursBefore,
-    required String timezoneId,
-  }) => TimezoneService.localPartsToUtc(
-    dateIso:
-        '${fridayDate.year.toString().padLeft(4, '0')}-'
-        '${fridayDate.month.toString().padLeft(2, '0')}-'
-        '${fridayDate.day.toString().padLeft(2, '0')}',
-    hhmm: settings.hhmm,
-    timezoneId: timezoneId,
-  ).subtract(Duration(hours: hoursBefore));
 }

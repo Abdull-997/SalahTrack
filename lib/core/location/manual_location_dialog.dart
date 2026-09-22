@@ -6,6 +6,7 @@ import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/location/country_names.dart';
 import 'package:salah_focus/core/location/manual_location_lookup.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ManualLocationDialog extends StatefulWidget {
   const ManualLocationDialog({
@@ -381,12 +382,26 @@ class _CityPickerState extends State<_CityPicker> {
                     ),
             ),
             const Divider(height: 1),
-            const Padding(
-              padding: EdgeInsets.only(top: 6),
-              child: Text(
-                '© OpenStreetMap contributors',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 11),
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Semantics(
+                link: true,
+                child: InkWell(
+                  key: const ValueKey<String>('openstreetmap-attribution'),
+                  onTap: () => launchUrl(
+                    Uri.parse('https://www.openstreetmap.org/copyright'),
+                    mode: LaunchMode.externalApplication,
+                  ),
+                  borderRadius: BorderRadius.circular(4),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    child: Text(
+                      '© OpenStreetMap contributors',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 11),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

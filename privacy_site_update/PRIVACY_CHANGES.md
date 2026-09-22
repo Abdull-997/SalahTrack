@@ -67,7 +67,7 @@ After copying this directory into the website repository and publishing:
 1. Open `index.html` and each `privacy-xx.html` URL on mobile and desktop.
 2. Confirm every language selector link returns HTTP 200.
 3. Confirm `ar`, `fa`, `pa`, `ps`, and `ur` have `dir="rtl"`.
-4. Search the published output for `SalahFocus` and confirm there are no hits.
+4. Search the published output for obsolete product branding and confirm there are no hits.
 5. Confirm `Photon`, `OpenStreetMap`, `api.aladhan.com`, the provider address,
    and `mailto:ar830222@gmail.com` appear as intended.
 6. Validate the HTML and test light/dark mode and keyboard navigation.

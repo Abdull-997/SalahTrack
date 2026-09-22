@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,7 +41,6 @@ const List<String> _allCategoryHelpKeys = <String>[
   'ramadanHistoryPreserved',
   'notificationPermissionHelp',
   'exactAlarmPermissionHelp',
-  'fullScreenAlarmPermissionHelp',
   'systemThemeHelp',
   'lightThemeHelp',
   'darkThemeHelp',
@@ -73,7 +71,6 @@ const List<_HelpCategory> _helpCategories = <_HelpCategory>[
     helpKeys: <String>[
       'notificationPermissionHelp',
       'exactAlarmPermissionHelp',
-      'fullScreenAlarmPermissionHelp',
     ],
   ),
   (
@@ -274,46 +271,4 @@ void main() {
       },
     );
   }
-
-  testWidgets(
-    'permission category help includes full-screen permission when it appears',
-    (WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.android;
-      addTearDown(() => debugDefaultTargetPlatformOverride = null);
-      await tester.pumpWidget(const _AndroidSettingsHelpApp());
-      await tester.pumpAndSettle();
-      final Finder permissionInfo = find.byKey(
-        const ValueKey<String>('settings-info-permissions'),
-      );
-      await tester.scrollUntilVisible(permissionInfo, 250);
-      await tester.pumpAndSettle();
-      await tester.tap(permissionInfo.hitTestable());
-      await tester.pumpAndSettle();
-      final AppStrings s = AppStrings(const Locale('en'));
-      final Finder dialog = find.byType(AlertDialog);
-      expect(
-        find.descendant(
-          of: dialog,
-          matching: find.text(s.t('fullScreenAlarmPermissionHelp')),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: dialog,
-          matching: find.text(s.t('gracePeriodHelp')),
-        ),
-        findsNothing,
-      );
-      expect(tester.takeException(), isNull);
-      debugDefaultTargetPlatformOverride = null;
-    },
-  );
-}
-
-class _AndroidSettingsHelpApp extends StatelessWidget {
-  const _AndroidSettingsHelpApp();
-
-  @override
-  Widget build(BuildContext context) => _app(const Locale('en'));
 }

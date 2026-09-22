@@ -1,38 +1,50 @@
 class FridayPrayerSettings {
   const FridayPrayerSettings({
     this.enabled = false,
-    this.minutesFromMidnight = 13 * 60 + 30,
+    this.manualMinutesFromMidnight,
   });
 
   final bool enabled;
 
-  /// The mosque-provided local Friday Prayer time.
-  final int minutesFromMidnight;
+  /// A mosque-provided local Friday Prayer time. When null, the calculated
+  /// Dhuhr time for each Friday remains the source of truth.
+  final int? manualMinutesFromMidnight;
 
-  int get hour => minutesFromMidnight ~/ 60;
-  int get minute => minutesFromMidnight % 60;
+  bool get usesDhuhrTime => manualMinutesFromMidnight == null;
 
-  String get hhmm =>
-      '${hour.toString().padLeft(2, '0')}:'
-      '${minute.toString().padLeft(2, '0')}';
+  int effectiveMinutesFromMidnight(int dhuhrMinutesFromMidnight) =>
+      manualMinutesFromMidnight ?? dhuhrMinutesFromMidnight;
 
-  FridayPrayerSettings copyWith({bool? enabled, int? minutesFromMidnight}) =>
-      FridayPrayerSettings(
-        enabled: enabled ?? this.enabled,
-        minutesFromMidnight: minutesFromMidnight ?? this.minutesFromMidnight,
-      );
+  FridayPrayerSettings copyWith({
+    bool? enabled,
+    int? manualMinutesFromMidnight,
+    bool useDhuhrTime = false,
+  }) => FridayPrayerSettings(
+    enabled: enabled ?? this.enabled,
+    manualMinutesFromMidnight: useDhuhrTime
+        ? null
+        : manualMinutesFromMidnight ?? this.manualMinutesFromMidnight,
+  );
 
   Map<String, Object?> toJson() => <String, Object?>{
     'enabled': enabled,
-    'minutesFromMidnight': minutesFromMidnight,
+    'manualMinutesFromMidnight': manualMinutesFromMidnight,
   };
 
   factory FridayPrayerSettings.fromJson(Map<String, Object?> json) {
-    final int rawMinutes =
-        (json['minutesFromMidnight'] as num?)?.toInt() ?? 13 * 60 + 30;
+    int? manualMinutes = (json['manualMinutesFromMidnight'] as num?)?.toInt();
+    if (!json.containsKey('manualMinutesFromMidnight')) {
+      // Legacy builds always serialized the old 13:30 placeholder, even when
+      // the user never edited it. Treat that placeholder as "automatic" while
+      // preserving every distinguishable mosque-specific legacy value.
+      final int? legacyMinutes = (json['minutesFromMidnight'] as num?)?.toInt();
+      if (legacyMinutes != null && legacyMinutes != 13 * 60 + 30) {
+        manualMinutes = legacyMinutes;
+      }
+    }
     return FridayPrayerSettings(
       enabled: (json['enabled'] as bool?) ?? false,
-      minutesFromMidnight: rawMinutes.clamp(0, 24 * 60 - 1),
+      manualMinutesFromMidnight: manualMinutes?.clamp(0, 24 * 60 - 1),
     );
   }
 
@@ -41,8 +53,8 @@ class FridayPrayerSettings {
       identical(this, other) ||
       other is FridayPrayerSettings &&
           enabled == other.enabled &&
-          minutesFromMidnight == other.minutesFromMidnight;
+          manualMinutesFromMidnight == other.manualMinutesFromMidnight;
 
   @override
-  int get hashCode => Object.hash(enabled, minutesFromMidnight);
+  int get hashCode => Object.hash(enabled, manualMinutesFromMidnight);
 }

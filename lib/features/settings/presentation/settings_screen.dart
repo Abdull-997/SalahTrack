@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salah_focus/app/app_providers.dart';
@@ -124,7 +123,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   key: const ValueKey<String>('friday-prayer-enabled'),
                   secondary: const Icon(Icons.mosque_outlined),
                   title: Text(s.t('fridayPrayer')),
-                  subtitle: Text(_fridayPrayerTime(s, settings.fridayPrayer)),
+                  subtitle: Text(_fridayPrayerTime(settings.fridayPrayer)),
                   value: settings.fridayPrayer.enabled,
                   onChanged: _working
                       ? null
@@ -142,12 +141,71 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     key: const ValueKey<String>('friday-prayer-time'),
                     leading: const Icon(Icons.access_time_rounded),
                     title: Text(s.t('fridayPrayerTime')),
-                    subtitle: Text(_fridayPrayerTime(s, settings.fridayPrayer)),
+                    subtitle: Text(_fridayPrayerTime(settings.fridayPrayer)),
                     trailing: const Icon(Icons.edit_outlined),
                     onTap: _working
                         ? null
                         : () => _chooseFridayPrayerTime(settings),
                   ),
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      18,
+                      4,
+                      18,
+                      14,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Icon(
+                          Icons.info_outline_rounded,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            s.t('fridayPrayerMosqueNote'),
+                            key: const ValueKey<String>(
+                              'friday-prayer-mosque-note',
+                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                  height: 1.4,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (!settings.fridayPrayer.usesDhuhrTime)
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                          12,
+                          0,
+                          12,
+                          10,
+                        ),
+                        child: TextButton.icon(
+                          key: const ValueKey<String>('friday-prayer-auto'),
+                          onPressed: _working
+                              ? null
+                              : () => _savePrayerSettings(
+                                  settings.copyWith(
+                                    fridayPrayer: settings.fridayPrayer
+                                        .copyWith(useDhuhrTime: true),
+                                  ),
+                                ),
+                          icon: const Icon(Icons.restart_alt_rounded),
+                          label: Text(s.t('useDhuhrTime')),
+                        ),
+                      ),
+                    ),
                 ],
               ],
             ),
@@ -179,17 +237,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: _working ? null : _requestExactAlarms,
                 ),
-                if (!kIsWeb &&
-                    defaultTargetPlatform ==
-                        TargetPlatform.android) ...<Widget>[
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.fullscreen_rounded),
-                    title: Text(s.t('fullScreenAlarmPermission')),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: _working ? null : _requestFullScreenAlarms,
-                  ),
-                ],
               ],
             ),
           ),
@@ -607,11 +654,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           title: s.t('exactAlarmPermission'),
           description: s.t('exactAlarmPermissionHelp'),
         ),
-        if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
-          _SettingsHelpItem(
-            title: s.t('fullScreenAlarmPermission'),
-            description: s.t('fullScreenAlarmPermissionHelp'),
-          ),
       ];
 
   List<_SettingsHelpItem> _reminderHelpItems(AppStrings s) =>
@@ -858,11 +900,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _chooseFridayPrayerTime(PrayerSettings current) async {
     final FridayPrayerSettings fridayPrayer = current.fridayPrayer;
     final AppStrings s = AppStrings.of(context);
+    int initialMinutes = fridayPrayer.manualMinutesFromMidnight ?? 12 * 60;
+    final UserLocation? location = ref
+        .read(settingsControllerProvider)
+        .location;
+    if (fridayPrayer.usesDhuhrTime && location != null) {
+      try {
+        final List<PrayerEntry> entries = await ref
+            .read(prayerCoordinatorProvider)
+            .upcomingFridayDhuhrs(
+              location: location,
+              settings: current,
+              nowUtc: ref.read(clockServiceProvider).nowUtc(),
+            );
+        if (entries.isNotEmpty) {
+          final DateTime local = TimezoneService.toLocal(
+            entries.first.scheduledAtUtc,
+            entries.first.timezoneId,
+          );
+          initialMinutes = local.hour * 60 + local.minute;
+        }
+      } on Object {
+        // The editor remains usable offline with a neutral local-time fallback.
+      }
+    }
+    if (!mounted) return;
     final TimeOfDay? selected = await showTimePicker(
       context: context,
       initialTime: TimeOfDay(
-        hour: fridayPrayer.hour,
-        minute: fridayPrayer.minute,
+        hour: initialMinutes ~/ 60,
+        minute: initialMinutes % 60,
       ),
       helpText: s.t('fridayPrayerTime'),
       cancelText: s.t('cancel'),
@@ -872,7 +939,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await _savePrayerSettings(
       current.copyWith(
         fridayPrayer: fridayPrayer.copyWith(
-          minutesFromMidnight: selected.hour * 60 + selected.minute,
+          manualMinutesFromMidnight: selected.hour * 60 + selected.minute,
         ),
       ),
     );
@@ -982,11 +1049,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final DateTime previewUtc = entry.scheduledAtUtc.add(
       Duration(minutes: adjustment - entry.manualOffsetMinutes),
     );
-    return strings.time(TimezoneService.toLocal(previewUtc, entry.timezoneId));
+    return strings.systemTime(
+      context,
+      TimezoneService.toLocal(previewUtc, entry.timezoneId),
+    );
   }
 
-  String _fridayPrayerTime(AppStrings strings, FridayPrayerSettings settings) =>
-      strings.time(DateTime(2000, 1, 1, settings.hour, settings.minute));
+  String _fridayPrayerTime(FridayPrayerSettings settings) {
+    final AppStrings strings = AppStrings.of(context);
+    final int? manual = settings.manualMinutesFromMidnight;
+    if (manual == null) return strings.t('fridayPrayerAutomatic');
+    return strings.systemTime(
+      context,
+      DateTime(2000, 1, 1, manual ~/ 60, manual % 60),
+    );
+  }
 
   Future<void> _chooseMaxSnoozes(PrayerSettings current) async {
     final int? value = await showDialog<int>(
@@ -1085,15 +1162,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  Future<void> _requestFullScreenAlarms() async {
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        builder: (_) => const NotificationSettingsScreen.fullScreenAlarms(),
-      ),
-    );
-    if (mounted) ref.invalidate(todayPrayerDayProvider);
-  }
-
   Future<void> _saveRamadanSettings(RamadanSettings settings) async {
     await ref
         .read(settingsControllerProvider.notifier)
@@ -1152,23 +1220,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _syncFridayPrayerReminders() async {
     final preferences = ref.read(settingsControllerProvider);
+    List<PrayerEntry> fridayDhuhrs = const <PrayerEntry>[];
     try {
-      PrayerDay? today = ref.read(todayPrayerDayProvider).value;
-      if (today == null && preferences.location != null) {
-        try {
-          today = await ref.read(todayPrayerDayProvider.future);
-        } on Object {
-          // Cached location time zone remains a usable offline fallback.
-        }
+      final UserLocation? location = preferences.location;
+      if (preferences.prayerSettings.fridayPrayer.enabled && location != null) {
+        fridayDhuhrs = await ref
+            .read(prayerCoordinatorProvider)
+            .upcomingFridayDhuhrs(
+              location: location,
+              settings: preferences.prayerSettings,
+              nowUtc: ref.read(clockServiceProvider).nowUtc(),
+            );
       }
       await ref
           .read(fridayPrayerReminderPlannerProvider)
           .reschedule(
             preferences.prayerSettings.fridayPrayer,
-            timezoneId:
-                today?.timezoneId ??
-                preferences.location?.timezoneId ??
-                ref.read(deviceTimezoneIdProvider),
+            fridayDhuhrEntries: fridayDhuhrs,
             languageCode: preferences.localeCode,
             nowUtc: ref.read(clockServiceProvider).nowUtc(),
           );

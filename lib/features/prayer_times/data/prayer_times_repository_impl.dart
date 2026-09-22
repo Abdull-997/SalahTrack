@@ -119,15 +119,11 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
         } else {
           trackingEnd = current.instantUtc.add(const Duration(hours: 12));
         }
-        final DateTime rawGrace = current.instantUtc.add(
-          Duration(minutes: settings.gracePeriodMinutes),
+        final DateTime graceEnd = calculateGraceEnd(
+          scheduledAtUtc: current.instantUtc,
+          trackingEndsAtUtc: trackingEnd,
+          gracePeriodMinutes: settings.gracePeriodMinutes,
         );
-        final DateTime latestGrace = trackingEnd.subtract(
-          const Duration(minutes: 1),
-        );
-        final DateTime graceEnd = rawGrace.isBefore(latestGrace)
-            ? rawGrace
-            : latestGrace;
         entries.add(
           PrayerEntry(
             id: '${day.localDate}:${current.type.name}',
@@ -208,15 +204,11 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
       return;
     }
 
-    final DateTime latestGrace = fajr.scheduledAtUtc.subtract(
-      const Duration(minutes: 1),
+    final DateTime graceEnd = calculateGraceEnd(
+      scheduledAtUtc: isha.scheduledAtUtc,
+      trackingEndsAtUtc: fajr.scheduledAtUtc,
+      gracePeriodMinutes: settings.gracePeriodMinutes,
     );
-    final DateTime requestedGrace = isha.scheduledAtUtc.add(
-      Duration(minutes: settings.gracePeriodMinutes),
-    );
-    final DateTime graceEnd = requestedGrace.isBefore(latestGrace)
-        ? requestedGrace
-        : latestGrace;
 
     PrayerStatus status = isha.status;
     bool clearSnooze = false;
@@ -251,6 +243,22 @@ class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
     return '${shifted.year.toString().padLeft(4, '0')}-'
         '${shifted.month.toString().padLeft(2, '0')}-'
         '${shifted.day.toString().padLeft(2, '0')}';
+  }
+
+  /// Computes the grace reminder boundary used for newly scheduled prayers.
+  /// The final minute remains reserved for the transition to the next prayer.
+  static DateTime calculateGraceEnd({
+    required DateTime scheduledAtUtc,
+    required DateTime trackingEndsAtUtc,
+    required int gracePeriodMinutes,
+  }) {
+    final DateTime requestedGrace = scheduledAtUtc.add(
+      Duration(minutes: gracePeriodMinutes),
+    );
+    final DateTime latestGrace = trackingEndsAtUtc.subtract(
+      const Duration(minutes: 1),
+    );
+    return requestedGrace.isBefore(latestGrace) ? requestedGrace : latestGrace;
   }
 
   @override

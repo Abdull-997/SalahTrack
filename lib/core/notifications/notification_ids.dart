@@ -14,8 +14,11 @@ class NotificationIds {
   static int soft(PrayerEntry entry) => _base(entry) + 4;
   static int oneHourRemaining(PrayerEntry entry) => _base(entry) + 6;
 
-  static int fridayPrayer(int hoursBefore) =>
-      1800000000 + (hoursBefore == 2 ? 1 : 2);
+  static int fridayPrayer(String localDate) {
+    final String compact = localDate.replaceAll('-', '');
+    final int date = int.tryParse(compact.substring(2)) ?? 0;
+    return 1800000000 + date;
+  }
 
   static int ramadan(String localDate, {required bool iftar}) {
     final String compact = localDate.replaceAll('-', '');

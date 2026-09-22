@@ -4,11 +4,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:salah_focus/core/notifications/friday_prayer_reminder_planner.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/features/prayer_times/domain/friday_prayer_settings.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 
 typedef _ScheduledFridayReminder = ({
-  DateTime firstReminderAtUtc,
+  String localDate,
+  DateTime reminderAtUtc,
   String timezoneId,
-  int hoursBefore,
   String languageCode,
 });
 
@@ -32,9 +35,9 @@ class _Notifications implements NotificationService {
 
   @override
   Future<void> scheduleFridayPrayerReminder({
-    required DateTime firstReminderAtUtc,
+    required String localDate,
+    required DateTime reminderAtUtc,
     required String timezoneId,
-    required int hoursBefore,
     required String languageCode,
   }) async {
     scheduleCalls++;
@@ -43,9 +46,9 @@ class _Notifications implements NotificationService {
       await firstScheduleGate!.future;
     }
     fridayReminders.add((
-      firstReminderAtUtc: firstReminderAtUtc,
+      localDate: localDate,
+      reminderAtUtc: reminderAtUtc,
       timezoneId: timezoneId,
-      hoursBefore: hoursBefore,
       languageCode: languageCode,
     ));
   }
@@ -54,14 +57,35 @@ class _Notifications implements NotificationService {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+PrayerEntry _dhuhr(String date, int hour, int minute) {
+  final int day = int.parse(date.substring(8));
+  return PrayerEntry(
+    id: '$date-dhuhr',
+    localDate: date,
+    type: PrayerType.dhuhr,
+    scheduledAtUtc: DateTime.utc(2026, 9, day, hour, minute),
+    timezoneId: 'UTC',
+    graceEndsAtUtc: DateTime.utc(
+      2026,
+      9,
+      day,
+      hour,
+      minute,
+    ).add(const Duration(minutes: 15)),
+    trackingEndsAtUtc: DateTime.utc(2026, 9, day, 23),
+    status: PrayerStatus.pending,
+  );
+}
+
 void main() {
-  const FridayPrayerSettings enabled = FridayPrayerSettings(
+  const FridayPrayerSettings automatic = FridayPrayerSettings(enabled: true);
+  const FridayPrayerSettings manual1330 = FridayPrayerSettings(
     enabled: true,
-    minutesFromMidnight: 13 * 60 + 30,
+    manualMinutesFromMidnight: 13 * 60 + 30,
   );
 
   test(
-    'schedules exactly two weekly Friday reminders one and two hours early',
+    'automatic Jumuah uses each Friday Dhuhr and schedules one hour early',
     () async {
       final _Notifications notifications = _Notifications();
       final FridayPrayerReminderPlanner planner = FridayPrayerReminderPlanner(
@@ -69,121 +93,127 @@ void main() {
       );
 
       await planner.reschedule(
-        enabled,
-        timezoneId: 'UTC',
+        automatic,
+        fridayDhuhrEntries: <PrayerEntry>[
+          _dhuhr('2026-09-18', 13, 28),
+          _dhuhr('2026-09-25', 13, 20),
+        ],
         languageCode: 'en',
         nowUtc: DateTime.utc(2026, 9, 14, 10),
       );
 
       expect(notifications.cancellations, 1);
-      expect(notifications.fridayReminders, hasLength(2));
       expect(
-        notifications.fridayReminders.map((item) => item.hoursBefore),
-        <int>[2, 1],
-      );
-      expect(
-        notifications.fridayReminders.map((item) => item.firstReminderAtUtc),
+        notifications.fridayReminders.map((item) => item.reminderAtUtc),
         <DateTime>[
-          DateTime.utc(2026, 9, 18, 11, 30),
-          DateTime.utc(2026, 9, 18, 12, 30),
+          DateTime.utc(2026, 9, 18, 12, 28),
+          DateTime.utc(2026, 9, 25, 12, 20),
         ],
-      );
-      expect(
-        notifications.fridayReminders.every(
-          (item) => item.firstReminderAtUtc.weekday == DateTime.friday,
-        ),
-        isTrue,
       );
     },
   );
 
-  test('disabling cancels both reminders and schedules nothing', () async {
+  test('13:30 and 12:45 manual Jumuah schedule at 12:30 and 11:45', () async {
     final _Notifications notifications = _Notifications();
     final FridayPrayerReminderPlanner planner = FridayPrayerReminderPlanner(
       notifications,
     );
+    final List<PrayerEntry> entries = <PrayerEntry>[
+      _dhuhr('2026-09-18', 13, 28),
+    ];
+
     await planner.reschedule(
-      enabled,
-      timezoneId: 'UTC',
+      manual1330,
+      fridayDhuhrEntries: entries,
       languageCode: 'en',
       nowUtc: DateTime.utc(2026, 9, 14, 10),
-    );
-
-    await planner.reschedule(
-      const FridayPrayerSettings(),
-      timezoneId: 'UTC',
-      languageCode: 'en',
-      nowUtc: DateTime.utc(2026, 9, 14, 10),
-    );
-
-    expect(notifications.cancellations, 2);
-    expect(notifications.fridayReminders, isEmpty);
-  });
-
-  test('changing the configured time replaces both reminders', () async {
-    final _Notifications notifications = _Notifications();
-    final FridayPrayerReminderPlanner planner = FridayPrayerReminderPlanner(
-      notifications,
-    );
-    await planner.reschedule(
-      enabled,
-      timezoneId: 'UTC',
-      languageCode: 'en',
-      nowUtc: DateTime.utc(2026, 9, 14, 10),
-    );
-
-    await planner.reschedule(
-      enabled.copyWith(minutesFromMidnight: 14 * 60),
-      timezoneId: 'UTC',
-      languageCode: 'de',
-      nowUtc: DateTime.utc(2026, 9, 14, 10),
-    );
-
-    expect(notifications.cancellations, 2);
-    expect(
-      notifications.fridayReminders.map((item) => item.firstReminderAtUtc),
-      <DateTime>[DateTime.utc(2026, 9, 18, 12), DateTime.utc(2026, 9, 18, 13)],
     );
     expect(
-      notifications.fridayReminders.every((item) => item.languageCode == 'de'),
-      isTrue,
+      notifications.fridayReminders.single.reminderAtUtc,
+      DateTime.utc(2026, 9, 18, 12, 30),
+    );
+
+    await planner.reschedule(
+      const FridayPrayerSettings(
+        enabled: true,
+        manualMinutesFromMidnight: 12 * 60 + 45,
+      ),
+      fridayDhuhrEntries: entries,
+      languageCode: 'en',
+      nowUtc: DateTime.utc(2026, 9, 14, 10),
+    );
+    expect(
+      notifications.fridayReminders.single.reminderAtUtc,
+      DateTime.utc(2026, 9, 18, 11, 45),
     );
   });
 
   test(
-    'rapid time changes cannot restore an older reminder schedule',
+    'disable cancels and re-enable schedules exactly one reminder per Friday',
     () async {
-      final _Notifications notifications = _Notifications()
-        ..firstScheduleStarted = Completer<void>()
-        ..firstScheduleGate = Completer<void>();
+      final _Notifications notifications = _Notifications();
       final FridayPrayerReminderPlanner planner = FridayPrayerReminderPlanner(
         notifications,
       );
-      final Future<void> oldSchedule = planner.reschedule(
-        enabled,
-        timezoneId: 'UTC',
+      final PrayerEntry entry = _dhuhr('2026-09-18', 13, 28);
+
+      await planner.reschedule(
+        automatic,
+        fridayDhuhrEntries: <PrayerEntry>[entry],
         languageCode: 'en',
         nowUtc: DateTime.utc(2026, 9, 14, 10),
       );
-      await notifications.firstScheduleStarted!.future;
-      final Future<void> newSchedule = planner.reschedule(
-        enabled.copyWith(minutesFromMidnight: 15 * 60),
-        timezoneId: 'UTC',
+      await planner.reschedule(
+        const FridayPrayerSettings(),
+        fridayDhuhrEntries: <PrayerEntry>[entry],
         languageCode: 'en',
         nowUtc: DateTime.utc(2026, 9, 14, 10),
       );
-      notifications.firstScheduleGate!.complete();
+      expect(notifications.fridayReminders, isEmpty);
 
-      await Future.wait(<Future<void>>[oldSchedule, newSchedule]);
-
-      expect(notifications.cancellations, 2);
-      expect(
-        notifications.fridayReminders.map((item) => item.firstReminderAtUtc),
-        <DateTime>[
-          DateTime.utc(2026, 9, 18, 13),
-          DateTime.utc(2026, 9, 18, 14),
-        ],
+      await planner.reschedule(
+        automatic,
+        fridayDhuhrEntries: <PrayerEntry>[entry, entry],
+        languageCode: 'en',
+        nowUtc: DateTime.utc(2026, 9, 14, 10),
       );
+      expect(notifications.cancellations, 3);
+      expect(notifications.fridayReminders, hasLength(1));
     },
   );
+
+  test('rapid changes cannot restore an older schedule', () async {
+    final _Notifications notifications = _Notifications()
+      ..firstScheduleStarted = Completer<void>()
+      ..firstScheduleGate = Completer<void>();
+    final FridayPrayerReminderPlanner planner = FridayPrayerReminderPlanner(
+      notifications,
+    );
+    final List<PrayerEntry> entries = <PrayerEntry>[
+      _dhuhr('2026-09-18', 13, 28),
+    ];
+    final Future<void> oldSchedule = planner.reschedule(
+      manual1330,
+      fridayDhuhrEntries: entries,
+      languageCode: 'en',
+      nowUtc: DateTime.utc(2026, 9, 14, 10),
+    );
+    await notifications.firstScheduleStarted!.future;
+    final Future<void> newSchedule = planner.reschedule(
+      const FridayPrayerSettings(
+        enabled: true,
+        manualMinutesFromMidnight: 15 * 60,
+      ),
+      fridayDhuhrEntries: entries,
+      languageCode: 'en',
+      nowUtc: DateTime.utc(2026, 9, 14, 10),
+    );
+    notifications.firstScheduleGate!.complete();
+    await Future.wait(<Future<void>>[oldSchedule, newSchedule]);
+
+    expect(
+      notifications.fridayReminders.single.reminderAtUtc,
+      DateTime.utc(2026, 9, 18, 14),
+    );
+  });
 }

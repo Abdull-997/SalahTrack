@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,10 +12,8 @@ import 'package:salah_focus/core/errors/app_exception.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/core/time/timezone_service.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
-import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
-import 'package:salah_focus/features/settings/presentation/notification_settings_screen.dart';
 import 'package:salah_focus/shared/errors/user_error_message.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -48,13 +45,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         actions: <Widget>[
           Padding(
             padding: const EdgeInsetsDirectional.only(end: 16),
-            child: Center(child: Text('${_page + 1}/6')),
+            child: Center(child: Text('${_page + 1}/5')),
           ),
         ],
       ),
       body: Column(
         children: <Widget>[
-          LinearProgressIndicator(value: (_page + 1) / 6),
+          LinearProgressIndicator(value: (_page + 1) / 5),
           Expanded(
             child: PageView(
               controller: _pageController,
@@ -76,21 +73,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   prayerDay: ref.watch(todayPrayerDayProvider),
                   onRefresh: () => ref.invalidate(todayPrayerDayProvider),
                 ),
-                _GracePage(
-                  minutes: prefs.prayerSettings.gracePeriodMinutes,
-                  onChanged: _setGracePeriod,
-                ),
                 _PermissionsPage(
                   working: _working,
                   onNotifications: _requestNotifications,
                   onExactAlarms: _requestExactAlarms,
-                  onFullScreenAlarms: _requestFullScreenAlarms,
                   onFinish: _finish,
                 ),
               ],
             ),
           ),
-          if (_page > 0 && _page < 5)
+          if (_page > 0 && _page < 4)
             SafeArea(
               top: false,
               child: Padding(
@@ -125,7 +117,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _next() {
-    if (_page >= 5) return;
+    if (_page >= 4) return;
     setState(() => _page += 1);
     _pageController.animateToPage(
       _page,
@@ -175,16 +167,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     });
   }
 
-  Future<void> _setGracePeriod(int minutes) async {
-    final PrayerSettings current = ref
-        .read(settingsControllerProvider)
-        .prayerSettings;
-    await ref
-        .read(settingsControllerProvider.notifier)
-        .setPrayerSettings(current.copyWith(gracePeriodMinutes: minutes));
-    ref.invalidate(todayPrayerDayProvider);
-  }
-
   Future<void> _requestNotifications() async {
     await _run(() async {
       final NotificationService service = ref.read(notificationServiceProvider);
@@ -199,14 +181,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       await service.initialize();
       await service.requestExactAlarmPermission();
     });
-  }
-
-  Future<void> _requestFullScreenAlarms() async {
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        builder: (_) => const NotificationSettingsScreen.fullScreenAlarms(),
-      ),
-    );
   }
 
   Future<void> _finish() async {
@@ -419,7 +393,7 @@ class _PrayerPreviewPage extends StatelessWidget {
                           Localizations.localeOf(context).languageCode,
                         ),
                       ),
-                      trailing: Text(AppStrings.of(context).time(local)),
+                      trailing: Text(s.systemTime(context, local)),
                     );
                   },
                 );
@@ -449,49 +423,16 @@ class _PrayerPreviewPage extends StatelessWidget {
   }
 }
 
-class _GracePage extends StatelessWidget {
-  const _GracePage({required this.minutes, required this.onChanged});
-  final int minutes;
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final AppStrings s = AppStrings.of(context);
-    const List<int> options = <int>[0, 15, 30, 45, 60, 90];
-    return _CenteredPage(
-      icon: Icons.timer_outlined,
-      title: s.t('graceQuestion'),
-      body: '${s.number(minutes)} ${s.t('minutesAfter')}',
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        alignment: WrapAlignment.center,
-        children: options
-            .map(
-              (int value) => ChoiceChip(
-                label: Text(s.minutes(value)),
-                selected: minutes == value,
-                onSelected: (_) => onChanged(value),
-              ),
-            )
-            .toList(),
-      ),
-    );
-  }
-}
-
 class _PermissionsPage extends StatelessWidget {
   const _PermissionsPage({
     required this.working,
     required this.onNotifications,
     required this.onExactAlarms,
-    required this.onFullScreenAlarms,
     required this.onFinish,
   });
   final bool working;
   final VoidCallback onNotifications;
   final VoidCallback onExactAlarms;
-  final VoidCallback onFullScreenAlarms;
   final VoidCallback onFinish;
 
   @override
@@ -527,15 +468,6 @@ class _PermissionsPage extends StatelessWidget {
               icon: const Icon(Icons.alarm_rounded),
               label: Text(s.t('exactAlarmPermission')),
             ),
-            if (!kIsWeb &&
-                defaultTargetPlatform == TargetPlatform.android) ...<Widget>[
-              const SizedBox(height: 10),
-              OutlinedButton.icon(
-                onPressed: working ? null : onFullScreenAlarms,
-                icon: const Icon(Icons.fullscreen_rounded),
-                label: Text(s.t('fullScreenAlarmPermission')),
-              ),
-            ],
             const SizedBox(height: 26),
             FilledButton.icon(
               onPressed: working ? null : onFinish,

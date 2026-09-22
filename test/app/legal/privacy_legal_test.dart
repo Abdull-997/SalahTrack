@@ -76,7 +76,16 @@ void main() {
       expect(allText, contains('photon.komoot.io'), reason: language.code);
       expect(allText, contains('OpenStreetMap'), reason: language.code);
       expect(allText, contains('api.aladhan.com'), reason: language.code);
-      expect(allText, isNot(contains('SalahFocus')), reason: language.code);
+      expect(
+        allText,
+        isNot(
+          contains(
+            'Salah'
+            'Focus',
+          ),
+        ),
+        reason: language.code,
+      );
     }
   });
 

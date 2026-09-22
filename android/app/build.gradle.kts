@@ -19,7 +19,7 @@ plugins {
 }
 
 android {
-    namespace = "com.salahfocus.salah_focus"
+    namespace = "com.salahtrack.app"
     // Current AndroidX dependencies require API 34 or newer. Keep this
     // explicit so builds do not depend on an older Flutter SDK default.
     compileSdk = 36
@@ -33,7 +33,7 @@ android {
 
     defaultConfig {
         multiDexEnabled = true
-        applicationId = "com.salahfocus.salah_focus"
+        applicationId = "com.salahtrack.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

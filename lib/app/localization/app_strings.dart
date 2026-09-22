@@ -36,10 +36,12 @@ class AppStrings {
       ...ramadanDeTranslations,
       'fridayPrayer': 'Freitagsgebet',
       'fridayPrayerTime': 'Zeit des Freitagsgebets',
-      'fridayPrayerHelp': 'Nur freitags sichtbar. Gib die Zeit deiner Moschee ein. Die App erinnert dich 2 Stunden und 1 Stunde vorher. Keine Bestätigung nötig.',
+      'fridayPrayerHelp': 'Nur freitags sichtbar. Standardmäßig wird die berechnete Dhuhr-Zeit verwendet; du kannst die Zeit deiner Moschee festlegen. Die App erinnert dich etwa eine Stunde vorher.',
       'fridayPrayerReminderOnly': 'Nur Erinnerung · keine Bestätigung',
-      'fridayPrayerInTwoHours': 'Das Freitagsgebet ist in 2 Stunden.',
       'fridayPrayerInOneHour': 'Das Freitagsgebet ist in 1 Stunde.',
+      'fridayPrayerAutomatic': 'Dhuhr-Zeit (automatisch)',
+      'useDhuhrTime': 'Dhuhr-Zeit verwenden',
+      'fridayPrayerMosqueNote': 'Die Jumu\'ah-Gebetszeit kann je nach Moschee unterschiedlich sein. Bitte vergleiche die Zeit mit deiner örtlichen Moschee.',
       'oneHourRemainingTitle': '{prayer} noch nicht bestätigt',
       'oneHourRemainingBody':
           'Du hast noch etwa 1 Stunde Zeit, bevor {nextPrayer} beginnt.',
@@ -48,12 +50,6 @@ class AppStrings {
       'alhamdulillah': 'Alhamdulillah',
       'prayerPrayedAndRecorded':
           'Das {prayer}-Gebet wurde gebetet und eingetragen.',
-      'fullScreenAlarmPermission': 'Vollbild-Erinnerungen erlauben',
-      'fullScreenAlarmsEnabled': 'Vollbild-Erinnerungen sind aktiviert',
-      'fullScreenAlarmsDisabled': 'Vollbild-Erinnerungen sind deaktiviert',
-      'fullScreenAlarmPermissionHelp': 'Erlaube Gebetserinnerungen, den Bildschirm einzuschalten und bei gesperrtem Gerät im Vollbild zu erscheinen. Android kann bei entsperrtem Gerät stattdessen eine Benachrichtigung anzeigen. Ohne diese Berechtigung erhältst du weiterhin normale Benachrichtigungen.',
-      'openFullScreenAlarmSettings':
-          'Vollbild-Zugriff in Systemeinstellungen öffnen',
       'appName': 'SalahTrack',
       'tagline': 'Gebete verfolgen & erinnern',
       'getStarted': "Los geht's",
@@ -212,10 +208,12 @@ class AppStrings {
       ...ramadanEnTranslations,
       'fridayPrayer': "Friday Prayer / Jumu'ah",
       'fridayPrayerTime': 'Friday Prayer time',
-      'fridayPrayerHelp': 'Shown only on Fridays. Enter your local mosque time. The app reminds you 2 hours and 1 hour before. No confirmation is needed.',
+      'fridayPrayerHelp': 'Shown only on Fridays. The calculated Dhuhr time is used automatically, or you can set your mosque time. The app reminds you about one hour before.',
       'fridayPrayerReminderOnly': 'Reminder only · no confirmation',
-      'fridayPrayerInTwoHours': 'Friday Prayer is in 2 hours.',
       'fridayPrayerInOneHour': 'Friday Prayer is in 1 hour.',
+      'fridayPrayerAutomatic': 'Dhuhr time (automatic)',
+      'useDhuhrTime': 'Use Dhuhr time',
+      'fridayPrayerMosqueNote': 'Jumu\'ah prayer times can vary between mosques. Please check the time with your local mosque.',
       'oneHourRemainingTitle': '{prayer} not confirmed yet',
       'oneHourRemainingBody':
           'You have about 1 hour left before {nextPrayer} begins.',
@@ -224,12 +222,6 @@ class AppStrings {
       'alhamdulillah': 'Alhamdulillah',
       'prayerPrayedAndRecorded':
           'The {prayer} prayer has been prayed and recorded.',
-      'fullScreenAlarmPermission': 'Allow full-screen reminders',
-      'fullScreenAlarmsEnabled': 'Full-screen reminders are enabled',
-      'fullScreenAlarmsDisabled': 'Full-screen reminders are disabled',
-      'fullScreenAlarmPermissionHelp': 'Allow prayer reminders to wake the screen and appear full-screen when your device is locked. Android may show a notification instead while your device is unlocked. Without this permission, you still receive regular notifications.',
-      'openFullScreenAlarmSettings':
-          'Open full-screen access in system settings',
       'appName': 'SalahTrack',
       'tagline': 'Prayer Tracker & Reminders',
       'getStarted': 'Get started',
@@ -389,21 +381,18 @@ class AppStrings {
       ...ramadanArTranslations,
       'fridayPrayer': 'صلاة الجمعة',
       'fridayPrayerTime': 'وقت صلاة الجمعة',
-      'fridayPrayerHelp': 'تظهر يوم الجمعة فقط. أدخل وقت مسجدك. يرسل التطبيق تذكيرًا قبل ساعتين وقبل ساعة. لا يلزم التأكيد.',
+      'fridayPrayerHelp': 'تظهر يوم الجمعة فقط. يُستخدم وقت الظهر المحسوب تلقائيًا، أو يمكنك تحديد وقت مسجدك. يرسل التطبيق تذكيرًا قبل نحو ساعة.',
       'fridayPrayerReminderOnly': 'تذكير فقط · لا يلزم التأكيد',
-      'fridayPrayerInTwoHours': 'صلاة الجمعة بعد ساعتين.',
       'fridayPrayerInOneHour': 'صلاة الجمعة بعد ساعة.',
+      'fridayPrayerAutomatic': 'وقت الظهر (تلقائي)',
+      'useDhuhrTime': 'استخدام وقت الظهر',
+      'fridayPrayerMosqueNote': 'قد يختلف وقت صلاة الجمعة من مسجد إلى آخر. يرجى التحقق من الوقت مع مسجدك المحلي.',
       'oneHourRemainingTitle': 'لم يتم تأكيد {prayer} بعد',
       'oneHourRemainingBody': 'بقي نحو ساعة واحدة قبل بدء {nextPrayer}.',
       'markAsPrayed': 'تسجيل الصلاة كمؤداة',
       'snoozeAction': 'تأجيل',
       'alhamdulillah': 'الحمد لله',
       'prayerPrayedAndRecorded': 'تمت صلاة {prayer} وتسجيلها.',
-      'fullScreenAlarmPermission': 'السماح بالتذكيرات بملء الشاشة',
-      'fullScreenAlarmsEnabled': 'التذكيرات بملء الشاشة مفعّلة',
-      'fullScreenAlarmsDisabled': 'التذكيرات بملء الشاشة غير مفعّلة',
-      'fullScreenAlarmPermissionHelp': 'اسمح لتذكيرات الصلاة بتشغيل الشاشة والظهور بملء الشاشة عندما يكون جهازك مقفلاً. قد يعرض أندرويد إشعاراً بدلاً من ذلك عند فتح القفل. ستستمر في تلقي الإشعارات العادية دون هذا الإذن.',
-      'openFullScreenAlarmSettings': 'فتح إذن ملء الشاشة في إعدادات النظام',
       'appName': 'SalahTrack',
       'tagline': 'تتبع صلواتك وتذكّرها',
       'getStarted': 'ابدأ',
@@ -564,10 +553,12 @@ class AppStrings {
       ...ramadanUrTranslations,
       'fridayPrayer': 'نمازِ جمعہ',
       'fridayPrayerTime': 'نمازِ جمعہ کا وقت',
-      'fridayPrayerHelp': 'صرف جمعہ کو دکھائی جاتی ہے۔ اپنی مقامی مسجد کا وقت درج کریں۔ ایپ دو گھنٹے اور ایک گھنٹہ پہلے یاد دہانی بھیجتی ہے۔ تصدیق ضروری نہیں۔',
+      'fridayPrayerHelp': 'صرف جمعہ کو دکھائی جاتی ہے۔ حساب شدہ ظہر کا وقت خودکار طور پر استعمال ہوتا ہے، یا آپ اپنی مسجد کا وقت مقرر کر سکتے ہیں۔ ایپ تقریباً ایک گھنٹہ پہلے یاد دہانی بھیجتی ہے۔',
       'fridayPrayerReminderOnly': 'صرف یاد دہانی · تصدیق ضروری نہیں',
-      'fridayPrayerInTwoHours': 'نمازِ جمعہ میں دو گھنٹے باقی ہیں۔',
       'fridayPrayerInOneHour': 'نمازِ جمعہ میں ایک گھنٹہ باقی ہے۔',
+      'fridayPrayerAutomatic': 'ظہر کا وقت (خودکار)',
+      'useDhuhrTime': 'ظہر کا وقت استعمال کریں',
+      'fridayPrayerMosqueNote': 'جمعہ کی نماز کا وقت مسجد کے لحاظ سے مختلف ہو سکتا ہے۔ براہِ کرم وقت کی تصدیق اپنی مقامی مسجد سے کریں۔',
       'oneHourRemainingTitle': '{prayer} کی ابھی تصدیق نہیں ہوئی',
       'oneHourRemainingBody':
           '{nextPrayer} شروع ہونے میں تقریباً ایک گھنٹہ باقی ہے۔',
@@ -575,12 +566,6 @@ class AppStrings {
       'snoozeAction': 'ملتوی کریں',
       'alhamdulillah': 'الحمدللہ',
       'prayerPrayedAndRecorded': '{prayer} کی نماز ادا کر کے درج کر لی گئی ہے۔',
-      'fullScreenAlarmPermission': 'پوری اسکرین کی یاددہانیوں کی اجازت دیں',
-      'fullScreenAlarmsEnabled': 'پوری اسکرین کی یاددہانیاں فعال ہیں',
-      'fullScreenAlarmsDisabled': 'پوری اسکرین کی یاددہانیاں غیر فعال ہیں',
-      'fullScreenAlarmPermissionHelp': 'نماز کی یاددہانیوں کو اسکرین روشن کرنے اور مقفل آلے پر پوری اسکرین میں دکھنے کی اجازت دیں۔ آلہ کھلا ہونے پر اینڈرائیڈ اس کے بجائے اطلاع دکھا سکتا ہے۔ اس اجازت کے بغیر بھی عام اطلاعات موصول ہوتی رہیں گی۔',
-      'openFullScreenAlarmSettings':
-          'سسٹم کی ترتیبات میں پوری اسکرین کی اجازت کھولیں',
       'appName': 'SalahTrack',
       'tagline': 'نمازوں کا ریکارڈ اور یاد دہانیاں',
       'getStarted': 'شروع کریں',
@@ -746,22 +731,18 @@ class AppStrings {
       ...ramadanPsTranslations,
       'fridayPrayer': 'د جمعې لمونځ',
       'fridayPrayerTime': 'د جمعې د لمانځه وخت',
-      'fridayPrayerHelp': 'یوازې د جمعې په ورځ ښکاري. د خپل جومات وخت ولیکئ. اپ دوه ساعته او یو ساعت مخکې یادونه کوي. تایید ته اړتیا نشته.',
+      'fridayPrayerHelp': 'یوازې د جمعې په ورځ ښکاري. د ماسپښین محاسبه شوی وخت په اوتومات ډول کارول کېږي، یا د خپل جومات وخت ټاکلی شئ. اپ شاوخوا یو ساعت مخکې یادونه کوي.',
       'fridayPrayerReminderOnly': 'یوازې یادونه · تایید ته اړتیا نشته',
-      'fridayPrayerInTwoHours': 'د جمعې لمونځ دوه ساعته وروسته دی.',
       'fridayPrayerInOneHour': 'د جمعې لمونځ یو ساعت وروسته دی.',
+      'fridayPrayerAutomatic': 'د ماسپښین وخت (اوتومات)',
+      'useDhuhrTime': 'د ماسپښین وخت وکاروئ',
+      'fridayPrayerMosqueNote': 'د جمعې د لمانځه وخت له یوه جومات څخه بل ته توپیر کولی شي. مهرباني وکړئ وخت له خپل سیمه‌ییز جومات سره تایید کړئ.',
       'oneHourRemainingTitle': '{prayer} لا نه دی تایید شوی',
       'oneHourRemainingBody': 'د {nextPrayer} تر پیل شاوخوا یو ساعت پاتې دی.',
       'markAsPrayed': 'لمونځ د ادا شوي په توګه ثبت کړئ',
       'snoozeAction': 'وروسته یادونه',
       'alhamdulillah': 'الحمدلله',
       'prayerPrayedAndRecorded': 'د {prayer} لمونځ ادا او ثبت شو.',
-      'fullScreenAlarmPermission': 'د بشپړې پردې یادونو ته اجازه ورکړئ',
-      'fullScreenAlarmsEnabled': 'د بشپړې پردې یادونې فعالې دي',
-      'fullScreenAlarmsDisabled': 'د بشپړې پردې یادونې غیرفعالې دي',
-      'fullScreenAlarmPermissionHelp': 'د لمانځه یادونو ته اجازه ورکړئ چې پرده روښانه کړي او د وسیلې د قلف پر مهال په بشپړه پرده ښکاره شي. کله چې وسیله خلاصه وي، انډرایډ ښايي پر ځای یې خبرتیا وښيي. له دې اجازې پرته به هم عادي خبرتیاوې ترلاسه کوئ.',
-      'openFullScreenAlarmSettings':
-          'د سیسټم په امستنو کې د بشپړې پردې اجازه پرانیزئ',
       'appName': 'SalahTrack',
       'tagline': 'د لمونځونو ثبت او یادونې',
       'getStarted': 'پیل کړئ',
@@ -984,8 +965,19 @@ class AppStrings {
     pattern: localizedMediumDatePatterns[locale.languageCode] ?? 'd MMMM y',
   );
 
-  String time(DateTime value) =>
-      _localizeDigits(DateFormat.Hm(_intlLocaleName).format(value));
+  /// Formats a clock time without changing its underlying instant. The caller
+  /// supplies the device's 12/24-hour preference instead of inferring it from
+  /// the selected app language.
+  String time(DateTime value, {required bool use24HourFormat}) =>
+      _localizeDigits(
+        (use24HourFormat
+                ? DateFormat.Hm(_intlLocaleName)
+                : DateFormat.jm(_intlLocaleName))
+            .format(value),
+      );
+
+  String systemTime(BuildContext context, DateTime value) =>
+      time(value, use24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context));
 
   String get _intlLocaleName =>
       locale.languageCode == 'pa' ? 'en' : locale.languageCode;

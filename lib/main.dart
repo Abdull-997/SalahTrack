@@ -29,7 +29,7 @@ Future<void> main() async {
         initialPreferencesProvider.overrideWithValue(preferences),
         deviceTimezoneIdProvider.overrideWithValue(timezoneId),
       ],
-      child: const SalahFocusApp(),
+      child: const SalahTrackApp(),
     ),
   );
 }

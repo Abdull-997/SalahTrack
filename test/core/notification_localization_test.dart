@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:salah_focus/core/notifications/local_notification_service.dart';
 import 'package:salah_focus/core/notifications/notification_ids.dart';
@@ -93,46 +92,22 @@ class _CapabilityService extends LocalNotificationService {
     required super.plugin,
     required this.notificationsEnabled,
     required this.exactEnabled,
-    required this.fullScreenEnabled,
   });
 
   final bool notificationsEnabled;
   final bool exactEnabled;
-  final bool fullScreenEnabled;
 
   @override
   Future<bool> notificationsAllowed() async => notificationsEnabled;
 
   @override
   Future<bool> canScheduleExactly() async => exactEnabled;
-
-  @override
-  Future<bool> canUseFullScreenIntent() async => fullScreenEnabled;
 }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  const MethodChannel settingsChannel = MethodChannel(
-    'salah_focus/system_settings',
-  );
-  setUp(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(settingsChannel, (call) async {
-          if (call.method == 'canUseFullScreenIntent') return true;
-          return null;
-        });
-  });
-  tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(settingsChannel, null);
-  });
 
-  test('prayer alert falls back to a normal notification when full screen is denied', () async {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(settingsChannel, (call) async {
-          if (call.method == 'canUseFullScreenIntent') return false;
-          return null;
-        });
+  test('prayer alert is a normal high-importance notification', () async {
     final _Plugin plugin = _Plugin();
     final LocalNotificationService service = LocalNotificationService(
       plugin: plugin,
@@ -150,42 +125,51 @@ void main() {
     );
     await service.schedulePrayer(entry, 'Fajr', languageCode: 'en');
     expect(plugin.scheduled, hasLength(1));
-    expect(plugin.scheduled.single.details.android!.fullScreenIntent, isFalse);
     expect(
       plugin.scheduled.single.details.android!.importance,
       Importance.high,
     );
+    expect(plugin.scheduled.single.details.android!.playSound, isTrue);
+    expect(plugin.scheduled.single.details.android!.enableVibration, isTrue);
+    expect(plugin.scheduled.single.details.android!.ongoing, isFalse);
+    expect(plugin.scheduled.single.details.android!.autoCancel, isTrue);
   });
 
-  test('exact-alarm denial schedules an inexact high-priority fallback', () async {
-    final _Plugin plugin = _Plugin();
-    final LocalNotificationService service = _CapabilityService(
-      plugin: plugin,
-      notificationsEnabled: true,
-      exactEnabled: false,
-      fullScreenEnabled: false,
-    );
-    final DateTime later = DateTime.now().toUtc().add(const Duration(hours: 2));
-    final PrayerEntry entry = PrayerEntry(
-      id: 'test-inexact-fajr',
-      localDate: later.toIso8601String().substring(0, 10),
-      type: PrayerType.fajr,
-      scheduledAtUtc: later,
-      timezoneId: 'UTC',
-      graceEndsAtUtc: later.add(const Duration(hours: 1)),
-      trackingEndsAtUtc: later.add(const Duration(hours: 2)),
-      status: PrayerStatus.upcoming,
-    );
+  test(
+    'exact-alarm denial schedules an inexact high-priority fallback',
+    () async {
+      final _Plugin plugin = _Plugin();
+      final LocalNotificationService service = _CapabilityService(
+        plugin: plugin,
+        notificationsEnabled: true,
+        exactEnabled: false,
+      );
+      final DateTime later = DateTime.now().toUtc().add(
+        const Duration(hours: 2),
+      );
+      final PrayerEntry entry = PrayerEntry(
+        id: 'test-inexact-fajr',
+        localDate: later.toIso8601String().substring(0, 10),
+        type: PrayerType.fajr,
+        scheduledAtUtc: later,
+        timezoneId: 'UTC',
+        graceEndsAtUtc: later.add(const Duration(hours: 1)),
+        trackingEndsAtUtc: later.add(const Duration(hours: 2)),
+        status: PrayerStatus.upcoming,
+      );
 
-    await service.schedulePrayer(entry, 'Fajr', languageCode: 'en');
+      await service.schedulePrayer(entry, 'Fajr', languageCode: 'en');
 
-    expect(plugin.scheduled, hasLength(1));
-    expect(plugin.scheduleModes, <AndroidScheduleMode>[
-      AndroidScheduleMode.inexactAllowWhileIdle,
-    ]);
-    expect(plugin.scheduled.single.details.android!.fullScreenIntent, isFalse);
-    expect(plugin.scheduled.single.details.android!.importance, Importance.high);
-  });
+      expect(plugin.scheduled, hasLength(1));
+      expect(plugin.scheduleModes, <AndroidScheduleMode>[
+        AndroidScheduleMode.inexactAllowWhileIdle,
+      ]);
+      expect(
+        plugin.scheduled.single.details.android!.importance,
+        Importance.high,
+      );
+    },
+  );
 
   test('denied notification permission is a safe no-op', () async {
     final _Plugin plugin = _Plugin();
@@ -193,7 +177,6 @@ void main() {
       plugin: plugin,
       notificationsEnabled: false,
       exactEnabled: false,
-      fullScreenEnabled: false,
     );
     final DateTime later = DateTime.now().toUtc().add(const Duration(hours: 2));
     final PrayerEntry entry = PrayerEntry(
@@ -213,70 +196,81 @@ void main() {
     expect(plugin.scheduleModes, isEmpty);
   });
 
-  test('all five prayer-time alerts name the prayer in German and English', () async {
-    final DateTime later = DateTime.now().toUtc().add(const Duration(hours: 2));
-    for (final String code in <String>['de', 'en']) {
-      final _Plugin plugin = _Plugin();
-      final LocalNotificationService service = LocalNotificationService(
-        plugin: plugin,
+  test(
+    'all five prayer-time alerts name the prayer in German and English',
+    () async {
+      final DateTime later = DateTime.now().toUtc().add(
+        const Duration(hours: 2),
       );
-      for (final PrayerType type in PrayerType.values) {
+      for (final String code in <String>['de', 'en']) {
+        final _Plugin plugin = _Plugin();
+        final LocalNotificationService service = LocalNotificationService(
+          plugin: plugin,
+        );
+        for (final PrayerType type in PrayerType.values) {
+          final PrayerEntry entry = PrayerEntry(
+            id: 'test-${type.name}',
+            localDate: later.toIso8601String().substring(0, 10),
+            type: type,
+            scheduledAtUtc: later,
+            timezoneId: 'UTC',
+            graceEndsAtUtc: later.add(const Duration(hours: 1)),
+            trackingEndsAtUtc: later.add(const Duration(hours: 2)),
+            status: PrayerStatus.upcoming,
+          );
+          final String name = type.localizedName(code);
+          await service.schedulePrayer(entry, name, languageCode: code);
+          final item = plugin.scheduled.last;
+          expect(item.title, '$name Adhan');
+          expect(
+            item.body,
+            code == 'de'
+                ? 'Die Zeit für das $name-Gebet ist eingetreten.'
+                : 'The time for $name prayer has begun.',
+          );
+        }
+        expect(plugin.scheduled, hasLength(5));
+      }
+    },
+  );
+
+  test(
+    'Arabic, Urdu and Pashto prayer-time alerts use local Adhan text',
+    () async {
+      final expected = <String, (String, String)>{
+        'ar': ('أذان المغرب', 'دخل وقت صلاة المغرب.'),
+        'ur': ('مغرب کی اذان', 'مغرب کی نماز کا وقت شروع ہو گیا ہے۔'),
+        'ps': ('د ماښام اذان', 'د ماښام د لمانځه وخت پیل شو.'),
+      };
+      final DateTime later = DateTime.now().toUtc().add(
+        const Duration(hours: 2),
+      );
+      for (final MapEntry<String, (String, String)> language
+          in expected.entries) {
+        final _Plugin plugin = _Plugin();
+        final LocalNotificationService service = LocalNotificationService(
+          plugin: plugin,
+        );
         final PrayerEntry entry = PrayerEntry(
-          id: 'test-${type.name}',
+          id: 'test-maghrib',
           localDate: later.toIso8601String().substring(0, 10),
-          type: type,
+          type: PrayerType.maghrib,
           scheduledAtUtc: later,
           timezoneId: 'UTC',
           graceEndsAtUtc: later.add(const Duration(hours: 1)),
           trackingEndsAtUtc: later.add(const Duration(hours: 2)),
           status: PrayerStatus.upcoming,
         );
-        final String name = type.localizedName(code);
-        await service.schedulePrayer(entry, name, languageCode: code);
-        final item = plugin.scheduled.last;
-        expect(item.title, '$name Adhan');
-        expect(
-          item.body,
-          code == 'de'
-              ? 'Die Zeit für das $name-Gebet ist eingetreten.'
-              : 'The time for $name prayer has begun.',
+        await service.schedulePrayer(
+          entry,
+          entry.type.localizedName(language.key),
+          languageCode: language.key,
         );
+        expect(plugin.scheduled.single.title, language.value.$1);
+        expect(plugin.scheduled.single.body, language.value.$2);
       }
-      expect(plugin.scheduled, hasLength(5));
-    }
-  });
-
-  test('Arabic, Urdu and Pashto prayer-time alerts use local Adhan text', () async {
-    final expected = <String, (String, String)>{
-      'ar': ('أذان المغرب', 'دخل وقت صلاة المغرب.'),
-      'ur': ('مغرب کی اذان', 'مغرب کی نماز کا وقت شروع ہو گیا ہے۔'),
-      'ps': ('د ماښام اذان', 'د ماښام د لمانځه وخت پیل شو.'),
-    };
-    final DateTime later = DateTime.now().toUtc().add(const Duration(hours: 2));
-    for (final MapEntry<String, (String, String)> language in expected.entries) {
-      final _Plugin plugin = _Plugin();
-      final LocalNotificationService service = LocalNotificationService(
-        plugin: plugin,
-      );
-      final PrayerEntry entry = PrayerEntry(
-        id: 'test-maghrib',
-        localDate: later.toIso8601String().substring(0, 10),
-        type: PrayerType.maghrib,
-        scheduledAtUtc: later,
-        timezoneId: 'UTC',
-        graceEndsAtUtc: later.add(const Duration(hours: 1)),
-        trackingEndsAtUtc: later.add(const Duration(hours: 2)),
-        status: PrayerStatus.upcoming,
-      );
-      await service.schedulePrayer(
-        entry,
-        entry.type.localizedName(language.key),
-        languageCode: language.key,
-      );
-      expect(plugin.scheduled.single.title, language.value.$1);
-      expect(plugin.scheduled.single.body, language.value.$2);
-    }
-  });
+    },
+  );
 
   for (final String code in <String>[
     'tr',
@@ -391,7 +385,7 @@ void main() {
         expect(plugin.scheduled[1].details.android!.channelName, channelName);
         expect(
           plugin.scheduled[1].details.android!.channelId,
-          'prayer_alarms_v2',
+          'salahtrack_prayer_reminders_v1',
         );
         for (final item in plugin.scheduled) {
           expect(item.body, isNotEmpty);
@@ -405,11 +399,11 @@ void main() {
         );
         for (final item in plugin.scheduled.take(3)) {
           final android = item.details.android!;
-          expect(android.fullScreenIntent, isTrue);
-          expect(android.ongoing, isTrue);
-          expect(android.autoCancel, isFalse);
-          expect(android.category, AndroidNotificationCategory.alarm);
-          expect(android.audioAttributesUsage, AudioAttributesUsage.alarm);
+          expect(android.category, AndroidNotificationCategory.reminder);
+          expect(
+            android.audioAttributesUsage,
+            AudioAttributesUsage.notification,
+          );
           expect(android.actions!.map((action) => action.id), [
             'mark_prayed',
             'snooze',
@@ -431,6 +425,12 @@ void main() {
             isNotEmpty,
           );
         }
+        expect(plugin.scheduled.first.details.android!.ongoing, isFalse);
+        expect(plugin.scheduled.first.details.android!.autoCancel, isTrue);
+        for (final item in plugin.scheduled.skip(1).take(2)) {
+          expect(item.details.android!.ongoing, isTrue);
+          expect(item.details.android!.autoCancel, isFalse);
+        }
         final category = plugin.settings!.iOS!.notificationCategories
             .singleWhere(
               (category) => category.identifier == 'prayer_actions_$code',
@@ -446,10 +446,6 @@ void main() {
             ),
           ),
           isTrue,
-        );
-        expect(
-          plugin.scheduled.last.details.android!.fullScreenIntent,
-          isFalse,
         );
       },
     );
@@ -621,8 +617,7 @@ void main() {
       );
       expect(item.matchDateTimeComponents, isNull);
       final android = item.details.android!;
-      expect(android.channelId, 'prayer_reminders');
-      expect(android.fullScreenIntent, isFalse);
+      expect(android.channelId, 'salahtrack_prayer_reminders_v1');
       expect(android.ongoing, isFalse);
       expect(android.autoCancel, isTrue);
       expect(android.category, AndroidNotificationCategory.reminder);
@@ -637,7 +632,7 @@ void main() {
   );
 
   test(
-    'Friday Prayer reminders are weekly, localized, and action-free',
+    'Friday Prayer reminder is one-shot, localized, and action-free',
     () async {
       final plugin = _Plugin();
       final service = LocalNotificationService(
@@ -649,35 +644,22 @@ void main() {
       );
 
       await service.scheduleFridayPrayerReminder(
-        firstReminderAtUtc: friday,
+        localDate: '2026-09-18',
+        reminderAtUtc: friday,
         timezoneId: 'UTC',
-        hoursBefore: 2,
-        languageCode: 'en',
-      );
-      await service.scheduleFridayPrayerReminder(
-        firstReminderAtUtc: friday.add(const Duration(hours: 1)),
-        timezoneId: 'UTC',
-        hoursBefore: 1,
         languageCode: 'en',
       );
 
-      expect(plugin.scheduled, hasLength(2));
-      expect(plugin.scheduled.map((item) => item.id), <int>[
-        NotificationIds.fridayPrayer(2),
-        NotificationIds.fridayPrayer(1),
-      ]);
-      expect(plugin.scheduled.map((item) => item.body), <String>[
-        'Friday Prayer is in 2 hours.',
-        'Friday Prayer is in 1 hour.',
-      ]);
+      expect(plugin.scheduled, hasLength(1));
+      expect(
+        plugin.scheduled.single.id,
+        NotificationIds.fridayPrayer('2026-09-18'),
+      );
+      expect(plugin.scheduled.single.body, 'Friday Prayer is in 1 hour.');
       for (final item in plugin.scheduled) {
-        expect(
-          item.matchDateTimeComponents,
-          DateTimeComponents.dayOfWeekAndTime,
-        );
+        expect(item.matchDateTimeComponents, isNull);
         final AndroidNotificationDetails android = item.details.android!;
-        expect(android.channelId, 'friday_prayer_reminders');
-        expect(android.fullScreenIntent, isFalse);
+        expect(android.channelId, 'salahtrack_prayer_reminders_v1');
         expect(android.ongoing, isFalse);
         expect(android.autoCancel, isTrue);
         expect(android.category, AndroidNotificationCategory.reminder);
@@ -759,8 +741,8 @@ void main() {
 
       expect(plugin.cancelled, isNot(contains(1)));
       expect(plugin.cancelled, contains(2));
-      expect(plugin.cancelled, contains(NotificationIds.fridayPrayer(2)));
-      expect(plugin.cancelled, contains(NotificationIds.fridayPrayer(1)));
+      expect(plugin.cancelled, contains(1800000001));
+      expect(plugin.cancelled, contains(1800000002));
     },
   );
 }

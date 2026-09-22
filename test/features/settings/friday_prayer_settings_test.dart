@@ -14,13 +14,13 @@ import 'package:salah_focus/features/settings/presentation/settings_screen.dart'
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _Notifications implements NotificationService {
-  final List<int> fridayReminderHours = <int>[];
+  final List<DateTime> fridayReminderTimes = <DateTime>[];
   int fridayCancellations = 0;
 
   @override
   Future<void> cancelAllFridayPrayerNotifications() async {
     fridayCancellations++;
-    fridayReminderHours.clear();
+    fridayReminderTimes.clear();
   }
 
   @override
@@ -28,11 +28,11 @@ class _Notifications implements NotificationService {
 
   @override
   Future<void> scheduleFridayPrayerReminder({
-    required DateTime firstReminderAtUtc,
+    required String localDate,
+    required DateTime reminderAtUtc,
     required String timezoneId,
-    required int hoursBefore,
     required String languageCode,
-  }) async => fridayReminderHours.add(hoursBefore);
+  }) async => fridayReminderTimes.add(reminderAtUtc);
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -40,8 +40,9 @@ class _Notifications implements NotificationService {
 
 Future<ProviderContainer> _mount(
   WidgetTester tester,
-  _Notifications notifications,
-) async {
+  _Notifications notifications, {
+  bool use24HourFormat = true,
+}) async {
   final ProviderContainer container = ProviderContainer(
     overrides: [
       initialPreferencesProvider.overrideWithValue(
@@ -72,7 +73,8 @@ Future<ProviderContainer> _mount(
           GlobalCupertinoLocalizations.delegate,
         ],
         builder: (BuildContext context, Widget? child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+          data: MediaQuery.of(context)
+              .copyWith(alwaysUse24HourFormat: use24HourFormat),
           child: child!,
         ),
         home: const SettingsScreen(),
@@ -117,16 +119,26 @@ void main() {
       isTrue,
     );
     expect(notifications.fridayCancellations, 1);
-    expect(notifications.fridayReminderHours, <int>[2, 1]);
+    expect(notifications.fridayReminderTimes, isEmpty);
     final Finder timeRow = find.byKey(
       const ValueKey<String>('friday-prayer-time'),
     );
     expect(timeRow, findsOneWidget);
-    expect(find.text('13:30'), findsWidgets);
+    expect(find.text('Dhuhr time (automatic)'), findsWidgets);
+    expect(
+      find.byKey(const ValueKey<String>('friday-prayer-mosque-note')),
+      findsOneWidget,
+    );
 
     await tester.tap(timeRow);
     await tester.pumpAndSettle();
     expect(find.byType(TimePickerDialog), findsOneWidget);
+    expect(
+      MediaQuery.alwaysUse24HourFormatOf(
+        tester.element(find.byType(TimePickerDialog)),
+      ),
+      isTrue,
+    );
     await tester.tap(find.byIcon(Icons.keyboard_outlined));
     await tester.pumpAndSettle();
     final Finder fields = find.byType(TextField);
@@ -141,12 +153,21 @@ void main() {
         .prayerSettings
         .fridayPrayer;
     expect(settings.enabled, isTrue);
-    expect(settings.hour, 14);
-    expect(settings.minute, 45);
+    expect(settings.manualMinutesFromMidnight, 14 * 60 + 45);
     expect(find.text('14:45'), findsWidgets);
 
     expect(notifications.fridayCancellations, 2);
-    expect(notifications.fridayReminderHours, <int>[2, 1]);
+    expect(notifications.fridayReminderTimes, isEmpty);
+    await tester.tap(find.byKey(const ValueKey<String>('friday-prayer-auto')));
+    await tester.pumpAndSettle();
+    expect(
+      container
+          .read(settingsControllerProvider)
+          .prayerSettings
+          .fridayPrayer
+          .manualMinutesFromMidnight,
+      isNull,
+    );
     await tester.tap(toggle);
     await tester.pumpAndSettle();
     expect(
@@ -157,8 +178,33 @@ void main() {
           .enabled,
       isFalse,
     );
-    expect(notifications.fridayCancellations, 3);
-    expect(notifications.fridayReminderHours, isEmpty);
+    expect(notifications.fridayCancellations, 4);
+    expect(notifications.fridayReminderTimes, isEmpty);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Jumuah editor follows a 12-hour system preference', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final _Notifications notifications = _Notifications();
+    await _mount(tester, notifications, use24HourFormat: false);
+    final Finder toggle = find.byKey(
+      const ValueKey<String>('friday-prayer-enabled'),
+    );
+    await tester.scrollUntilVisible(toggle, 250);
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey<String>('friday-prayer-time')));
+    await tester.pumpAndSettle();
+    expect(
+      MediaQuery.alwaysUse24HourFormatOf(
+        tester.element(find.byType(TimePickerDialog)),
+      ),
+      isFalse,
+    );
   });
 }

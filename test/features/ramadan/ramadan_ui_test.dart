@@ -452,6 +452,10 @@ Widget _localizedApp({
     AppStrings.cupertinoFallbackDelegate,
     GlobalCupertinoLocalizations.delegate,
   ],
+  builder: (BuildContext context, Widget? child) => MediaQuery(
+    data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+    child: child!,
+  ),
   home: home,
 );
 

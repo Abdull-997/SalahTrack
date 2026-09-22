@@ -134,11 +134,6 @@ void main() {
           'markAsPrayed',
           'snoozeAction',
           'alhamdulillah',
-          'fullScreenAlarmPermission',
-          'fullScreenAlarmsEnabled',
-          'fullScreenAlarmsDisabled',
-          'fullScreenAlarmPermissionHelp',
-          'openFullScreenAlarmSettings',
           'settingsInfo',
           'settingsInfoTitle',
           'trackerInfo',
@@ -174,8 +169,10 @@ void main() {
           'fridayPrayerTime',
           'fridayPrayerHelp',
           'fridayPrayerReminderOnly',
-          'fridayPrayerInTwoHours',
           'fridayPrayerInOneHour',
+          'fridayPrayerAutomatic',
+          'useDhuhrTime',
+          'fridayPrayerMosqueNote',
           'oneHourRemainingTitle',
           'oneHourRemainingBody',
           'prayerPrayedAndRecorded',
@@ -374,7 +371,7 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: const SalahFocusApp(),
+          child: const SalahTrackApp(),
         ),
       );
       await tester.pumpAndSettle();

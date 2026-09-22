@@ -16,14 +16,14 @@ import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
 
-class SalahFocusApp extends ConsumerStatefulWidget {
-  const SalahFocusApp({super.key});
+class SalahTrackApp extends ConsumerStatefulWidget {
+  const SalahTrackApp({super.key});
 
   @override
-  ConsumerState<SalahFocusApp> createState() => _SalahFocusAppState();
+  ConsumerState<SalahTrackApp> createState() => _SalahTrackAppState();
 }
 
-class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
+class _SalahTrackAppState extends ConsumerState<SalahTrackApp> {
   StreamSubscription<UserLocation>? _automaticLocationSubscription;
   Future<void> _pendingAutomaticLocationUpdate = Future<void>.value();
   int _automaticLocationGeneration = 0;
@@ -190,23 +190,23 @@ class _SalahFocusAppState extends ConsumerState<SalahFocusApp> {
 
   Future<void> _syncFridayPrayerReminders() async {
     final preferences = ref.read(settingsControllerProvider);
+    List<PrayerEntry> fridayDhuhrs = const <PrayerEntry>[];
     try {
-      PrayerDay? today = ref.read(todayPrayerDayProvider).value;
-      if (today == null && preferences.location != null) {
-        try {
-          today = await ref.read(todayPrayerDayProvider.future);
-        } on Object {
-          // Cached location time zone remains a usable offline fallback.
-        }
+      final UserLocation? location = preferences.location;
+      if (preferences.prayerSettings.fridayPrayer.enabled && location != null) {
+        fridayDhuhrs = await ref
+            .read(prayerCoordinatorProvider)
+            .upcomingFridayDhuhrs(
+              location: location,
+              settings: preferences.prayerSettings,
+              nowUtc: ref.read(clockServiceProvider).nowUtc(),
+            );
       }
       await ref
           .read(fridayPrayerReminderPlannerProvider)
           .reschedule(
             preferences.prayerSettings.fridayPrayer,
-            timezoneId:
-                today?.timezoneId ??
-                preferences.location?.timezoneId ??
-                ref.read(deviceTimezoneIdProvider),
+            fridayDhuhrEntries: fridayDhuhrs,
             languageCode: preferences.localeCode,
             nowUtc: ref.read(clockServiceProvider).nowUtc(),
           );

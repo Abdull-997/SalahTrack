@@ -20,6 +20,8 @@ void main() {
       expect(appGradle, contains('minSdk = flutter.minSdkVersion'));
       expect(appGradle, contains('JavaVersion.VERSION_17'));
       expect(appGradle, contains('JvmTarget.JVM_17'));
+      expect(appGradle, contains('namespace = "com.salahtrack.app"'));
+      expect(appGradle, contains('applicationId = "com.salahtrack.app"'));
       expect(
         settingsGradle,
         contains('com.android.application") version "9.1.0'),
@@ -34,7 +36,20 @@ void main() {
       expect(manifest, isNot(contains('android:resizeableActivity="false"')));
       expect(manifest, isNot(contains('ACCESS_BACKGROUND_LOCATION')));
       expect(manifest, isNot(contains('USE_EXACT_ALARM')));
+      expect(
+        manifest,
+        isNot(
+          contains(
+            'USE_FULL_'
+            'SCREEN_INTENT',
+          ),
+        ),
+      );
       expect(manifest, isNot(contains('SYSTEM_ALERT_WINDOW')));
+      expect(manifest, isNot(contains('BIND_ACCESSIBILITY_SERVICE')));
+      expect(manifest, isNot(contains('PACKAGE_USAGE_STATS')));
+      expect(manifest, isNot(contains('BIND_VPN_SERVICE')));
+      expect(manifest, isNot(contains('BIND_DEVICE_ADMIN')));
       expect(manifest, isNot(contains('QUERY_ALL_PACKAGES')));
     },
   );
@@ -45,10 +60,7 @@ void main() {
     final String entitlements = _read('ios/Runner/Runner.entitlements');
 
     expect(project, contains('IPHONEOS_DEPLOYMENT_TARGET = 16.0'));
-    expect(
-      project,
-      contains('PRODUCT_BUNDLE_IDENTIFIER = com.salahfocus.salahFocus'),
-    );
+    expect(project, contains('PRODUCT_BUNDLE_IDENTIFIER = com.salahtrack.app'));
     expect(info, contains('<key>NSLocationWhenInUseUsageDescription</key>'));
     expect(info, isNot(contains('NSLocationAlways')));
     expect(info, isNot(contains('UIBackgroundModes')));

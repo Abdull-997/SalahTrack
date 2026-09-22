@@ -60,7 +60,7 @@ void main() {
       final PrayerSettings withFridayPrayer = base.copyWith(
         fridayPrayer: const FridayPrayerSettings(
           enabled: true,
-          minutesFromMidnight: 14 * 60,
+          manualMinutesFromMidnight: 14 * 60,
         ),
       );
 

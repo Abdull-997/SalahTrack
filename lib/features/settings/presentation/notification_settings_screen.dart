@@ -5,7 +5,7 @@ import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/shared/errors/user_error_message.dart';
 
-enum _NotificationPermission { notifications, exactAlarms, fullScreenAlarms }
+enum _NotificationPermission { notifications, exactAlarms }
 
 /// Keeps permission status in the app theme. Operating-system settings are
 /// opened only through the explicitly labelled external-settings button.
@@ -16,15 +16,9 @@ class NotificationSettingsScreen extends ConsumerStatefulWidget {
   const NotificationSettingsScreen.exactAlarms({super.key})
     : _permission = _NotificationPermission.exactAlarms;
 
-  const NotificationSettingsScreen.fullScreenAlarms({super.key})
-    : _permission = _NotificationPermission.fullScreenAlarms;
-
   final _NotificationPermission _permission;
 
   bool get isExactAlarm => _permission == _NotificationPermission.exactAlarms;
-  bool get isFullScreenAlarm =>
-      _permission == _NotificationPermission.fullScreenAlarms;
-
   @override
   ConsumerState<NotificationSettingsScreen> createState() =>
       _NotificationSettingsScreenState();
@@ -76,8 +70,6 @@ class _NotificationSettingsScreenState
           await service.openNotificationSettings();
         case _NotificationPermission.exactAlarms:
           await service.openExactAlarmSettings();
-        case _NotificationPermission.fullScreenAlarms:
-          await service.openFullScreenIntentSettings();
       }
     } catch (error) {
       if (mounted) setState(() => _error = error);
@@ -105,8 +97,6 @@ class _NotificationSettingsScreenState
           await service.notificationsAllowed(),
         _NotificationPermission.exactAlarms =>
           await service.canScheduleExactly(),
-        _NotificationPermission.fullScreenAlarms =>
-          await service.canUseFullScreenIntent(),
       };
       if (mounted) {
         if (_allowed == false && allowed) {
@@ -135,23 +125,16 @@ class _NotificationSettingsScreenState
     final String permissionKey = switch (widget._permission) {
       _NotificationPermission.notifications => 'notificationPermission',
       _NotificationPermission.exactAlarms => 'exactAlarmPermission',
-      _NotificationPermission.fullScreenAlarms => 'fullScreenAlarmPermission',
     };
     final String statusKey = switch (widget._permission) {
       _NotificationPermission.notifications =>
         _allowed == true ? 'notificationsEnabled' : 'notificationsDisabled',
       _NotificationPermission.exactAlarms =>
         _allowed == true ? 'exactAlarmsEnabled' : 'exactAlarmsDisabled',
-      _NotificationPermission.fullScreenAlarms =>
-        _allowed == true
-            ? 'fullScreenAlarmsEnabled'
-            : 'fullScreenAlarmsDisabled',
     };
     final String helpKey = switch (widget._permission) {
       _NotificationPermission.notifications => 'notificationPermissionHelp',
       _NotificationPermission.exactAlarms => 'exactAlarmPermissionHelp',
-      _NotificationPermission.fullScreenAlarms =>
-        'fullScreenAlarmPermissionHelp',
     };
     return Scaffold(
       appBar: AppBar(title: Text(s.t(permissionKey))),
@@ -166,9 +149,7 @@ class _NotificationSettingsScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Icon(
-                      widget.isFullScreenAlarm
-                          ? Icons.fullscreen_rounded
-                          : widget.isExactAlarm
+                      widget.isExactAlarm
                           ? Icons.alarm_rounded
                           : _allowed == true
                           ? Icons.notifications_active_outlined
@@ -235,13 +216,7 @@ class _NotificationSettingsScreenState
             OutlinedButton.icon(
               onPressed: _openingSettings ? null : _openSettings,
               icon: const Icon(Icons.open_in_new_rounded),
-              label: Text(
-                s.t(
-                  widget.isFullScreenAlarm
-                      ? 'openFullScreenAlarmSettings'
-                      : 'openSystemSettings',
-                ),
-              ),
+              label: Text(s.t('openSystemSettings')),
             ),
             const SizedBox(height: 12),
             Text(

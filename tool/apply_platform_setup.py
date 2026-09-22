@@ -20,8 +20,13 @@ def patch_android() -> None:
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.VIBRATE",
         "android.permission.SCHEDULE_EXACT_ALARM",
-        "android.permission.USE_FULL_SCREEN_INTENT",
     ]
+    obsolete_permission = "android.permission.USE_FULL_" + "SCREEN_INTENT"
+    text = re.sub(
+        rf'\s*<uses-permission android:name="{re.escape(obsolete_permission)}"\s*/>',
+        "",
+        text,
+    )
     insertion = "\n".join(
         f'    <uses-permission android:name="{permission}" />'
         for permission in permissions
@@ -94,7 +99,7 @@ def patch_android() -> None:
 
     native_main_activity = ROOT / "native/android/MainActivity.kt"
     if native_main_activity.exists():
-        kotlin_target = ROOT / "android/app/src/main/kotlin/com/salahfocus/salah_focus/MainActivity.kt"
+        kotlin_target = ROOT / "android/app/src/main/kotlin/com/salahtrack/app/MainActivity.kt"
         kotlin_target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(native_main_activity, kotlin_target)
 
@@ -118,6 +123,10 @@ if (releaseKeystorePropertiesFile.exists()) {
 
 '''
             g = signing + g
+        g = re.sub(r'namespace\s*=\s*"[^"]+"',
+                   'namespace = "com.salahtrack.app"', g, count=1)
+        g = re.sub(r'applicationId\s*=\s*"[^"]+"',
+                   'applicationId = "com.salahtrack.app"', g, count=1)
         if "isCoreLibraryDesugaringEnabled" not in g:
             g = g.replace("compileOptions {", "compileOptions {\n        isCoreLibraryDesugaringEnabled = true", 1)
         if "multiDexEnabled = true" not in g:
@@ -302,6 +311,13 @@ def patch_ios() -> None:
         p = re.sub(r"IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+;", "IPHONEOS_DEPLOYMENT_TARGET = 16.0;", p)
         p = localize_ios_project(p)
         p = configure_ios_notification_entitlements(p)
+        p = re.sub(
+            r'PRODUCT_BUNDLE_IDENTIFIER = ([^;]+);',
+            lambda match: 'PRODUCT_BUNDLE_IDENTIFIER = com.salahtrack.app.RunnerTests;'
+            if match.group(1).endswith('.RunnerTests')
+            else 'PRODUCT_BUNDLE_IDENTIFIER = com.salahtrack.app;',
+            p,
+        )
         project.write_text(p, encoding="utf-8")
 
 

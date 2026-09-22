@@ -14,6 +14,21 @@ import 'package:salah_focus/core/theme/app_theme.dart';
 void main() {
   setUpAll(initializeDateFormatting);
 
+  test(
+    'clock formatting follows the supplied system 12/24-hour preference',
+    () {
+      final AppStrings strings = AppStrings(const Locale('en'));
+      final DateTime instant = DateTime(2026, 9, 18, 13, 30);
+      expect(strings.time(instant, use24HourFormat: true), '13:30');
+      expect(
+        strings.time(instant, use24HourFormat: false).replaceAll('\u202f', ' '),
+        '1:30 PM',
+      );
+      expect(instant.hour, 13);
+      expect(instant.minute, 30);
+    },
+  );
+
   const Map<String, String> gregorianExamples = <String, String>{
     'ar': 'الاثنين، ٢١ سبتمبر ٢٠٢٦',
     'bn': 'সোমবার, ২১ সেপ্টেম্বর ২০২৬',

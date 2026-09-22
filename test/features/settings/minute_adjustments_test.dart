@@ -91,9 +91,12 @@ Widget _app({
       AppStrings.cupertinoFallbackDelegate,
       GlobalCupertinoLocalizations.delegate,
     ],
-    builder: (BuildContext context, Widget? child) => Directionality(
-      textDirection: textDirectionForLanguage(locale.languageCode),
-      child: child ?? const SizedBox.shrink(),
+    builder: (BuildContext context, Widget? child) => MediaQuery(
+      data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+      child: Directionality(
+        textDirection: textDirectionForLanguage(locale.languageCode),
+        child: child ?? const SizedBox.shrink(),
+      ),
     ),
     home: const SettingsScreen(),
   ),
@@ -156,7 +159,10 @@ void main() {
           final (int hour, int minute) = _times[type]!;
           expect(
             _textAtKey(tester, 'adjustment-time-${type.name}'),
-            strings.time(DateTime.utc(2026, 9, 14, hour, minute)),
+            strings.time(
+              DateTime.utc(2026, 9, 14, hour, minute),
+              use24HourFormat: true,
+            ),
           );
           if (type != PrayerType.fajr) continue;
           final Finder plus = find.byKey(
@@ -171,7 +177,10 @@ void main() {
           await tester.pump();
           expect(
             _textAtKey(tester, 'adjustment-time-fajr'),
-            strings.time(DateTime.utc(2026, 9, 14, 5, 43)),
+            strings.time(
+              DateTime.utc(2026, 9, 14, 5, 43),
+              use24HourFormat: true,
+            ),
           );
           expect(
             _textAtKey(tester, 'adjustment-value-fajr'),

@@ -60,7 +60,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '5. Notifications and device features',
           paragraphs: <String>[
-            'With permission, SalahTrack schedules local prayer, Friday, snooze, and Ramadan notifications on the device. Notification text, dates, prayer identifiers, and actions are handled by the operating system; no remote-push token or notification server is used. Android may use exact alarms, vibration, restart scheduling after boot, and optional full-screen prayer alerts. iOS may use Time Sensitive notifications.',
+            'With permission, SalahTrack schedules local prayer, Friday, snooze, and Ramadan notifications on the device. Notification text, dates, prayer identifiers, and actions are handled by the operating system; no remote-push token or notification server is used. Android may use exact alarms, vibration, restart scheduling after boot, and standard high-importance notifications. iOS may use Time Sensitive notifications.',
             'The current iOS target does not contain FamilyControls, ManagedSettings, DeviceActivity, an App Group, or a Family Controls entitlement. SalahTrack therefore does not access Screen Time app selections or usage data in this release.',
           ],
         ),
@@ -129,7 +129,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '5. Benachrichtigungen und Gerätefunktionen',
           paragraphs: <String>[
-            'Mit deiner Erlaubnis plant SalahTrack lokale Gebets-, Freitags-, Snooze- und Ramadan-Benachrichtigungen. Inhalt, Termine, Gebetskennungen und Aktionen verarbeitet das Betriebssystem; es gibt keinen Remote-Push-Token und keinen Benachrichtigungsserver. Android kann exakte Alarme, Vibration, Neuplanung nach Neustart und optionale Vollbildhinweise verwenden. iOS kann zeitkritische Mitteilungen verwenden.',
+            'Mit deiner Erlaubnis plant SalahTrack lokale Gebets-, Freitags-, Snooze- und Ramadan-Benachrichtigungen. Inhalt, Termine, Gebetskennungen und Aktionen verarbeitet das Betriebssystem; es gibt keinen Remote-Push-Token und keinen Benachrichtigungsserver. Android kann exakte Alarme, Vibration, Neuplanung nach Neustart und normale Benachrichtigungen mit hoher Priorität verwenden. iOS kann zeitkritische Mitteilungen verwenden.',
             'Das aktuelle iOS-Ziel enthält keine FamilyControls-, ManagedSettings- oder DeviceActivity-Integration, keine App Group und keine Family-Controls-Berechtigung. Diese Version greift daher nicht auf Bildschirmzeit-Auswahlen oder Nutzungsdaten zu.',
           ],
         ),
@@ -198,7 +198,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '5. الإشعارات وميزات الجهاز',
           paragraphs: <String>[
-            'بعد الإذن يجدول التطبيق إشعارات محلية للصلاة والجمعة والتأجيل ورمضان. يعالج نظام التشغيل النص والمواعيد ومعرّفات الصلاة والإجراءات، ولا يستخدم التطبيق رمز دفع بعيدًا أو خادم إشعارات. قد يستخدم Android المنبهات الدقيقة والاهتزاز وإعادة الجدولة بعد التشغيل والتنبيه الاختياري بملء الشاشة، وقد يستخدم iOS إشعارات حساسة للوقت.',
+            'بعد الإذن يجدول التطبيق إشعارات محلية للصلاة والجمعة والتأجيل ورمضان. يعالج نظام التشغيل النص والمواعيد ومعرّفات الصلاة والإجراءات، ولا يستخدم التطبيق رمز دفع بعيدًا أو خادم إشعارات. قد يستخدم Android المنبهات الدقيقة والاهتزاز وإعادة الجدولة بعد التشغيل والإشعارات العادية ذات الأهمية العالية، وقد يستخدم iOS إشعارات حساسة للوقت.',
             'هدف iOS الحالي لا يتضمن FamilyControls أو ManagedSettings أو DeviceActivity أو App Group أو صلاحية Family Controls، لذلك لا يصل هذا الإصدار إلى اختيارات «مدة استخدام الجهاز» أو بيانات الاستخدام.',
           ],
         ),
@@ -267,7 +267,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '5. Notifications et fonctions de l’appareil',
           paragraphs: <String>[
-            'Avec votre autorisation, l’app programme localement les rappels de prière, du vendredi, de report et de Ramadan. Le système traite textes, dates, identifiants et actions ; aucun jeton push distant ni serveur de notifications n’est utilisé. Android peut utiliser alarmes exactes, vibration, reprogrammation au démarrage et plein écran facultatif ; iOS peut utiliser les notifications urgentes.',
+            'Avec votre autorisation, l’app programme localement les rappels de prière, du vendredi, de report et de Ramadan. Le système traite textes, dates, identifiants et actions ; aucun jeton push distant ni serveur de notifications n’est utilisé. Android peut utiliser les alarmes exactes, la vibration, la reprogrammation au démarrage et des notifications standard de haute importance ; iOS peut utiliser les notifications urgentes.',
             'La cible iOS actuelle n’intègre pas FamilyControls, ManagedSettings, DeviceActivity, App Group ni l’autorisation Family Controls. Cette version n’accède donc pas aux choix ou données Temps d’écran.',
           ],
         ),
@@ -336,7 +336,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '5. Notificaciones y funciones del dispositivo',
           paragraphs: <String>[
-            'Con permiso, la app programa notificaciones locales de oración, viernes, posposición y Ramadán. El sistema gestiona texto, fechas, identificadores y acciones; no hay token push remoto ni servidor. Android puede usar alarmas exactas, vibración, reinicio y pantalla completa opcional; iOS, notificaciones urgentes.',
+            'Con permiso, la app programa notificaciones locales de oración, viernes, posposición y Ramadán. El sistema gestiona texto, fechas, identificadores y acciones; no hay token push remoto ni servidor. Android puede usar alarmas exactas, vibración, reprogramación tras el reinicio y notificaciones estándar de alta importancia; iOS, notificaciones urgentes.',
             'El objetivo iOS actual no contiene FamilyControls, ManagedSettings, DeviceActivity, App Group ni la autorización Family Controls, por lo que no accede a selecciones o datos de Tiempo de uso.',
           ],
         ),
@@ -405,7 +405,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '5. Bildirimler ve cihaz özellikleri',
           paragraphs: <String>[
-            'İzinle cihazda namaz, cuma, erteleme ve Ramazan bildirimleri planlanır. Metin, tarih, kimlik ve eylemleri işletim sistemi işler; uzak push belirteci veya bildirim sunucusu yoktur. Android kesin alarm, titreşim, açılışta yeniden planlama ve isteğe bağlı tam ekranı; iOS Zamana Duyarlı bildirimleri kullanabilir.',
+            'İzinle cihazda namaz, cuma, erteleme ve Ramazan bildirimleri planlanır. Metin, tarih, kimlik ve eylemleri işletim sistemi işler; uzak push belirteci veya bildirim sunucusu yoktur. Android kesin alarm, titreşim, açılışta yeniden planlama ve standart yüksek öncelikli bildirimleri; iOS Zamana Duyarlı bildirimleri kullanabilir.',
             'Mevcut iOS hedefinde FamilyControls, ManagedSettings, DeviceActivity, App Group veya Family Controls yetkisi yoktur; Ekran Süresi seçimlerine ya da kullanım verilerine erişilmez.',
           ],
         ),
@@ -474,7 +474,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '5. Notifikasi dan fitur perangkat',
           paragraphs: <String>[
-            'Dengan izin, notifikasi salat, Jumat, tunda, dan Ramadan dijadwalkan secara lokal. Sistem operasi menangani teks, tanggal, ID, dan tindakan; tidak ada token push jarak jauh atau server notifikasi. Android dapat memakai alarm tepat, getaran, penjadwalan setelah boot, dan layar penuh opsional; iOS dapat memakai notifikasi Peka Waktu.',
+            'Dengan izin, notifikasi salat, Jumat, tunda, dan Ramadan dijadwalkan secara lokal. Sistem operasi menangani teks, tanggal, ID, dan tindakan; tidak ada token push jarak jauh atau server notifikasi. Android dapat memakai alarm tepat, getaran, penjadwalan setelah boot, dan notifikasi standar berprioritas tinggi; iOS dapat memakai notifikasi Peka Waktu.',
             'Target iOS saat ini tidak memiliki FamilyControls, ManagedSettings, DeviceActivity, App Group, atau hak Family Controls, sehingga tidak mengakses pilihan atau data Durasi Layar.',
           ],
         ),
@@ -543,7 +543,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '5. Pemberitahuan dan ciri peranti',
           paragraphs: <String>[
-            'Dengan kebenaran, pemberitahuan solat, Jumaat, tunda dan Ramadan dijadualkan secara setempat. Sistem mengurus teks, tarikh, ID dan tindakan; tiada token push jauh atau pelayan. Android boleh menggunakan penggera tepat, getaran, penjadualan selepas but dan skrin penuh pilihan; iOS boleh menggunakan pemberitahuan Sensitif Masa.',
+            'Dengan kebenaran, pemberitahuan solat, Jumaat, tunda dan Ramadan dijadualkan secara setempat. Sistem mengurus teks, tarikh, ID dan tindakan; tiada token push jauh atau pelayan. Android boleh menggunakan penggera tepat, getaran, penjadualan selepas but dan pemberitahuan standard berkeutamaan tinggi; iOS boleh menggunakan pemberitahuan Sensitif Masa.',
             'Sasaran iOS semasa tidak mempunyai FamilyControls, ManagedSettings, DeviceActivity, App Group atau kelayakan Family Controls, maka data Masa Skrin tidak diakses.',
           ],
         ),
@@ -612,7 +612,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '৫. নোটিফিকেশন ও ডিভাইস বৈশিষ্ট্য',
           paragraphs: <String>[
-            'অনুমতি দিলে নামাজ, জুমা, স্নুজ ও রমজান নোটিফিকেশন ডিভাইসে নির্ধারিত হয়। লেখা, তারিখ, ID ও কাজ অপারেটিং সিস্টেম সামলায়; দূরবর্তী push token বা সার্ভার নেই। Android সঠিক alarm, vibration, boot-এর পর পুনঃনির্ধারণ ও ঐচ্ছিক full-screen; iOS Time Sensitive নোটিফিকেশন ব্যবহার করতে পারে।',
+            'অনুমতি দিলে নামাজ, জুমা, স্নুজ ও রমজান নোটিফিকেশন ডিভাইসে নির্ধারিত হয়। লেখা, তারিখ, ID ও কাজ অপারেটিং সিস্টেম সামলায়; দূরবর্তী push token বা সার্ভার নেই। Android সঠিক alarm, vibration, boot-এর পর পুনঃনির্ধারণ ও সাধারণ উচ্চ-গুরুত্বের নোটিফিকেশন; iOS Time Sensitive নোটিফিকেশন ব্যবহার করতে পারে।',
             'বর্তমান iOS টার্গেটে FamilyControls, ManagedSettings, DeviceActivity, App Group বা Family Controls entitlement নেই; Screen Time নির্বাচন বা ব্যবহার ডেটা নেওয়া হয় না।',
           ],
         ),
@@ -681,7 +681,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '۵. اعلان‌ها و قابلیت‌های دستگاه',
           paragraphs: <String>[
-            'با اجازه، اعلان نماز، جمعه، تعویق و رمضان محلی زمان‌بندی می‌شود. سیستم متن، تاریخ، شناسه و اقدام را مدیریت می‌کند؛ توکن push یا سرور اعلان وجود ندارد. Android می‌تواند از زنگ دقیق، لرزش، زمان‌بندی پس از راه‌اندازی و تمام‌صفحهٔ اختیاری و iOS از اعلان Time Sensitive استفاده کند.',
+            'با اجازه، اعلان نماز، جمعه، تعویق و رمضان محلی زمان‌بندی می‌شود. سیستم متن، تاریخ، شناسه و اقدام را مدیریت می‌کند؛ توکن push یا سرور اعلان وجود ندارد. Android می‌تواند از زنگ دقیق، لرزش، زمان‌بندی پس از راه‌اندازی و اعلان‌های عادی با اهمیت بالا و iOS از اعلان Time Sensitive استفاده کند.',
             'هدف فعلی iOS شامل FamilyControls، ManagedSettings، DeviceActivity، App Group یا مجوز Family Controls نیست؛ بنابراین داده یا انتخاب Screen Time خوانده نمی‌شود.',
           ],
         ),
@@ -750,7 +750,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '۵. اطلاعات تے ڈیوائس سہولتاں',
           paragraphs: <String>[
-            'اجازت نال نماز، جمعہ، سنوز تے رمضان اطلاعات ڈیوائس تے شیڈول ہوندیاں۔ سسٹم متن، تاریخ، ID تے عمل سنبھالدا؛ ریموٹ push token یا سرور نئیں۔ Android درست الارم، وائبریشن، بوٹ توں بعد شیڈول تے اختیاری پوری سکرین؛ iOS Time Sensitive اطلاع ورت سکدا اے۔',
+            'اجازت نال نماز، جمعہ، سنوز تے رمضان اطلاعات ڈیوائس تے شیڈول ہوندیاں۔ سسٹم متن، تاریخ، ID تے عمل سنبھالدا؛ ریموٹ push token یا سرور نئیں۔ Android درست الارم، وائبریشن، بوٹ توں بعد شیڈول تے عام اعلیٰ اہمیت والیاں اطلاعات؛ iOS Time Sensitive اطلاع ورت سکدا اے۔',
             'موجودہ iOS ٹارگٹ وچ FamilyControls، ManagedSettings، DeviceActivity، App Group یا Family Controls entitlement نئیں؛ Screen Time ڈیٹا نئیں پڑھیا جاندا۔',
           ],
         ),
@@ -819,7 +819,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '۵. خبرتیاوې او د وسیلې ځانګړنې',
           paragraphs: <String>[
-            'له اجازې سره د لمانځه، جمعې، ځنډ او رمضان خبرتیاوې محلي مهالویش کېږي. سیستم متن، نېټه، پېژند او عمل سمبالوي؛ لرې push token یا سرور نشته. Android دقیق الارم، رپ، له چالانېدو وروسته مهالویش او اختیاري بشپړ سکرین؛ iOS Time Sensitive خبرتیا کارولی شي.',
+            'له اجازې سره د لمانځه، جمعې، ځنډ او رمضان خبرتیاوې محلي مهالویش کېږي. سیستم متن، نېټه، پېژند او عمل سمبالوي؛ لرې push token یا سرور نشته. Android دقیق الارم، رپ، له چالانېدو وروسته مهالویش او عادي لوړ اهمیت خبرتیاوې؛ iOS Time Sensitive خبرتیا کارولی شي.',
             'اوسنی iOS هدف FamilyControls، ManagedSettings، DeviceActivity، App Group یا Family Controls حق نه لري؛ د Screen Time معلومات نه لوستل کېږي.',
           ],
         ),
@@ -888,7 +888,7 @@ abstract final class PrivacyLegalDocuments {
         LegalSection(
           title: '۵. اطلاعات اور ڈیوائس خصوصیات',
           paragraphs: <String>[
-            'اجازت کے ساتھ نماز، جمعہ، سنوز اور رمضان اطلاعات ڈیوائس پر شیڈول ہوتی ہیں۔ سسٹم متن، تاریخ، ID اور عمل سنبھالتا؛ ریموٹ push token یا سرور نہیں۔ Android درست الارم، وائبریشن، بوٹ کے بعد شیڈول اور اختیاری پوری اسکرین؛ iOS Time Sensitive اطلاع استعمال کر سکتا ہے۔',
+            'اجازت کے ساتھ نماز، جمعہ، سنوز اور رمضان اطلاعات ڈیوائس پر شیڈول ہوتی ہیں۔ سسٹم متن، تاریخ، ID اور عمل سنبھالتا؛ ریموٹ push token یا سرور نہیں۔ Android درست الارم، وائبریشن، بوٹ کے بعد شیڈول اور عام اعلیٰ اہمیت والی اطلاعات؛ iOS Time Sensitive اطلاع استعمال کر سکتا ہے۔',
             'موجودہ iOS ہدف میں FamilyControls، ManagedSettings، DeviceActivity، App Group یا Family Controls entitlement نہیں؛ Screen Time ڈیٹا نہیں پڑھا جاتا۔',
           ],
         ),

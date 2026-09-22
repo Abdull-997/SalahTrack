@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -139,7 +138,7 @@ Future<ProviderContainer> _mount(
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: const SalahFocusApp(),
+      child: const SalahTrackApp(),
     ),
   );
   await tester.pumpAndSettle();
@@ -160,23 +159,9 @@ void main() {
   }
 
   TestWidgetsFlutterBinding.ensureInitialized();
-  const alarmChannel = MethodChannel('salah_focus/prayer_alarm');
-  final alarmStates = <bool>[];
   setUpAll(initializeDateFormatting);
-  setUp(() {
-    alarmStates.clear();
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(alarmChannel, (call) async {
-          alarmStates.add((call.arguments as Map)['active'] as bool);
-          return null;
-        });
-  });
-  tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(alarmChannel, null);
-  });
 
-  testRouting('cold body tap opens Isha and Android blocks Back until choice', (
+  testRouting('cold body tap opens Isha with standard dismissible navigation', (
     tester,
   ) async {
     final notifications = _Notifications()..initial = Future.value(_payload());
@@ -185,19 +170,12 @@ void main() {
     expect(find.byType(PrayerReminderScreen), findsOneWidget);
     expect(find.text('Isha'), findsOneWidget);
     expect(find.text('Mark as Prayed'), findsOneWidget);
-    expect(find.text('Home'), findsNothing);
+    expect(find.text('Home'), findsOneWidget);
     expect(find.text('Skip today'), findsNothing);
     expect(
       tester.widget<PopScope<void>>(find.byType(PopScope<void>)).canPop,
-      isFalse,
+      isTrue,
     );
-    await tester.binding.handlePopRoute();
-    await tester.pumpAndSettle();
-    expect(
-      container.read(goRouterProvider).routeInformationProvider.value.uri.path,
-      '/reminder/2026-09-13:isha',
-    );
-    expect(alarmStates.last, isTrue);
     await tester.tap(find.text('Mark as Prayed'));
     await tester.pumpAndSettle();
     expect(coordinator.confirms, 1);
@@ -212,7 +190,6 @@ void main() {
       tester.widget<PopScope<void>>(find.byType(PopScope<void>)).canPop,
       isTrue,
     );
-    expect(alarmStates.last, isFalse);
     await tester.pump(const Duration(seconds: 10));
     expect(find.text('Alhamdulillah 🤲🏼'), findsOneWidget);
     await tester.tap(find.text('Home'));
@@ -283,10 +260,7 @@ void main() {
     expect(success, findsOneWidget);
     expect(Theme.of(context).brightness, Brightness.dark);
     expect(Directionality.of(context), TextDirection.rtl);
-    expect(
-      find.text("${strings.t('alhamdulillah')} 🤲🏼"),
-      findsOneWidget,
-    );
+    expect(find.text("${strings.t('alhamdulillah')} 🤲🏼"), findsOneWidget);
     expect(
       find.text(
         strings.t(
@@ -432,26 +406,21 @@ void main() {
       container.read(goRouterProvider).routeInformationProvider.value.uri.path,
       '/home',
     );
-    expect(alarmStates.last, isFalse);
   });
 
-  testRouting(
-    'iOS reminder always offers Home and never enables Android alarm flags',
-    (tester) async {
-      final notifications = _Notifications()
-        ..initial = Future.value(_payload());
-      final coordinator = _Coordinator()..entries[_entry().id] = _entry();
-      await _mount(tester, notifications, coordinator);
-      expect(find.text('Isha'), findsOneWidget);
-      expect(find.text('Home'), findsOneWidget);
-      expect(
-        tester.widget<PopScope<void>>(find.byType(PopScope<void>)).canPop,
-        isTrue,
-      );
-      expect(alarmStates, isEmpty);
-    },
-    platform: TargetPlatform.iOS,
-  );
+  testRouting('iOS reminder offers the same standard Home action', (
+    tester,
+  ) async {
+    final notifications = _Notifications()..initial = Future.value(_payload());
+    final coordinator = _Coordinator()..entries[_entry().id] = _entry();
+    await _mount(tester, notifications, coordinator);
+    expect(find.text('Isha'), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+    expect(
+      tester.widget<PopScope<void>>(find.byType(PopScope<void>)).canPop,
+      isTrue,
+    );
+  }, platform: TargetPlatform.iOS);
 
   testRouting('warm response wins over a delayed cold-launch payload', (
     tester,
@@ -549,29 +518,25 @@ void main() {
         isTrue,
       );
       expect(coordinator.confirms, 0);
-      expect(alarmStates.last, isFalse);
     });
   }
 
-  testRouting(
-    'action errors keep target visible and release Back and alarm flags',
-    (tester) async {
-      final notifications = _Notifications()
-        ..initial = Future.value(_payload());
-      final coordinator = _Coordinator()
-        ..entries[_entry().id] = _entry()
-        ..actionError = StateError('cannot schedule');
-      await _mount(tester, notifications, coordinator);
-      await tester.tap(find.byIcon(Icons.snooze_rounded));
-      await tester.pumpAndSettle();
-      expect(find.text('Isha'), findsOneWidget);
-      expect(find.text('Home'), findsOneWidget);
-      expect(
-        tester.widget<PopScope<void>>(find.byType(PopScope<void>)).canPop,
-        isTrue,
-      );
-      expect(alarmStates.last, isFalse);
-      expect(coordinator.confirms, 0);
-    },
-  );
+  testRouting('action errors keep target visible and allow Back', (
+    tester,
+  ) async {
+    final notifications = _Notifications()..initial = Future.value(_payload());
+    final coordinator = _Coordinator()
+      ..entries[_entry().id] = _entry()
+      ..actionError = StateError('cannot schedule');
+    await _mount(tester, notifications, coordinator);
+    await tester.tap(find.byIcon(Icons.snooze_rounded));
+    await tester.pumpAndSettle();
+    expect(find.text('Isha'), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+    expect(
+      tester.widget<PopScope<void>>(find.byType(PopScope<void>)).canPop,
+      isTrue,
+    );
+    expect(coordinator.confirms, 0);
+  });
 }

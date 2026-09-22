@@ -8,12 +8,12 @@ with tempfile.TemporaryDirectory() as d:
     # fake source structure used by patch script
     shutil.copytree(src/'native', r/'native')
     (r/'android/app/src/main').mkdir(parents=True)
-    (r/'android/app/src/main/AndroidManifest.xml').write_text('<?xml version="1.0" encoding="utf-8"?>\n<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:label="salah_focus"></application></manifest>')
+    (r/'android/app/src/main/AndroidManifest.xml').write_text('<?xml version="1.0" encoding="utf-8"?>\n<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:label="SalahTrack"></application></manifest>')
     (r/'android/app').mkdir(parents=True, exist_ok=True)
     (r/'android/app/build.gradle.kts').write_text('''android {\n  compileOptions {\n  }\n  defaultConfig {\n  }\n}\n''')
     (r/'ios/Runner').mkdir(parents=True)
     with (r/'ios/Runner/Info.plist').open('wb') as h:
-        plistlib.dump({'CFBundleDisplayName':'salah_focus'}, h)
+        plistlib.dump({'CFBundleDisplayName':'SalahTrack'}, h)
     (r/'ios/Runner/AppDelegate.swift').write_text('// template')
     (r/'ios/Podfile').write_text("platform :ios, '13.0'\n")
     (r/'ios/Runner.xcodeproj').mkdir(parents=True)
@@ -67,7 +67,7 @@ TESTS /* Tests */ = {
     txt=manifest.read_text()
     assert txt.index('<manifest') < txt.index('<uses-permission') < txt.index('<application')
     assert 'android:label="@string/app_name"' in txt
-    for token in ['POST_NOTIFICATIONS','SCHEDULE_EXACT_ALARM','USE_FULL_SCREEN_INTENT',
+    for token in ['POST_NOTIFICATIONS','SCHEDULE_EXACT_ALARM',
                   'ScheduledNotificationReceiver','ScheduledNotificationBootReceiver',
                   'ActionBroadcastReceiver']:
         assert token in txt, token
@@ -78,11 +78,11 @@ TESTS /* Tests */ = {
     assert 'signingConfig = signingConfigs.getByName("debug")' not in gradle
     assert (r/'android/app/src/main/res/raw/keep.xml').is_file()
     native_main_activity = r/'native/android/MainActivity.kt'
-    generated_main_activity = r/'android/app/src/main/kotlin/com/salahfocus/salah_focus/MainActivity.kt'
+    generated_main_activity = r/'android/app/src/main/kotlin/com/salahtrack/app/MainActivity.kt'
     assert generated_main_activity.is_file() == native_main_activity.is_file()
     assert native_main_activity.is_file(), 'System settings bridge must survive bootstrap'
     assert generated_main_activity.read_bytes() == native_main_activity.read_bytes()
-    assert (src/'android/app/src/main/kotlin/com/salahfocus/salah_focus/MainActivity.kt').read_bytes() == native_main_activity.read_bytes()
+    assert (src/'android/app/src/main/kotlin/com/salahtrack/app/MainActivity.kt').read_bytes() == native_main_activity.read_bytes()
 
     # Applying the setup again must not duplicate notification permissions/receivers.
     mod.patch_android()

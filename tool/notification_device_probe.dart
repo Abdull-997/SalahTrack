@@ -1,6 +1,6 @@
 // Manual Android notification probe. Run with:
 // flutter run -d emulator-5554 -t tool/notification_device_probe.dart
-// Grant notifications/exact alarms/full-screen alarms on the test emulator.
+// Grant notifications/exact alarms on the test emulator.
 // The first launch schedules Isha 25 seconds later. Fajr and Dhuhr are stored
 // for warm/cold action replay through the plugin's Android activity intents.
 // Probe rows use a separate date and IDs; subsequent launches preserve results.
@@ -61,7 +61,7 @@ Future<void> main() async {
           ),
         ),
       ],
-      child: const SalahFocusApp(),
+      child: const SalahTrackApp(),
     ),
   );
 }

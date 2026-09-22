@@ -142,7 +142,6 @@ This is not a replacement for `flutter analyze` or `flutter test`; compiler-leve
 - `RECEIVE_BOOT_COMPLETED`
 - `VIBRATE`
 - `SCHEDULE_EXACT_ALARM`
-- `USE_FULL_SCREEN_INTENT`
 
 The app deliberately does **not** request:
 
@@ -159,6 +158,13 @@ Prayer notifications use exact scheduling only when Android reports that the app
 Android vendors can still apply additional background/battery restrictions to scheduled work. The release checklist therefore requires physical-device testing on Samsung, Pixel and at least one aggressively managed Android skin such as Xiaomi; SalahTrack does not attempt to bypass OEM power-management policies.
 
 The user can request precise-alarm permission from Onboarding or Settings. A denied permission must never crash the app.
+
+Prayer reminders use the high-importance `salahtrack_prayer_reminders_v1`
+channel and the normal Android notification system. Initial prayer alerts are
+dismissible; actionable grace and snooze reminders may stay ongoing until the
+user responds. Tapping a reminder opens SalahTrack. The application does not
+request overlay, accessibility, usage-access, background-location, or other
+permissions intended to force its interface over another application.
 
 ### Android Prayer Focus
 

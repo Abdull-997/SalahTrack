@@ -6,7 +6,7 @@ class ApplicationLocale {
   ApplicationLocale._();
 
   static const MethodChannel _channel = MethodChannel(
-    'salah_focus/system_settings',
+    'salahtrack/system_settings',
   );
 
   static Future<void> followSystem() async {

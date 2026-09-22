@@ -241,6 +241,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         if (prayer.type == PrayerType.dhuhr) ...<Widget>[
                           _FridayPrayerTile(
                             settings: preferences.prayerSettings.fridayPrayer,
+                            dhuhr: prayer,
                           ),
                           const SizedBox(height: 10),
                         ],
@@ -298,7 +299,7 @@ class _NextPrayerCard extends StatelessWidget {
       next.scheduledAtUtc,
       next.timezoneId,
     );
-    final String time = s.time(local);
+    final String time = s.systemTime(context, local);
     final Duration remaining = next.scheduledAtUtc.difference(nowUtc);
     final bool waiting = remaining.isNegative;
     final String countdown = waiting
@@ -394,7 +395,7 @@ class _PrayerTileState extends ConsumerState<_PrayerTile> {
       prayer.scheduledAtUtc,
       prayer.timezoneId,
     );
-    final String time = AppStrings.of(context).time(local);
+    final String time = AppStrings.of(context).systemTime(context, local);
     final bool actionable =
         prayer.status == PrayerStatus.active ||
         prayer.status == PrayerStatus.pending ||
@@ -478,16 +479,31 @@ class _PrayerTileState extends ConsumerState<_PrayerTile> {
 }
 
 class _FridayPrayerTile extends StatelessWidget {
-  const _FridayPrayerTile({required this.settings});
+  const _FridayPrayerTile({required this.settings, required this.dhuhr});
 
   final FridayPrayerSettings settings;
+  final PrayerEntry dhuhr;
 
   @override
   Widget build(BuildContext context) {
     final AppStrings s = AppStrings.of(context);
     final Color primary = Theme.of(context).colorScheme.primary;
-    final String time = s.time(
-      DateTime(2000, 1, 1, settings.hour, settings.minute),
+    final DateTime localDhuhr = TimezoneService.toLocal(
+      dhuhr.scheduledAtUtc,
+      dhuhr.timezoneId,
+    );
+    final int effectiveMinutes = settings.effectiveMinutesFromMidnight(
+      localDhuhr.hour * 60 + localDhuhr.minute,
+    );
+    final String time = s.systemTime(
+      context,
+      DateTime(
+        localDhuhr.year,
+        localDhuhr.month,
+        localDhuhr.day,
+        effectiveMinutes ~/ 60,
+        effectiveMinutes % 60,
+      ),
     );
     return Card(
       child: Padding(
