@@ -36,6 +36,7 @@ class _SalahTrackAppState extends ConsumerState<SalahTrackApp> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (ref.read(storeScreenshotModeProvider)) return;
       ApplicationLocale.followSystem();
       _handleLaunchPayload();
       _syncAutomaticLocationUpdates();
@@ -130,6 +131,7 @@ class _SalahTrackAppState extends ConsumerState<SalahTrackApp> {
   }
 
   Future<void> _syncAutomaticLocationUpdates() async {
+    if (ref.read(storeScreenshotModeProvider)) return;
     final int generation = ++_automaticLocationGeneration;
     final StreamSubscription<UserLocation>? previous =
         _automaticLocationSubscription;
@@ -189,6 +191,7 @@ class _SalahTrackAppState extends ConsumerState<SalahTrackApp> {
   }
 
   Future<void> _syncFridayPrayerReminders() async {
+    if (ref.read(storeScreenshotModeProvider)) return;
     final preferences = ref.read(settingsControllerProvider);
     List<PrayerEntry> fridayDhuhrs = const <PrayerEntry>[];
     try {
@@ -216,6 +219,7 @@ class _SalahTrackAppState extends ConsumerState<SalahTrackApp> {
   }
 
   Future<void> _syncRamadanReminders() async {
+    if (ref.read(storeScreenshotModeProvider)) return;
     final preferences = ref.read(settingsControllerProvider);
     PrayerDay? today;
     if (preferences.ramadanSettings.enabled && preferences.location != null) {
@@ -252,6 +256,7 @@ class _SalahTrackAppState extends ConsumerState<SalahTrackApp> {
   }
 
   Future<void> _handleLaunchPayload() async {
+    if (ref.read(storeScreenshotModeProvider)) return;
     final service = ref.read(notificationServiceProvider);
     final String? payload = await service.takeInitialPayload();
     // A foreground response is newer than the launch intent. Do not let a

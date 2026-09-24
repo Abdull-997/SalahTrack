@@ -19,6 +19,10 @@ import 'package:salah_focus/features/settings/application/settings_controller.da
 import 'package:salah_focus/features/ramadan/application/ramadan_notification_planner.dart';
 import 'package:salah_focus/features/ramadan/application/ramadan_reminder_coordinator.dart';
 
+/// Opt-in only from the store screenshot integration test. Production always
+/// uses the normal data sources and startup side effects.
+final Provider<bool> storeScreenshotModeProvider = Provider<bool>((Ref ref) => false);
+
 final Provider<String> deviceTimezoneIdProvider = Provider<String>(
   (Ref ref) => 'UTC',
 );

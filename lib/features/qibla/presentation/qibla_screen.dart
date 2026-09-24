@@ -7,6 +7,11 @@ import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/features/qibla/domain/qibla_calculator.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
 
+/// Test-only sensor input. Null keeps the real compass stream in production.
+final Provider<double?> qiblaScreenshotHeadingProvider = Provider<double?>(
+  (Ref ref) => null,
+);
+
 class QiblaScreen extends ConsumerWidget {
   const QiblaScreen({super.key});
 
@@ -34,6 +39,7 @@ class QiblaScreen extends ConsumerWidget {
               latitude: location.latitude,
               longitude: location.longitude,
               locationLabel: location.label,
+              screenshotHeading: ref.watch(qiblaScreenshotHeadingProvider),
             ),
     );
   }
@@ -44,11 +50,13 @@ class _QiblaCompass extends StatelessWidget {
     required this.latitude,
     required this.longitude,
     required this.locationLabel,
+    required this.screenshotHeading,
   });
 
   final double latitude;
   final double longitude;
   final String locationLabel;
+  final double? screenshotHeading;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +65,9 @@ class _QiblaCompass extends StatelessWidget {
       latitude: latitude,
       longitude: longitude,
     );
-    final Stream<CompassEvent>? events = TickerMode.valuesOf(context).enabled
+    final Stream<CompassEvent>? events = screenshotHeading != null
+        ? null
+        : TickerMode.valuesOf(context).enabled
         ? FlutterCompass.events
         : null;
     return ListView(
@@ -76,7 +86,16 @@ class _QiblaCompass extends StatelessWidget {
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         const SizedBox(height: 28),
-        if (events == null)
+        if (screenshotHeading != null)
+          _CompassFace(
+            bearing: bearing,
+            heading: screenshotHeading!,
+            relative: QiblaCalculator.relativeAngle(
+              qiblaBearing: bearing,
+              heading: screenshotHeading!,
+            ),
+          )
+        else if (events == null)
           _BearingOnly(bearing: bearing)
         else
           StreamBuilder<CompassEvent>(
