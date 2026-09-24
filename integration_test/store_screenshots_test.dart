@@ -116,6 +116,7 @@ Future<void> _capture(String name) async {
       try {
         socket.write('$name\n');
         final String result = await socket
+            .cast<List<int>>()
             .transform(utf8.decoder)
             .transform(const LineSplitter())
             .first

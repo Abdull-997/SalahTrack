@@ -17,6 +17,7 @@ Future<void> main() async {
   server.listen((Socket socket) async {
     try {
       final String name = await socket
+          .cast<List<int>>()
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .first
