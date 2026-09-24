@@ -60,7 +60,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
     }
     _nowUtc = ref.read(clockServiceProvider).nowUtc();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    if (!ref.read(storeScreenshotModeProvider)) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && TickerMode.valuesOf(context).enabled) _tick();
     });

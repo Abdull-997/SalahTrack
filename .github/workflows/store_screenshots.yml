@@ -2,11 +2,17 @@ name: Store screenshots
 
 on:
   workflow_dispatch:
+    inputs:
+      locales:
+        description: 'Space-separated locale codes (start with: en de ar)'
+        required: true
+        default: 'en de ar'
+        type: string
 
 jobs:
   android:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -14,20 +20,36 @@ jobs:
           flutter-version: '3.47.4'
           channel: stable
           cache: true
-      - run: flutter pub get
+      - name: Get Flutter dependencies
+        timeout-minutes: 10
+        run: flutter pub get
       - name: Capture Android phone screenshots
+        timeout-minutes: 110
         uses: reactivecircus/android-emulator-runner@v2
+        env:
+          STORE_LOCALES: ${{ inputs.locales }}
         with:
           api-level: 35
           target: google_apis
           arch: x86_64
-          profile: pixel_8
-          script: bash tool/generate_store_screenshots.sh android emulator-5554
-      - uses: actions/upload-artifact@v4
+          disable-animations: true
+          script: |
+            adb devices
+            bash tool/generate_store_screenshots.sh android emulator-5554
+      - name: Android emulator diagnostics on failure
+        if: failure()
+        timeout-minutes: 2
+        run: |
+          avdmanager list device || true
+          adb devices || true
+          adb -s emulator-5554 emu kill || true
+      - name: Upload Android screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: store-screenshots-android-phone
           path: store_screenshots/android/
-          if-no-files-found: error
+          if-no-files-found: warn
 
   ios:
     runs-on: macos-26
@@ -43,29 +65,43 @@ jobs:
           flutter-version: '3.47.4'
           channel: stable
           cache: true
-      - run: flutter pub get
+      - name: Get Flutter dependencies
+        timeout-minutes: 10
+        run: flutter pub get
       - name: Select and boot simulator
         id: simulator
+        timeout-minutes: 15
         shell: bash
         run: |
           set -euo pipefail
-          simulator=$(xcrun simctl list devices available -j | python3 -c '
+          selected=$(xcrun simctl list devices available -j | python3 -c '
           import json, sys
           family = sys.argv[1]
           devices = [d for group in json.load(sys.stdin)["devices"].values() for d in group if d.get("isAvailable")]
           matching = [d for d in devices if d["name"].lower().startswith(family)]
           preferred = [d for d in matching if "Pro Max" in d["name"]] if family == "iphone" else [d for d in matching if "13-inch" in d["name"]]
-          selected = (preferred or matching)
+          selected = preferred or matching
           if not selected: sys.exit(f"No available {family} simulator")
-          print(selected[0]["udid"])
+          d = selected[0]
+          print("|".join((d["name"], d["udid"], d["state"], d.get("deviceTypeIdentifier", "unknown"))))
           ' '${{ matrix.family }}')
-          xcrun simctl boot "$simulator" || true
+          IFS='|' read -r name simulator state device_type <<< "$selected"
+          echo "[Store Screenshots] Selected $name ($simulator), type $device_type, state $state"
+          if [[ $state != Booted ]]; then xcrun simctl boot "$simulator"; fi
           xcrun simctl bootstatus "$simulator" -b
+          xcrun simctl io "$simulator" screenshot /tmp/store-simulator-resolution.png
+          sips -g pixelWidth -g pixelHeight /tmp/store-simulator-resolution.png
           echo "udid=$simulator" >> "$GITHUB_OUTPUT"
       - name: Capture iOS screenshots
+        timeout-minutes: 110
+        env:
+          STORE_LOCALES: ${{ inputs.locales }}
+          STORE_OUTPUT: store_screenshots/ios/${{ matrix.family }}
         run: bash tool/generate_store_screenshots.sh ios '${{ steps.simulator.outputs.udid }}'
-      - uses: actions/upload-artifact@v4
+      - name: Upload iOS screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: store-screenshots-ios-${{ matrix.family }}
-          path: store_screenshots/ios/
-          if-no-files-found: error
+          path: store_screenshots/ios/${{ matrix.family }}/
+          if-no-files-found: warn

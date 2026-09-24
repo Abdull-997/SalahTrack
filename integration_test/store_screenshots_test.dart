@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -105,38 +104,24 @@ final List<RamadanRecord> _ramadanHistory = List<RamadanRecord>.generate(
 );
 
 Future<void> _settle(WidgetTester tester) async {
-  await tester.pumpAndSettle(const Duration(milliseconds: 100));
-  await tester.pump(const Duration(milliseconds: 300));
+  // The fake providers resolve immediately. Pump a fixed number of frames so
+  // a background timer or animation cannot keep the test waiting forever.
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 350));
+  await tester.pump();
 }
 
-Future<void> _capture(String name) async {
-  for (int attempt = 0; attempt < 50; attempt++) {
-    try {
-      final Socket socket = await Socket.connect('127.0.0.1', 48765);
-      try {
-        socket.write('$name\n');
-        final String result = await socket
-            .cast<List<int>>()
-            .transform(utf8.decoder)
-            .transform(const LineSplitter())
-            .first
-            .timeout(const Duration(seconds: 20));
-        if (result != 'OK') {
-          throw StateError('Host screenshot capture failed: $name');
-        }
-      } finally {
-        socket.destroy();
-      }
-      return;
-    } on SocketException {
-      if (attempt == 49) rethrow;
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-    }
-  }
+Future<void> _capture(
+  IntegrationTestWidgetsFlutterBinding binding,
+  String name,
+) async {
+  print('  Capturing $name.png');
+  await binding.takeScreenshot(name).timeout(const Duration(seconds: 45));
 }
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final IntegrationTestWidgetsFlutterBinding binding =
+      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('capture real localized store screens', (WidgetTester tester) async {
     expect(appLanguages.map((language) => language.code), contains(_locale));
@@ -190,7 +175,13 @@ void main() {
       child: const SalahTrackApp(),
     ));
     await _settle(tester);
+    // Android screenshots require an image-backed surface before capture.
+    if (Platform.isAndroid) {
+      await binding.convertFlutterSurfaceToImage();
+      await _settle(tester);
+    }
 
+    print('  Opening Home');
     final BuildContext context = tester.element(find.byType(HomeScreen));
     final AppStrings strings = AppStrings.of(context);
     expect(strings.locale.languageCode, _locale);
@@ -199,21 +190,24 @@ void main() {
     if (_locale == 'ar') expect(strings.t('settings'), 'الإعدادات');
     expect(find.text(strings.t('today')), findsWidgets);
     expect(find.byKey(const ValueKey<String>('ramadan-home-card')), findsOneWidget);
-    await tester.runAsync(() => _capture('$_locale/01_home'));
+    await _capture(binding, '$_locale/01_home');
 
     final GoRouter router = GoRouter.of(context);
+    print('  Opening Prayer Tracking');
     router.go('/tracker');
     await _settle(tester);
     expect(find.byType(TrackerScreen), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('today-stats-card')), findsOneWidget);
-    await tester.runAsync(() => _capture('$_locale/02_tracking'));
+    await _capture(binding, '$_locale/02_tracking');
 
+    print('  Opening Qibla');
     router.go('/qibla');
     await _settle(tester);
     expect(find.byType(QiblaScreen), findsOneWidget);
     expect(find.text(strings.t('qiblaDirection')), findsWidgets);
-    await tester.runAsync(() => _capture('$_locale/03_qibla'));
+    await _capture(binding, '$_locale/03_qibla');
 
+    print('  Opening Ramadan');
     router.go('/tracker');
     await _settle(tester);
     final Finder ramadan = find.byKey(
@@ -222,6 +216,7 @@ void main() {
     await tester.scrollUntilVisible(
       ramadan,
       400,
+      maxScrolls: 15,
       scrollable: find.descendant(
         of: find.byType(TrackerScreen),
         matching: find.byType(Scrollable),
@@ -231,12 +226,13 @@ void main() {
     await _settle(tester);
     expect(ramadan, findsOneWidget);
     expect(find.text(strings.t('ramadanTracker')), findsWidgets);
-    await tester.runAsync(() => _capture('$_locale/04_ramadan'));
+    await _capture(binding, '$_locale/04_ramadan');
 
+    print('  Opening Settings');
     router.go('/settings');
     await _settle(tester);
     expect(find.byType(SettingsScreen), findsOneWidget);
     expect(find.text(strings.t('prayerTimes')), findsWidgets);
-    await tester.runAsync(() => _capture('$_locale/05_settings'));
-  });
+    await _capture(binding, '$_locale/05_settings');
+  }, timeout: const Timeout(Duration(minutes: 6)));
 }
