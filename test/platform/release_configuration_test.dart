@@ -85,7 +85,12 @@ void main() {
     expect(workflow, contains("flutter-version: '3.47.4'"));
     expect(workflow, contains('flutter analyze'));
     expect(workflow, contains('flutter test'));
-    expect(workflow, contains('flutter build ios --release --no-codesign'));
+    expect(workflow, contains('flutter build ipa'));
+    expect(workflow, contains('--export-options-plist'));
+    expect(workflow, contains('app-store-connect'));
+    expect(workflow, contains('IOS_CERTIFICATE_BASE64'));
+    expect(workflow, contains('IOS_PROVISIONING_PROFILE_BASE64'));
+    expect(workflow, isNot(contains('--no-codesign')));
     expect(workflow, isNot(contains('tool/bootstrap')));
   });
 }
