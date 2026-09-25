@@ -1,65 +1,217 @@
-name: Build iOS (SalahTrack)
+name: Build signed iOS App Store IPA
 
 on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
   workflow_dispatch:
+  push:
+    branches:
+      - appstore-release
 
 jobs:
   build-ios:
-    # App Store Connect requires Xcode 26 / the iOS 26 SDK for submissions.
     runs-on: macos-26
 
     steps:
-      - name: Quellcode auschecken
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Flutter SDK einrichten
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.47.4'
           channel: stable
           cache: true
 
-      - name: Flutter-, Xcode- und SDK-Versionen prüfen
+      - name: Show versions
         run: |
           flutter --version
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
 
-      - name: Abhängigkeiten laden und prüfen
+      - name: Install dependencies and run tests
         run: |
           flutter pub get
           flutter analyze
           flutter test
 
-      - name: iOS App kompilieren (Release, nicht signiert)
-        run: flutter build ios --release --no-codesign
-
-      - name: Nicht signierte IPA erstellen
-        shell: bash
+      - name: Install Apple signing certificate and profile
+        env:
+          IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
           set -euo pipefail
-          ipa_staging="$RUNNER_TEMP/SalahTrack-ipa"
-          mkdir -p "$ipa_staging/Payload"
-          ditto build/ios/iphoneos/Runner.app "$ipa_staging/Payload/Runner.app"
-          ditto -c -k --sequesterRsrc --keepParent \
-            "$ipa_staging/Payload" SalahTrack.ipa
-          unzip -Z1 SalahTrack.ipa | grep '^Payload/Runner\.app/' > /dev/null
 
-      - name: Nicht signierte IPA als Artefakt hochladen
+          CERTIFICATE_PATH="$RUNNER_TEMP/distribution.p12"
+          PROFILE_PATH="$RUNNER_TEMP/SalahTrack.mobileprovision"
+          PROFILE_PLIST="$RUNNER_TEMP/profile.plist"
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+
+          printf '%s' "$IOS_CERTIFICATE_BASE64" \
+            | openssl base64 -d -A \
+            -out "$CERTIFICATE_PATH"
+
+          printf '%s' "$IOS_PROVISIONING_PROFILE_BASE64" \
+            | openssl base64 -d -A \
+            -out "$PROFILE_PATH"
+
+          security create-keychain \
+            -p "$KEYCHAIN_PASSWORD" \
+            "$KEYCHAIN_PATH"
+
+          security set-keychain-settings \
+            -lut 21600 \
+            "$KEYCHAIN_PATH"
+
+          security unlock-keychain \
+            -p "$KEYCHAIN_PASSWORD" \
+            "$KEYCHAIN_PATH"
+
+          security import "$CERTIFICATE_PATH" \
+            -P "$IOS_CERTIFICATE_PASSWORD" \
+            -A \
+            -f pkcs12 \
+            -k "$KEYCHAIN_PATH"
+
+          security set-key-partition-list \
+            -S apple-tool:,apple:,codesign: \
+            -s \
+            -k "$KEYCHAIN_PASSWORD" \
+            "$KEYCHAIN_PATH"
+
+          security list-keychains \
+            -d user \
+            -s "$KEYCHAIN_PATH"
+
+          security default-keychain \
+            -d user \
+            -s "$KEYCHAIN_PATH"
+
+          echo "Installed signing identities:"
+          security find-identity \
+            -v \
+            -p codesigning \
+            "$KEYCHAIN_PATH"
+
+          security cms -D \
+            -i "$PROFILE_PATH" \
+            > "$PROFILE_PLIST"
+
+          PROFILE_UUID=$(
+            /usr/libexec/PlistBuddy \
+              -c "Print :UUID" \
+              "$PROFILE_PLIST"
+          )
+
+          PROFILE_NAME=$(
+            /usr/libexec/PlistBuddy \
+              -c "Print :Name" \
+              "$PROFILE_PLIST"
+          )
+
+          APP_ID=$(
+            /usr/libexec/PlistBuddy \
+              -c "Print :Entitlements:application-identifier" \
+              "$PROFILE_PLIST"
+          )
+
+          TIME_SENSITIVE=$(
+            /usr/libexec/PlistBuddy \
+              -c "Print :Entitlements:com.apple.developer.usernotifications.time-sensitive" \
+              "$PROFILE_PLIST"
+          )
+
+          echo "Profile: $PROFILE_NAME"
+          echo "App ID: $APP_ID"
+          echo "Time Sensitive: $TIME_SENSITIVE"
+
+          test "$PROFILE_NAME" = "SalahTrack App Store"
+          test "$APP_ID" = "68J586L9SW.com.salahtrack.app"
+          test "$TIME_SENSITIVE" = "true"
+
+          mkdir -p \
+            "$HOME/Library/MobileDevice/Provisioning Profiles"
+
+          mkdir -p \
+            "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
+
+          cp "$PROFILE_PATH" \
+            "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+
+          cp "$PROFILE_PATH" \
+            "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+
+      - name: Configure iOS Release signing
+        run: |
+          cat >> ios/Flutter/Release.xcconfig <<'EOF'
+
+          DEVELOPMENT_TEAM=68J586L9SW
+          CODE_SIGN_STYLE=Manual
+          CODE_SIGN_IDENTITY=Apple Distribution
+          PROVISIONING_PROFILE_SPECIFIER=SalahTrack App Store
+          EOF
+
+      - name: Create App Store export options
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>destination</key>
+              <string>export</string>
+
+              <key>method</key>
+              <string>app-store-connect</string>
+
+              <key>signingStyle</key>
+              <string>manual</string>
+
+              <key>signingCertificate</key>
+              <string>Apple Distribution</string>
+
+              <key>teamID</key>
+              <string>68J586L9SW</string>
+
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.salahtrack.app</key>
+                  <string>SalahTrack App Store</string>
+              </dict>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Build signed App Store IPA
+        run: |
+          flutter build ipa \
+            --release \
+            --build-name=1.0.0 \
+            --build-number=${{ github.run_number }} \
+            --export-options-plist="$RUNNER_TEMP/ExportOptions.plist"
+
+      - name: Verify IPA
+        run: |
+          set -euo pipefail
+
+          IPA_PATH=$(find build/ios/ipa -name '*.ipa' | head -1)
+
+          test -n "$IPA_PATH"
+
+          echo "Created IPA:"
+          echo "$IPA_PATH"
+
+      - name: Upload signed App Store IPA
         uses: actions/upload-artifact@v4
         with:
-          name: SalahTrack-iOS-IPA
-          path: SalahTrack.ipa
+          name: SalahTrack-AppStore-IPA
+          path: build/ios/ipa/*.ipa
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 14
 
-      - name: Nicht signierten Build als Artefakt hochladen
-        uses: actions/upload-artifact@v4
-        with:
-          name: SalahTrack-iOS-unsigned
-          path: build/ios/iphoneos/Runner.app
-          retention-days: 7
+      - name: Cleanup signing keychain
+        if: always()
+        run: |
+          security delete-keychain \
+            "$RUNNER_TEMP/app-signing.keychain-db" \
+            2>/dev/null || true
