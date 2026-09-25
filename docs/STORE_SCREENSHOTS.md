@@ -24,20 +24,22 @@ The default output roots are `store_screenshots/android/` and
 `en/01_home.png`, `en/02_tracking.png`, `en/03_qibla.png`,
 `en/04_ramadan.png`, `en/05_settings.png`. The same names are used for all
 13 locales: `ar de en es fr ps tr ur id bn pa fa ms`. The script's optional
-locale arguments select a subset; with none, it runs all 13. It rejects an
+locale arguments select a subset; with none, it uses `STORE_LOCALES` or defaults
+to `en de ar`. Pass all 13 codes to capture the complete set. It rejects an
 unsupported code.
 
-Use a **Pixel 8 phone AVD**, Android API 35, Google APIs, portrait, at its
+Use a **Pixel 8 phone AVD**, Android API 34, Google APIs, portrait, at its
 unmodified 1080 × 2400 display size for Google Play phone screenshots. The manual
-GitHub workflow uses this profile. For Apple, use an **iPhone 16 Pro Max**
+GitHub workflow uses this profile and installs Android platform 36 for the app's
+compile SDK. For Apple, use an **iPhone 16 Pro Max**
 simulator in portrait when that runtime is installed; its native screenshot
 size is 1320 × 2868 pixels. The current iOS project targets both iPhone and
 iPad (`TARGETED_DEVICE_FAMILY = 1,2`). For an iPad set, use a **13-inch iPad
 Pro** simulator in portrait (2064 × 2752 pixels for the M4 model). Simulator
-models and available runtimes vary by Xcode version; check the actual PNG
-dimensions and App Store Connect's current accepted device classes before
-upload. The manual workflow chooses an available iPhone Pro Max and 13-inch
-iPad where possible, and otherwise an available device of that family.
+models and available runtimes vary by Xcode version. The manual workflow
+prefers an available iPhone Pro Max and 13-inch iPad and checks their native
+dimensions against App Store Connect's accepted phone and 13-inch iPad sizes.
+Check the actual PNG dimensions again before upload.
 
 The screenshot test launches `SalahTrackApp` with the normal router, shell,
 home, tracker, Qibla, Ramadan section, and settings widgets. Riverpod test
@@ -47,11 +49,9 @@ The test sets the selected app locale in initial preferences. It verifies that
 the resulting `AppStrings` locale and `Directionality` match, including RTL
 for Arabic, Urdu, Pashto, Persian, and Shahmukhi Punjabi. It waits for screen
 rendering and checks a visible screen marker before each capture. At each
-capture point, the integration test asks a small loopback server in the host
-test driver to take a screenshot before the test navigates onward. Android
-uses `adb reverse` for this loopback connection. The driver uses `adb
-screencap` or `xcrun simctl io screenshot` to save the **whole native display**,
-including the status bar, with no resizing. The script sets a
+capture point, the integration test sends screenshot bytes to the host
+integration driver, which verifies the PNG and saves it without resizing. The
+script sets a
 9:41 demo status bar where the emulator or simulator supports it.
 
 Demo data exists only in `integration_test/store_screenshots_test.dart` and
