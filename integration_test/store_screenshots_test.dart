@@ -115,7 +115,7 @@ Future<void> _capture(
   IntegrationTestWidgetsFlutterBinding binding,
   String name,
 ) async {
-  print('  Capturing $name.png');
+  debugPrint('  Capturing $name.png');
   await binding.takeScreenshot(name).timeout(const Duration(seconds: 45));
 }
 
@@ -181,7 +181,7 @@ void main() {
       await _settle(tester);
     }
 
-    print('  Opening Home');
+    debugPrint('  Opening Home');
     final BuildContext context = tester.element(find.byType(HomeScreen));
     final AppStrings strings = AppStrings.of(context);
     expect(strings.locale.languageCode, _locale);
@@ -193,21 +193,21 @@ void main() {
     await _capture(binding, '$_locale/01_home');
 
     final GoRouter router = GoRouter.of(context);
-    print('  Opening Prayer Tracking');
+    debugPrint('  Opening Prayer Tracking');
     router.go('/tracker');
     await _settle(tester);
     expect(find.byType(TrackerScreen), findsOneWidget);
     expect(find.byKey(const ValueKey<String>('today-stats-card')), findsOneWidget);
     await _capture(binding, '$_locale/02_tracking');
 
-    print('  Opening Qibla');
+    debugPrint('  Opening Qibla');
     router.go('/qibla');
     await _settle(tester);
     expect(find.byType(QiblaScreen), findsOneWidget);
     expect(find.text(strings.t('qiblaDirection')), findsWidgets);
     await _capture(binding, '$_locale/03_qibla');
 
-    print('  Opening Ramadan');
+    debugPrint('  Opening Ramadan');
     router.go('/tracker');
     await _settle(tester);
     final Finder ramadan = find.byKey(
@@ -228,7 +228,7 @@ void main() {
     expect(find.text(strings.t('ramadanTracker')), findsWidgets);
     await _capture(binding, '$_locale/04_ramadan');
 
-    print('  Opening Settings');
+    debugPrint('  Opening Settings');
     router.go('/settings');
     await _settle(tester);
     expect(find.byType(SettingsScreen), findsOneWidget);

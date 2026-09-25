@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:integration_test/integration_test_driver.dart';
+import 'package:integration_test/integration_test_driver_extended.dart';
 
 Future<void> main() async {
   final String output =
@@ -11,7 +11,11 @@ Future<void> main() async {
   }
 
   await integrationDriver(
-    onScreenshot: (name, bytes, [args]) async {
+    onScreenshot: (
+      String name,
+      List<int> bytes, [
+      Map<String, Object?>? args,
+    ]) async {
       if (!RegExp(r'^[a-z]{2}/0[1-5]_[a-z]+$').hasMatch(name) ||
           !name.startsWith('$locale/')) {
         throw StateError('Unexpected screenshot name: $name');
