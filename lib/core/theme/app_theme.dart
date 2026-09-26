@@ -6,8 +6,15 @@ class AppTheme {
   static const Color seed = Color(0xFF276749);
   static const Color warm = Color(0xFFF5F0E7);
 
-  /// Platform font families with broad Arabic-script coverage.
-  /// Flutter/Skia continues to system fallback if a family is unavailable.
+  // Standard Arabic fonts. Do not use Urdu Nastaliq for Arabic.
+  static const List<String> arabicFontFallback = <String>[
+    'Noto Sans Arabic',
+    'Geeza Pro',
+    'Noto Naskh Arabic',
+    'Segoe UI',
+  ];
+
+  // Arabic-script fonts used by Urdu, Persian, Pashto and Punjabi.
   static const List<String> arabicScriptFontFallback = <String>[
     'Noto Sans Arabic',
     'Noto Naskh Arabic',
@@ -26,7 +33,8 @@ class AppTheme {
 
   static List<String>? _fontFallbackFor(String? languageCode) =>
       switch (languageCode) {
-        'ar' || 'fa' || 'pa' || 'ps' || 'ur' => arabicScriptFontFallback,
+        'ar' => arabicFontFallback,
+        'fa' || 'pa' || 'ps' || 'ur' => arabicScriptFontFallback,
         'bn' => bengaliFontFallback,
         _ => null,
       };
@@ -37,6 +45,7 @@ class AppTheme {
       brightness: Brightness.light,
       surface: const Color(0xFFFFFBF5),
     );
+
     return ThemeData(
       useMaterial3: true,
       fontFamilyFallback: _fontFallbackFor(languageCode),
@@ -88,6 +97,7 @@ class AppTheme {
       brightness: Brightness.dark,
       surface: const Color(0xFF151A17),
     );
+
     return ThemeData(
       useMaterial3: true,
       fontFamilyFallback: _fontFallbackFor(languageCode),
