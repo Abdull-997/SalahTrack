@@ -160,8 +160,48 @@ void main() {
     }
   });
 
-  test('native-script locales retain targeted font fallbacks', () {
+  /*test('native-script locales retain targeted font fallbacks', () {
     for (final String languageCode in <String>['ar', 'fa', 'pa', 'ps', 'ur']) {
+      for (final ThemeData theme in <ThemeData>[
+        AppTheme.light(languageCode: languageCode),
+        AppTheme.dark(languageCode: languageCode),
+      ]) {
+        final List<String>? fallbacks =
+            theme.textTheme.bodyMedium?.fontFamilyFallback;
+        expect(fallbacks, contains('Noto Sans Arabic'));
+        expect(fallbacks, contains('Noto Nastaliq Urdu'));
+        expect(fallbacks, contains('Nirmala UI'));
+        expect(fallbacks, isNot(contains('Noto Sans Bengali')));
+      }
+    }
+
+    for (final ThemeData theme in <ThemeData>[
+      AppTheme.light(languageCode: 'bn'),
+      AppTheme.dark(languageCode: 'bn'),
+    ]) {
+      final List<String>? fallbacks =
+          theme.textTheme.bodyMedium?.fontFamilyFallback;
+      expect(fallbacks, contains('Noto Sans Bengali'));
+      expect(fallbacks, contains('Nirmala UI'));
+      expect(fallbacks, isNot(contains('Noto Sans Arabic')));
+    }
+  });
+*/
+  test('native-script locales retain targeted font fallbacks', () {
+    for (final ThemeData theme in <ThemeData>[
+      AppTheme.light(languageCode: 'ar'),
+      AppTheme.dark(languageCode: 'ar'),
+    ]) {
+      final List<String>? fallbacks =
+          theme.textTheme.bodyMedium?.fontFamilyFallback;
+      expect(fallbacks, contains('Noto Sans Arabic'));
+      expect(fallbacks, contains('Geeza Pro'));
+      expect(fallbacks, contains('Noto Naskh Arabic'));
+      expect(fallbacks, isNot(contains('Noto Nastaliq Urdu')));
+      expect(fallbacks, isNot(contains('Noto Sans Bengali')));
+    }
+
+    for (final String languageCode in <String>['fa', 'pa', 'ps', 'ur']) {
       for (final ThemeData theme in <ThemeData>[
         AppTheme.light(languageCode: languageCode),
         AppTheme.dark(languageCode: languageCode),
