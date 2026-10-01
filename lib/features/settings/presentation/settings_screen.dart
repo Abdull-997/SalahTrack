@@ -23,6 +23,7 @@ import 'package:salah_focus/features/settings/presentation/notification_settings
 import 'package:salah_focus/features/settings/presentation/reminder_exceptions_section.dart';
 import 'package:salah_focus/features/settings/presentation/privacy_legal_screen.dart';
 import 'package:salah_focus/features/settings/presentation/report_problem_screen.dart';
+import 'package:salah_focus/features/statistics/presentation/statistics_screen.dart';
 import 'package:salah_focus/shared/errors/user_error_message.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -47,6 +48,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: <Widget>[
+          Card(
+            child: ListTile(
+              key: const ValueKey<String>('open-statistics'),
+              leading: const Icon(Icons.bar_chart_rounded),
+              title: Text(s.t('statistics')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const StatisticsScreen(),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           _SectionTitle(
             title: s.t('prayerTimes'),
             icon: Icons.schedule_rounded,
