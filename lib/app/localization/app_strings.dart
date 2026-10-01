@@ -10,6 +10,7 @@ import 'package:salah_focus/app/localization/privacy_legal_translations.dart';
 import 'package:salah_focus/app/localization/ramadan_translations.dart';
 import 'package:salah_focus/app/localization/report_problem_translations.dart';
 import 'package:salah_focus/app/localization/tracker_today_translations.dart';
+import 'package:salah_focus/app/localization/prayer_detail_translations.dart';
 
 class AppStrings {
   AppStrings(this.locale);
@@ -920,6 +921,8 @@ class AppStrings {
       return 'SalahTrack';
     }
     String value =
+        prayerDetailTranslations[locale.languageCode]?[key] ??
+        prayerDetailTranslations['en']?[key] ??
         reportProblemTranslations[locale.languageCode]?[key] ??
         reportProblemTranslations['en']?[key] ??
         trackerTodayTranslations[locale.languageCode]?[key] ??

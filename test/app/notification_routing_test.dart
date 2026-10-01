@@ -41,6 +41,7 @@ class _Coordinator implements PrayerCoordinator {
   int reads = 0;
   int confirms = 0;
   int snoozes = 0;
+  int skips = 0;
   Object? readError;
   Object? actionError;
   Completer<void>? pending;
@@ -75,6 +76,22 @@ class _Coordinator implements PrayerCoordinator {
       snoozedUntilUtc: _Clock().nowUtc().add(
         Duration(minutes: settings.snoozeMinutes),
       ),
+    );
+  }
+
+  @override
+  Future<PrayerEntry> skip(
+    PrayerEntry prayer,
+    PrayerSettings settings,
+    String prayerName,
+    String languageCode, {
+    String? reason,
+  }) async {
+    skips++;
+    if (actionError != null) throw actionError!;
+    return entries[prayer.id] = prayer.copyWith(
+      status: PrayerStatus.skipped,
+      dismissReason: reason,
     );
   }
 
@@ -198,6 +215,40 @@ void main() {
       container.read(goRouterProvider).routeInformationProvider.value.uri.path,
       '/home',
     );
+  });
+
+  testRouting('stop reminding saves a selected reason', (tester) async {
+    final notifications = _Notifications()..initial = Future.value(_payload());
+    final coordinator = _Coordinator()..entries[_entry().id] = _entry();
+    await _mount(tester, notifications, coordinator, localeCode: 'ar');
+    final AppStrings s = AppStrings(const Locale('ar'));
+    await tester.tap(find.text(s.t('stopReminding')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(s.t('reasonOutside')).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(s.t('yesEnd')));
+    await tester.pumpAndSettle();
+    expect(coordinator.skips, 1);
+    expect(coordinator.entries[_entry().id]?.status, PrayerStatus.skipped);
+    expect(
+      coordinator.entries[_entry().id]?.dismissReason,
+      'preset:reasonOutside',
+    );
+  });
+
+  testRouting('stop reminding saves without a reason', (tester) async {
+    final notifications = _Notifications()..initial = Future.value(_payload());
+    final coordinator = _Coordinator()..entries[_entry().id] = _entry();
+    await _mount(tester, notifications, coordinator);
+    await tester.tap(find.text('Stop reminding me'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Yes, end reminder'));
+    await tester.pumpAndSettle();
+    expect(coordinator.skips, 1);
+    expect(coordinator.entries[_entry().id]?.status, PrayerStatus.skipped);
+    expect(coordinator.entries[_entry().id]?.dismissReason, isNull);
   });
 
   for (final prayer in PrayerType.values.where(

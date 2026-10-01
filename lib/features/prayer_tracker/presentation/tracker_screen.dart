@@ -6,6 +6,7 @@ import 'package:salah_focus/core/time/timezone_service.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_day.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
 import 'package:salah_focus/features/ramadan/domain/ramadan_calendar.dart';
 import 'package:salah_focus/features/ramadan/presentation/ramadan_tracker_section.dart';
@@ -155,6 +156,96 @@ Future<void> _showTodayInfo(BuildContext context) => showDialog<void>(
   },
 );
 
+Future<void> _showDayDetails(
+  BuildContext context,
+  DateTime date,
+  List<PrayerEntry> entries,
+) => showDialog<void>(
+  context: context,
+  builder: (BuildContext dialogContext) {
+    final AppStrings s = AppStrings.of(dialogContext);
+    final Map<PrayerType, PrayerEntry> byType = <PrayerType, PrayerEntry>{
+      for (final PrayerEntry entry in entries) entry.type: entry,
+    };
+    return AlertDialog(
+      title: Text('${s.t('dayDetails')} · ${s.mediumDate(date)}'),
+      content: SizedBox(
+        width: 440,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (entries.isEmpty) Text(s.t('noData')),
+              if (entries.isNotEmpty)
+                for (final PrayerType type in PrayerType.values)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 7),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        _StatusIcon(
+                          status: byType[type]?.status ?? PrayerStatus.missed,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                type.localizedName(s.locale.languageCode),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              Text(
+                                byType[type] == null
+                                    ? s.t('notPrayed')
+                                    : _statusLabel(
+                                        dialogContext,
+                                        byType[type]!.status,
+                                      ),
+                              ),
+                              if (byType[type]?.status ==
+                                      PrayerStatus.skipped &&
+                                  byType[type]?.dismissReason != null)
+                                Text(
+                                  '${s.t('dismissReasonLabel')}: ${_localizedDismissReason(s, byType[type]!.dismissReason!)}',
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+            ],
+          ),
+        ),
+      ),
+      actions: <Widget>[
+        FilledButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: Text(s.t('close')),
+        ),
+      ],
+    );
+  },
+);
+
+String _localizedDismissReason(AppStrings s, String reason) {
+  if (reason.startsWith('preset:')) {
+    final String key = reason.substring('preset:'.length);
+    const keys = <String>{
+      'reasonAlreadyPrayed',
+      'reasonCannotNow',
+      'reasonOutside',
+      'reasonSick',
+      'reasonOther',
+    };
+    if (keys.contains(key)) return s.t(key);
+  }
+  return reason;
+}
+
 class _StatusExplanation extends StatelessWidget {
   const _StatusExplanation({required this.status});
 
@@ -262,7 +353,11 @@ class _TrackerContent extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          _StatsCard(prayed: prayed, ratio: ratio),
+          InkWell(
+            onTap: () => _showDayDetails(context, now, todayEntries),
+            borderRadius: BorderRadius.circular(12),
+            child: _StatsCard(prayed: prayed, ratio: ratio),
+          ),
           if (prayed == 5)
             Padding(
               padding: const EdgeInsetsDirectional.only(top: 8, start: 4),
@@ -542,11 +637,19 @@ class _DayCardState extends ConsumerState<_DayCard> {
                         ],
                       ),
                     ),
-                    Text(
-                      '${s.number(prayed)}/${s.number(5)}',
-                      style: TextStyle(
-                        color: scheme.onSurface,
-                        fontWeight: FontWeight.w800,
+                    InkWell(
+                      onTap: () =>
+                          _showDayDetails(context, parsed, widget.entries),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: Text(
+                          '${s.number(prayed)}/${s.number(5)}',
+                          style: TextStyle(
+                            color: scheme.onSurface,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ),
                     ),
                     if (!widget.isToday) ...<Widget>[
@@ -689,47 +792,52 @@ class _MonthGrid extends StatelessWidget {
             );
             return Semantics(
               excludeSemantics: true,
+              button: true,
               label:
                   '${isToday ? '${s.t('today')}, ' : ''}${s.number(day)}, ${s.number(prayed)}/${s.number(5)} ${s.t('confirmedPrayers')}',
-              child: DecoratedBox(
-                key: ValueKey<String>('calendar-$key'),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: background,
-                  border: isToday
-                      ? Border.all(color: scheme.primary, width: 2)
-                      : null,
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          s.number(day),
-                          maxLines: 1,
-                          softWrap: false,
-                          style: TextStyle(
-                            color: foreground,
-                            fontWeight: FontWeight.w800,
+              child: InkWell(
+                onTap: () => _showDayDetails(context, date, values),
+                borderRadius: BorderRadius.circular(12),
+                child: DecoratedBox(
+                  key: ValueKey<String>('calendar-$key'),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: background,
+                    border: isToday
+                        ? Border.all(color: scheme.primary, width: 2)
+                        : null,
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            s.number(day),
+                            maxLines: 1,
+                            softWrap: false,
+                            style: TextStyle(
+                              color: foreground,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
-                      ),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          '${s.number(prayed)}/${s.number(5)}',
-                          maxLines: 1,
-                          softWrap: false,
-                          style: Theme.of(context).textTheme.labelMedium
-                              ?.copyWith(
-                                color: foreground,
-                                fontWeight: FontWeight.w700,
-                              ),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            '${s.number(prayed)}/${s.number(5)}',
+                            maxLines: 1,
+                            softWrap: false,
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  color: foreground,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

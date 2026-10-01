@@ -245,6 +245,13 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
                   Text(s.t('snoozeUnavailable'), textAlign: TextAlign.center),
                 ],
               ],
+              if (!prayer.status.isFinal) ...<Widget>[
+                const SizedBox(height: 10),
+                TextButton(
+                  onPressed: _working ? null : _stopReminding,
+                  child: Text(s.t('stopReminding')),
+                ),
+              ],
               if (_actionError != null) ...<Widget>[
                 const SizedBox(height: 12),
                 Text(
@@ -275,6 +282,120 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
 
   Future<void> _confirm() => _run(snooze: false);
   Future<void> _snooze() => _run(snooze: true);
+
+  Future<void> _stopReminding() async {
+    const choices = <String>[
+      'reasonAlreadyPrayed',
+      'reasonCannotNow',
+      'reasonOutside',
+      'reasonSick',
+      'reasonOther',
+    ];
+    String typedNote = '';
+    String? selected;
+    final String? reason = await showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setDialogState) {
+          final AppStrings s = AppStrings.of(context);
+          return AlertDialog(
+            title: Text(s.t('skipConfirmTitle')),
+            content: SizedBox(
+              width: 440,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(s.t('skipConfirmBody')),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      initialValue: selected,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        labelText: s.t('dismissReasonPrompt'),
+                      ),
+                      items: <DropdownMenuItem<String>>[
+                        for (final String key in choices)
+                          DropdownMenuItem(value: key, child: Text(s.t(key))),
+                      ],
+                      onChanged: (String? value) =>
+                          setDialogState(() => selected = value),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      onChanged: (String value) => typedNote = value,
+                      maxLength: 250,
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        labelText: s.t('reasonFreeText'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(s.t('cancel')),
+              ),
+              FilledButton(
+                onPressed: () {
+                  final String typed = typedNote.trim();
+                  Navigator.of(context).pop(
+                    typed.isNotEmpty
+                        ? typed
+                        : selected == null || selected == 'reasonOther'
+                        ? ''
+                        : 'preset:$selected',
+                  );
+                },
+                child: Text(s.t('yesEnd')),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    if (!mounted || reason == null || _working) return;
+    final int generation = _generation;
+    setState(() {
+      _working = true;
+      _actionError = null;
+    });
+    try {
+      final coordinator = ref.read(prayerCoordinatorProvider);
+      final PrayerEntry? current = await coordinator.prayerById(
+        widget.prayerId,
+      );
+      if (!mounted || generation != _generation || current == null) return;
+      final PrayerSettings settings = ref
+          .read(settingsControllerProvider)
+          .prayerSettings;
+      final String language = Localizations.localeOf(context).languageCode;
+      final PrayerEntry updated = await coordinator.skip(
+        current,
+        settings.copyWith(softReminderAfterSkip: false),
+        current.type.localizedName(language),
+        language,
+        reason: reason.isEmpty ? null : reason,
+      );
+      if (!mounted || generation != _generation) return;
+      ref.invalidate(prayerByIdProvider(widget.prayerId));
+      ref.invalidate(todayPrayerDayProvider);
+      setState(() => _prayer = updated);
+      _close();
+    } catch (error) {
+      if (mounted && generation == _generation) {
+        setState(() => _actionError = userErrorMessage(context, error));
+      }
+    } finally {
+      if (mounted && generation == _generation) {
+        setState(() => _working = false);
+      }
+    }
+  }
 
   Future<void> _run({required bool snooze}) async {
     if (_working) return;

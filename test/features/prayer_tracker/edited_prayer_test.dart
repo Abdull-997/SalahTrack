@@ -104,6 +104,24 @@ void main() {
     expect(PrayerEntry.fromMap(row).editedAtUtc, isNull);
   });
 
+  test('dismiss reason survives a prayer time refresh', () async {
+    final db = AppDatabase(_MemoryDatabase());
+    final original = _entry('2026-09-12').copyWith(
+      status: PrayerStatus.skipped,
+      dismissReason: 'preset:reasonSick',
+    );
+    await db.upsertPrayerEntry(original);
+    await db.upsertPrayerEntries([
+      original.copyWith(
+        status: PrayerStatus.upcoming,
+        clearDismissReason: true,
+      ),
+    ]);
+    final restored = (await db.prayerEntryById(original.id))!;
+    expect(restored.status, PrayerStatus.skipped);
+    expect(restored.dismissReason, 'preset:reasonSick');
+  });
+
   test(
     'past-day corrections persist after reads, undo, and schedule refresh',
     () async {

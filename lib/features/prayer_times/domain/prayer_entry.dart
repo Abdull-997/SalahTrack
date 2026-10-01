@@ -16,6 +16,7 @@ class PrayerEntry {
     this.snoozedUntilUtc,
     this.snoozeCount = 0,
     this.manualOffsetMinutes = 0,
+    this.dismissReason,
   });
 
   final String id;
@@ -34,6 +35,9 @@ class PrayerEntry {
   final int snoozeCount;
   final int manualOffsetMinutes;
 
+  /// Optional reason recorded when reminders for this prayer were ended.
+  final String? dismissReason;
+
   PrayerEntry copyWith({
     DateTime? scheduledAtUtc,
     String? timezoneId,
@@ -47,6 +51,8 @@ class PrayerEntry {
     bool clearSnoozedUntil = false,
     int? snoozeCount,
     int? manualOffsetMinutes,
+    String? dismissReason,
+    bool clearDismissReason = false,
   }) {
     return PrayerEntry(
       id: id,
@@ -66,6 +72,9 @@ class PrayerEntry {
           : snoozedUntilUtc ?? this.snoozedUntilUtc,
       snoozeCount: snoozeCount ?? this.snoozeCount,
       manualOffsetMinutes: manualOffsetMinutes ?? this.manualOffsetMinutes,
+      dismissReason: clearDismissReason
+          ? null
+          : dismissReason ?? this.dismissReason,
     );
   }
 
@@ -83,6 +92,7 @@ class PrayerEntry {
     'snoozed_until_utc': snoozedUntilUtc?.toIso8601String(),
     'snooze_count': snoozeCount,
     'manual_offset_minutes': manualOffsetMinutes,
+    'dismiss_reason': dismissReason,
   };
 
   factory PrayerEntry.fromMap(Map<String, Object?> map) {
@@ -109,6 +119,7 @@ class PrayerEntry {
           : DateTime.parse(map['snoozed_until_utc']! as String).toUtc(),
       snoozeCount: (map['snooze_count'] as int?) ?? 0,
       manualOffsetMinutes: (map['manual_offset_minutes'] as int?) ?? 0,
+      dismissReason: map['dismiss_reason'] as String?,
     );
   }
 }

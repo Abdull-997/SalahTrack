@@ -37,7 +37,7 @@ class AppDatabase {
     final String root = await getDatabasesPath();
     final Database db = await openDatabase(
       p.join(root, 'salah_focus.db'),
-      version: 5,
+      version: 6,
       onConfigure: (Database db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -64,6 +64,11 @@ class AppDatabase {
           );
           await _createRamadanTables(db);
         }
+        if (oldVersion < 6) {
+          await db.execute(
+            'ALTER TABLE prayer_entries ADD COLUMN dismiss_reason TEXT',
+          );
+        }
       },
       onCreate: (Database db, int version) async {
         await db.execute('''
@@ -80,7 +85,8 @@ class AppDatabase {
             edited_at_utc TEXT,
             snoozed_until_utc TEXT,
             snooze_count INTEGER NOT NULL DEFAULT 0,
-            manual_offset_minutes INTEGER NOT NULL DEFAULT 0
+            manual_offset_minutes INTEGER NOT NULL DEFAULT 0,
+            dismiss_reason TEXT
           )
         ''');
         await db.execute(
@@ -118,6 +124,7 @@ class AppDatabase {
             'edited_at_utc',
             'snoozed_until_utc',
             'snooze_count',
+            'dismiss_reason',
           ],
           where: 'id = ?',
           whereArgs: <Object?>[entry.id],
@@ -128,6 +135,7 @@ class AppDatabase {
           final Map<String, Object?> old = previous.first;
           // Schedule refreshes must preserve the user's edit history.
           row['edited_at_utc'] = old['edited_at_utc'];
+          row['dismiss_reason'] = old['dismiss_reason'];
           final String oldStatus = old['status']! as String;
           if (oldStatus == 'prayed' ||
               oldStatus == 'skipped' ||

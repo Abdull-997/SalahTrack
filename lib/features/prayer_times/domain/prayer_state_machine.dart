@@ -49,6 +49,7 @@ class PrayerStateMachine {
       status: PrayerStatus.prayed,
       confirmedAtUtc: nowUtc.toUtc(),
       clearSnoozedUntil: true,
+      clearDismissReason: true,
     );
   }
 
@@ -75,13 +76,14 @@ class PrayerStateMachine {
     );
   }
 
-  PrayerEntry skip(PrayerEntry prayer) {
+  PrayerEntry skip(PrayerEntry prayer, {String? reason}) {
     if (prayer.status == PrayerStatus.prayed) {
       throw StateError('A confirmed prayer cannot be skipped.');
     }
     return prayer.copyWith(
       status: PrayerStatus.skipped,
       clearSnoozedUntil: true,
+      dismissReason: reason,
     );
   }
 }

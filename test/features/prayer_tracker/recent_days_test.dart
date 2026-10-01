@@ -7,6 +7,7 @@ import 'package:salah_focus/app/app_providers.dart';
 import 'package:salah_focus/app/localization/app_language.dart';
 import 'package:salah_focus/app/localization/app_strings.dart';
 import 'package:salah_focus/app/localization/tracker_today_translations.dart';
+import 'package:salah_focus/app/localization/prayer_detail_translations.dart';
 import 'package:salah_focus/core/theme/app_theme.dart';
 import 'package:salah_focus/core/time/clock_service.dart';
 import 'package:salah_focus/features/prayer_times/application/prayer_coordinator.dart';
@@ -163,6 +164,99 @@ void main() {
       trackerTodayTranslations['en']?['todayAllPrayersCompleted'],
       'Alhamdulillah 🤲🏼 All prayers completed today.',
     );
+  });
+
+  test('day details and reminder reason labels cover supported languages', () {
+    const keys = <String>{
+      'dayDetails',
+      'notPrayed',
+      'stopReminding',
+      'dismissReasonPrompt',
+      'reasonAlreadyPrayed',
+      'reasonCannotNow',
+      'reasonOutside',
+      'reasonSick',
+      'reasonOther',
+      'reasonFreeText',
+      'dismissReasonLabel',
+    };
+    for (final Locale locale in AppStrings.supportedLocales) {
+      expect(
+        prayerDetailTranslations[locale.languageCode]?.keys.toSet(),
+        keys,
+        reason: locale.languageCode,
+      );
+    }
+  });
+
+  testWidgets('day details show five prayed prayers', (tester) async {
+    final DateTime now = DateTime.utc(2026, 9, 13, 12);
+    final _Coordinator coordinator = _Coordinator(now);
+    for (int i = 0; i < coordinator.entries.length; i++) {
+      final PrayerEntry entry = coordinator.entries[i];
+      if (entry.localDate == _iso(now)) {
+        coordinator.entries[i] = entry.copyWith(status: PrayerStatus.prayed);
+      }
+    }
+    await tester.pumpWidget(_app(coordinator, now, locale: const Locale('en')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey<String>('today-stats-card')));
+    await tester.pumpAndSettle();
+    final Finder dialog = find.byType(AlertDialog);
+    expect(
+      find.descendant(of: dialog, matching: find.text('Prayed')),
+      findsNWidgets(5),
+    );
+  });
+
+  testWidgets('day details show missing and skipped prayers with reason', (
+    tester,
+  ) async {
+    final DateTime now = DateTime.utc(2026, 9, 13, 12);
+    final _Coordinator coordinator = _Coordinator(now);
+    for (int i = 0; i < coordinator.entries.length; i++) {
+      final PrayerEntry entry = coordinator.entries[i];
+      if (entry.localDate == _iso(now) && entry.type == PrayerType.dhuhr) {
+        coordinator.entries[i] = entry.copyWith(
+          status: PrayerStatus.skipped,
+          dismissReason: 'preset:reasonOutside',
+        );
+      }
+    }
+    await tester.pumpWidget(_app(coordinator, now, locale: const Locale('ar')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey<String>('today-stats-card')));
+    await tester.pumpAndSettle();
+    final AppStrings s = AppStrings(const Locale('ar'));
+    expect(find.textContaining(s.t('dayDetails')), findsOneWidget);
+    expect(find.textContaining(s.t('reasonOutside')), findsOneWidget);
+    expect(find.text(s.t('missed')), findsWidgets);
+  });
+
+  testWidgets('calendar day opens its prayer details', (tester) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final DateTime now = DateTime.utc(2026, 9, 13, 12);
+    await tester.pumpWidget(
+      _app(_Coordinator(now), now, locale: const Locale('ar')),
+    );
+    await tester.pumpAndSettle();
+    final Finder day = find.byKey(
+      const ValueKey<String>('calendar-2026-09-12'),
+    );
+    await tester.scrollUntilVisible(day, 220);
+    await tester.ensureVisible(day);
+    await tester.pumpAndSettle();
+    await tester.tap(day);
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(
+      find.text(AppStrings(const Locale('ar')).t('missed')),
+      findsNWidgets(5),
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Today card shows only the prayer count below five', (

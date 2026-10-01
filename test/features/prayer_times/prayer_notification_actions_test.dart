@@ -41,6 +41,38 @@ void main() {
     await database.upsertPrayerEntry(original);
   });
 
+  test('ending reminders saves a reason with the skipped prayer', () async {
+    await coordinator.skip(
+      original,
+      settings.copyWith(softReminderAfterSkip: false),
+      'Isha',
+      'en',
+      reason: 'preset:reasonOutside',
+    );
+    final PrayerEntry stored = (await database.prayerEntryById(original.id))!;
+    expect(stored.status, PrayerStatus.skipped);
+    expect(stored.dismissReason, 'preset:reasonOutside');
+    expect(
+      PrayerEntry.fromMap(stored.toMap()).dismissReason,
+      'preset:reasonOutside',
+    );
+  });
+
+  test(
+    'ending reminders without a reason still saves skipped status',
+    () async {
+      await coordinator.skip(
+        original,
+        settings.copyWith(softReminderAfterSkip: false),
+        'Isha',
+        'en',
+      );
+      final PrayerEntry stored = (await database.prayerEntryById(original.id))!;
+      expect(stored.status, PrayerStatus.skipped);
+      expect(stored.dismissReason, isNull);
+    },
+  );
+
   test(
     'concurrent snooze responses schedule once and consume one snooze',
     () async {

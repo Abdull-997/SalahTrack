@@ -248,6 +248,7 @@ class PrayerCoordinator {
       editedAtUtc: isPastDay ? now : null,
       clearConfirmedAt: !prayed,
       clearSnoozedUntil: true,
+      clearDismissReason: true,
     );
     await _repository.saveEntry(updated);
     await _notifications.cancelPrayer(prayer);
@@ -293,11 +294,12 @@ class PrayerCoordinator {
     PrayerEntry prayer,
     PrayerSettings settings,
     String prayerName,
-    String languageCode,
-  ) => _serialize(() async {
+    String languageCode, {
+    String? reason,
+  }) => _serialize(() async {
     final PrayerEntry current =
         await _database.prayerEntryById(prayer.id) ?? prayer;
-    final PrayerEntry updated = _stateMachine.skip(current);
+    final PrayerEntry updated = _stateMachine.skip(current, reason: reason);
     await _repository.saveEntry(updated);
     await _notifications.cancelPrayer(prayer);
     if (settings.softReminderAfterSkip) {
