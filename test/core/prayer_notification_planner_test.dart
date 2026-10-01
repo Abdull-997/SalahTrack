@@ -2,10 +2,97 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/core/notifications/prayer_notification_planner.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
+import 'package:salah_focus/features/prayer_times/domain/reminder_exception.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 
 void main() {
+  test(
+    'daily exception suppresses every reminder stage for one prayer',
+    () async {
+      final service = FakeNotificationService();
+      final entries = <PrayerEntry>[
+        _entryFor(PrayerType.dhuhr, DateTime.utc(2026, 8, 15, 13)),
+        _entryFor(PrayerType.asr, DateTime.utc(2026, 8, 15, 16)),
+      ];
+      await PrayerNotificationPlanner(service).reschedule(
+        entries,
+        settings: const PrayerSettings(
+          reminderExceptions: <ReminderException>[
+            ReminderException(prayer: PrayerType.dhuhr),
+          ],
+        ),
+        prayerName: (entry) => entry.type.name,
+        languageCode: 'en',
+        nowUtc: DateTime.utc(2026, 8, 15, 10),
+      );
+      expect(service.prayers, <String>[entries.last.id]);
+      expect(service.grace, <String>[entries.last.id]);
+      expect(service.oneHourRemaining, isEmpty);
+      expect(service.cancelledPrayers, <String>[entries.first.id]);
+    },
+  );
+
+  test('weekday exception leaves reminders active on other weekdays', () async {
+    final service = FakeNotificationService();
+    final thursday = _entryOn('2026-08-13', PrayerType.maghrib, 19);
+    final friday = _entryOn('2026-08-14', PrayerType.maghrib, 19);
+    await PrayerNotificationPlanner(service).reschedule(
+      <PrayerEntry>[thursday, friday],
+      settings: const PrayerSettings(
+        reminderExceptions: <ReminderException>[
+          ReminderException(prayer: PrayerType.maghrib, weekdays: <int>{4}),
+        ],
+      ),
+      prayerName: (entry) => entry.type.name,
+      languageCode: 'en',
+      nowUtc: DateTime.utc(2026, 8, 12, 10),
+    );
+    expect(service.cancelledPrayers, <String>[thursday.id]);
+    expect(service.prayers, <String>[friday.id]);
+    expect(service.grace, <String>[friday.id]);
+  });
+
+  test('exception suppresses a pending snooze reminder', () async {
+    final service = FakeNotificationService();
+    final now = DateTime.utc(2026, 8, 15, 10);
+    final entry = _entry(now).copyWith(
+      status: PrayerStatus.snoozed,
+      snoozedUntilUtc: now.add(const Duration(minutes: 20)),
+    );
+    await PrayerNotificationPlanner(service).reschedule(
+      <PrayerEntry>[entry],
+      settings: const PrayerSettings(
+        reminderExceptions: <ReminderException>[
+          ReminderException(prayer: PrayerType.dhuhr),
+        ],
+      ),
+      prayerName: (entry) => entry.type.name,
+      languageCode: 'en',
+      nowUtc: now,
+    );
+    expect(service.snoozes, isEmpty);
+    expect(service.cancelledPrayers, <String>[entry.id]);
+  });
+
+  test('exception cancels a previously scheduled soft reminder', () async {
+    final service = FakeNotificationService();
+    final PrayerEntry skipped = _entry(DateTime.utc(2026, 8, 15, 10))
+        .copyWith(status: PrayerStatus.skipped);
+    await PrayerNotificationPlanner(service).reschedule(
+      <PrayerEntry>[skipped],
+      settings: const PrayerSettings(
+        reminderExceptions: <ReminderException>[
+          ReminderException(prayer: PrayerType.dhuhr),
+        ],
+      ),
+      prayerName: (entry) => entry.type.name,
+      languageCode: 'en',
+      nowUtc: DateTime.utc(2026, 8, 14, 10),
+    );
+    expect(service.cancelledPrayers, <String>[skipped.id]);
+  });
   test(
     'planner schedules prayer and grace reminder for future prayer',
     () async {
@@ -195,6 +282,22 @@ PrayerEntry _entryFor(
   status: status,
 );
 
+PrayerEntry _entryOn(String date, PrayerType type, int hour) {
+  final DateTime scheduled = DateTime.parse(
+    '${date}T${hour.toString().padLeft(2, '0')}:00:00Z',
+  );
+  return PrayerEntry(
+    id: '$date:${type.name}',
+    localDate: date,
+    type: type,
+    scheduledAtUtc: scheduled,
+    timezoneId: 'UTC',
+    graceEndsAtUtc: scheduled.add(const Duration(minutes: 15)),
+    trackingEndsAtUtc: scheduled.add(const Duration(hours: 4)),
+    status: PrayerStatus.upcoming,
+  );
+}
+
 class FakeNotificationService implements NotificationService {
   @override
   Stream<String> get payloads => const Stream<String>.empty();
@@ -202,6 +305,7 @@ class FakeNotificationService implements NotificationService {
   final List<String> prayers = <String>[];
   final List<String> grace = <String>[];
   final List<String> snoozes = <String>[];
+  final List<String> cancelledPrayers = <String>[];
   final List<({String prayerId, String nextPrayerId, DateTime scheduledAtUtc})>
   oneHourRemaining =
       <({String prayerId, String nextPrayerId, DateTime scheduledAtUtc})>[];
@@ -226,7 +330,8 @@ class FakeNotificationService implements NotificationService {
   Future<void> cancelAllRamadanNotifications() async {}
 
   @override
-  Future<void> cancelPrayer(PrayerEntry prayer) async {}
+  Future<void> cancelPrayer(PrayerEntry prayer) async =>
+      cancelledPrayers.add(prayer.id);
 
   @override
   Future<void> initialize() async {}

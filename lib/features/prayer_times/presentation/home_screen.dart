@@ -390,6 +390,11 @@ class _PrayerTileState extends ConsumerState<_PrayerTile> {
   @override
   Widget build(BuildContext context) {
     final PrayerEntry prayer = widget.prayer;
+    final settings = ref.watch(settingsControllerProvider).prayerSettings;
+    final bool remindersDisabled = settings.remindersDisabledFor(
+      prayer.type,
+      prayer.localDate,
+    );
     final String language = Localizations.localeOf(context).languageCode;
     final DateTime local = TimezoneService.toLocal(
       prayer.scheduledAtUtc,
@@ -403,7 +408,7 @@ class _PrayerTileState extends ConsumerState<_PrayerTile> {
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
-        onTap: actionable && !_working
+        onTap: actionable && !_working && !remindersDisabled
             ? () => context.push('/reminder/${Uri.encodeComponent(prayer.id)}')
             : null,
         child: Padding(
@@ -416,10 +421,33 @@ class _PrayerTileState extends ConsumerState<_PrayerTile> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(
-                      prayer.type.localizedName(language),
-                      style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w700),
+                    Row(
+                      children: <Widget>[
+                        Flexible(
+                          child: Text(
+                            prayer.type.localizedName(language),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                        if (remindersDisabled) ...<Widget>[
+                          const SizedBox(width: 6),
+                          Tooltip(
+                            key: ValueKey<String>(
+                              'reminders-disabled-${prayer.id}',
+                            ),
+                            message: AppStrings.of(context)
+                                .t('remindersDisabled'),
+                            child: Icon(
+                              Icons.notifications_off_outlined,
+                              size: 18,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 3),
                     Text(

@@ -20,6 +20,7 @@ import 'package:salah_focus/features/settings/application/settings_controller.da
 import 'package:salah_focus/features/settings/data/problem_report_service.dart';
 import 'package:salah_focus/features/settings/presentation/language_selection_screen.dart';
 import 'package:salah_focus/features/settings/presentation/notification_settings_screen.dart';
+import 'package:salah_focus/features/settings/presentation/reminder_exceptions_section.dart';
 import 'package:salah_focus/features/settings/presentation/privacy_legal_screen.dart';
 import 'package:salah_focus/features/settings/presentation/report_problem_screen.dart';
 import 'package:salah_focus/shared/errors/user_error_message.dart';
@@ -297,6 +298,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ],
             ),
+          ),
+          const SizedBox(height: 18),
+          _PlainSectionTitle(
+            title: s.t('reminderExceptions'),
+            icon: Icons.notifications_off_outlined,
+          ),
+          ReminderExceptionsSection(
+            settings: settings,
+            onChanged: _savePrayerSettings,
           ),
           const SizedBox(height: 18),
           _SectionTitle(

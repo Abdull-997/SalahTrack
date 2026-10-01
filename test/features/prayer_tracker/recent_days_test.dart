@@ -13,6 +13,7 @@ import 'package:salah_focus/core/time/clock_service.dart';
 import 'package:salah_focus/features/prayer_times/application/prayer_coordinator.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
+import 'package:salah_focus/features/prayer_times/domain/reminder_exception.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/prayer_times/domain/user_location.dart';
@@ -91,11 +92,12 @@ Widget _app(
   _Coordinator coordinator,
   DateTime now, {
   Locale locale = const Locale('de'),
+  PrayerSettings settings = const PrayerSettings(),
 }) => ProviderScope(
   overrides: [
     initialPreferencesProvider.overrideWithValue(
       AppPreferences(
-        prayerSettings: const PrayerSettings(),
+        prayerSettings: settings,
         localeCode: locale.languageCode,
         themeMode: 'dark',
         onboardingComplete: true,
@@ -257,6 +259,49 @@ void main() {
       findsNWidgets(5),
     );
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('muted bell appears only on a configured weekday', (
+    tester,
+  ) async {
+    final DateTime now = DateTime.utc(2026, 9, 13, 12); // Sunday.
+    await tester.pumpWidget(
+      _app(
+        _Coordinator(now),
+        now,
+        locale: const Locale('en'),
+        settings: const PrayerSettings(
+          reminderExceptions: <ReminderException>[
+            ReminderException(prayer: PrayerType.dhuhr, weekdays: <int>{6}),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(
+        const ValueKey<String>('tracker-reminders-disabled-2026-09-13-dhuhr'),
+      ),
+      findsNothing,
+    );
+    final Finder yesterday = find.byKey(
+      const ValueKey<String>('tracker-header-2026-09-12'),
+    );
+    await tester.scrollUntilVisible(yesterday, 200);
+    await tester.ensureVisible(yesterday);
+    await tester.tap(yesterday);
+    await tester.pumpAndSettle();
+    final Finder bell = find.byKey(
+      const ValueKey<String>('tracker-reminders-disabled-2026-09-12-dhuhr'),
+    );
+    expect(bell, findsOneWidget);
+    expect(tester.widget<Tooltip>(bell).message, 'Reminders disabled');
+    expect(
+      find.byKey(
+        const ValueKey<String>('tracker-reminders-disabled-2026-09-12-asr'),
+      ),
+      findsNothing,
+    );
   });
 
   testWidgets('Today card shows only the prayer count below five', (

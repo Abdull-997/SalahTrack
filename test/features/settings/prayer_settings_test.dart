@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/prayer_times/domain/friday_prayer_settings.dart';
+import 'package:salah_focus/features/prayer_times/domain/reminder_exception.dart';
 import 'package:salah_focus/features/settings/data/settings_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,6 +15,79 @@ void main() {
     expect(PrayerSettings.defaultConfirmationText('ar'), 'لقد صليت');
     expect(PrayerSettings.defaultConfirmationText('ur'), 'میں نے نماز پڑھی ہے');
     expect(PrayerSettings.defaultConfirmationText('ps'), 'ما لمونځ کړی دی');
+  });
+
+  test('daily and weekday reminder exceptions match the prayer local date', () {
+    const PrayerSettings settings = PrayerSettings(
+      reminderExceptions: <ReminderException>[
+        ReminderException(prayer: PrayerType.dhuhr),
+        ReminderException(prayer: PrayerType.maghrib, weekdays: <int>{4}),
+        ReminderException(prayer: PrayerType.fajr, weekdays: <int>{6, 7}),
+      ],
+    );
+    expect(
+      settings.remindersDisabledFor(PrayerType.dhuhr, '2026-10-01'),
+      isTrue,
+    );
+    expect(
+      settings.remindersDisabledFor(PrayerType.dhuhr, '2026-10-02'),
+      isTrue,
+    );
+    expect(
+      settings.remindersDisabledFor(PrayerType.maghrib, '2026-10-01'),
+      isTrue,
+    );
+    expect(
+      settings.remindersDisabledFor(PrayerType.maghrib, '2026-10-02'),
+      isFalse,
+    );
+    expect(
+      settings.remindersDisabledFor(PrayerType.fajr, '2026-10-03'),
+      isTrue,
+    );
+    expect(
+      settings.remindersDisabledFor(PrayerType.fajr, '2026-10-04'),
+      isTrue,
+    );
+    expect(
+      settings.remindersDisabledFor(PrayerType.fajr, '2026-10-05'),
+      isFalse,
+    );
+    expect(
+      settings.remindersDisabledFor(PrayerType.asr, '2026-10-01'),
+      isFalse,
+    );
+  });
+
+  test('reminder exceptions survive a settings repository reload', () async {
+    final SettingsRepository repository = SettingsRepository();
+    await repository.savePrayerSettings(
+      const PrayerSettings(
+        reminderExceptions: <ReminderException>[
+          ReminderException(prayer: PrayerType.dhuhr),
+          ReminderException(prayer: PrayerType.fajr, weekdays: <int>{6, 7}),
+        ],
+      ),
+    );
+    final PrayerSettings restored =
+        (await SettingsRepository().load()).prayerSettings;
+    expect(restored.reminderExceptions, hasLength(2));
+    expect(
+      restored.remindersDisabledFor(PrayerType.dhuhr, '2026-10-05'),
+      isTrue,
+    );
+    expect(
+      restored.remindersDisabledFor(PrayerType.fajr, '2026-10-03'),
+      isTrue,
+    );
+    expect(
+      restored.remindersDisabledFor(PrayerType.fajr, '2026-10-05'),
+      isFalse,
+    );
+    expect(
+      PrayerSettings.fromJson(<String, Object?>{}).reminderExceptions,
+      isEmpty,
+    );
   });
 
   test('settings round-trip preserves prayer calculation configuration', () {

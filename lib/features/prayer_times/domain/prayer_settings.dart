@@ -1,5 +1,6 @@
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 import 'package:salah_focus/features/prayer_times/domain/friday_prayer_settings.dart';
+import 'package:salah_focus/features/prayer_times/domain/reminder_exception.dart';
 
 enum AsrMadhhab { standard, hanafi }
 
@@ -17,6 +18,7 @@ class PrayerSettings {
     this.confirmationText = 'Ich habe gebetet',
     this.adjustments = const <PrayerType, int>{},
     this.fridayPrayer = const FridayPrayerSettings(),
+    this.reminderExceptions = const <ReminderException>[],
   });
 
   final int calculationMethodId;
@@ -29,6 +31,13 @@ class PrayerSettings {
   final String confirmationText;
   final Map<PrayerType, int> adjustments;
   final FridayPrayerSettings fridayPrayer;
+  final List<ReminderException> reminderExceptions;
+
+  bool remindersDisabledFor(PrayerType prayer, String localDate) =>
+      reminderExceptions.any(
+        (ReminderException exception) =>
+            exception.prayer == prayer && exception.appliesTo(localDate),
+      );
 
   static const Map<String, String> _defaultConfirmationTexts = <String, String>{
     'bn': 'আমি নামাজ পড়েছি',
@@ -79,6 +88,7 @@ class PrayerSettings {
     String? confirmationText,
     Map<PrayerType, int>? adjustments,
     FridayPrayerSettings? fridayPrayer,
+    List<ReminderException>? reminderExceptions,
   }) {
     return PrayerSettings(
       calculationMethodId: calculationMethodId ?? this.calculationMethodId,
@@ -92,6 +102,7 @@ class PrayerSettings {
       confirmationText: confirmationText ?? this.confirmationText,
       adjustments: adjustments ?? this.adjustments,
       fridayPrayer: fridayPrayer ?? this.fridayPrayer,
+      reminderExceptions: reminderExceptions ?? this.reminderExceptions,
     );
   }
 
@@ -109,11 +120,24 @@ class PrayerSettings {
         type.name: adjustmentFor(type),
     },
     'fridayPrayer': fridayPrayer.toJson(),
+    'reminderExceptions': <Map<String, Object?>>[
+      for (final ReminderException exception in reminderExceptions)
+        exception.toJson(),
+    ],
   };
 
   factory PrayerSettings.fromJson(Map<String, Object?> json) {
     final Object? rawAdjustments = json['adjustments'];
     final Object? rawFridayPrayer = json['fridayPrayer'];
+    final Object? rawExceptions = json['reminderExceptions'];
+    final Map<PrayerType, ReminderException> exceptions =
+        <PrayerType, ReminderException>{};
+    if (rawExceptions is List) {
+      for (final Object? raw in rawExceptions) {
+        final ReminderException? exception = ReminderException.fromJson(raw);
+        if (exception != null) exceptions[exception.prayer] = exception;
+      }
+    }
     final Map<PrayerType, int> adjustments = <PrayerType, int>{};
     if (rawAdjustments is Map) {
       for (final MapEntry<Object?, Object?> entry in rawAdjustments.entries) {
@@ -155,6 +179,7 @@ class PrayerSettings {
               Map<String, Object?>.from(rawFridayPrayer),
             )
           : const FridayPrayerSettings(),
+      reminderExceptions: exceptions.values.toList(growable: false),
     );
   }
 

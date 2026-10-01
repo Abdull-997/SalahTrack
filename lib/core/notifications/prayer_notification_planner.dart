@@ -1,5 +1,6 @@
 import 'package:salah_focus/core/notifications/notification_service.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
+import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
 
@@ -12,6 +13,7 @@ class PrayerNotificationPlanner {
     List<PrayerEntry> entries, {
     required String Function(PrayerEntry entry) prayerName,
     required String languageCode,
+    PrayerSettings settings = const PrayerSettings(),
     DateTime? nowUtc,
     int horizonDays = 4,
   }) async {
@@ -24,6 +26,11 @@ class PrayerNotificationPlanner {
         '${entry.localDate}:${entry.type.name}': entry,
     };
     for (final PrayerEntry entry in entries) {
+      if (settings.remindersDisabledFor(entry.type, entry.localDate)) {
+        // Also remove a one-off soft reminder left by an earlier skip.
+        await _notifications.cancelPrayer(entry);
+        continue;
+      }
       if (entry.status == PrayerStatus.prayed ||
           entry.status == PrayerStatus.skipped ||
           entry.status == PrayerStatus.missed) {

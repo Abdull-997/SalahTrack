@@ -99,6 +99,15 @@ class _PrayerReminderScreenState extends ConsumerState<PrayerReminderScreen> {
           .read(prayerCoordinatorProvider)
           .prayerById(widget.prayerId);
       if (!mounted || generation != _generation) return;
+      if (entry != null &&
+          widget.action != PrayerNotificationAction.markPrayed &&
+          ref
+              .read(settingsControllerProvider)
+              .prayerSettings
+              .remindersDisabledFor(entry.type, entry.localDate)) {
+        _close();
+        return;
+      }
       setState(() {
         _prayer = entry;
         _loaded = true;

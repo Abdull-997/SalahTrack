@@ -8,6 +8,7 @@ import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_times_repository.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
+import 'package:salah_focus/features/prayer_times/domain/reminder_exception.dart';
 import 'package:sqflite/sqflite.dart';
 
 void main() {
@@ -40,6 +41,36 @@ void main() {
     );
     await database.upsertPrayerEntry(original);
   });
+
+  test(
+    'exception suppresses direct snooze and soft follow-up scheduling',
+    () async {
+      const PrayerSettings disabled = PrayerSettings(
+        reminderExceptions: <ReminderException>[
+          ReminderException(prayer: PrayerType.isha),
+        ],
+      );
+      final PrayerEntry unchanged = await coordinator.snooze(
+        original,
+        disabled,
+        'Isha',
+        'en',
+      );
+      expect(unchanged.status, PrayerStatus.pending);
+      expect(notifications.snoozeAttempts, 0);
+      final PrayerEntry skipped = await coordinator.skip(
+        original,
+        disabled,
+        'Isha',
+        'en',
+      );
+      expect(skipped.status, PrayerStatus.skipped);
+      expect(
+        (await database.prayerEntryById(original.id))?.status,
+        PrayerStatus.skipped,
+      );
+    },
+  );
 
   test('ending reminders saves a reason with the skipped prayer', () async {
     await coordinator.skip(

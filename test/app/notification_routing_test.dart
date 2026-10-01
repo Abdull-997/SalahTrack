@@ -16,6 +16,7 @@ import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
+import 'package:salah_focus/features/prayer_times/domain/reminder_exception.dart';
 import 'package:salah_focus/features/prayer_times/presentation/prayer_reminder_screen.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
 import 'package:salah_focus/features/settings/data/settings_repository.dart';
@@ -128,12 +129,13 @@ Future<ProviderContainer> _mount(
   _Coordinator coordinator, {
   String localeCode = 'en',
   String themeMode = 'light',
+  PrayerSettings prayerSettings = const PrayerSettings(),
 }) async {
   final container = ProviderContainer(
     overrides: [
       initialPreferencesProvider.overrideWithValue(
         AppPreferences(
-          prayerSettings: const PrayerSettings(),
+          prayerSettings: prayerSettings,
           localeCode: localeCode,
           themeMode: themeMode,
           onboardingComplete: true,
@@ -215,6 +217,47 @@ void main() {
       container.read(goRouterProvider).routeInformationProvider.value.uri.path,
       '/home',
     );
+  });
+
+  testRouting('a disabled prayer does not open a stale reminder', (
+    tester,
+  ) async {
+    final notifications = _Notifications()..initial = Future.value(_payload());
+    final coordinator = _Coordinator()..entries[_entry().id] = _entry();
+    await _mount(
+      tester,
+      notifications,
+      coordinator,
+      prayerSettings: const PrayerSettings(
+        reminderExceptions: <ReminderException>[
+          ReminderException(prayer: PrayerType.isha),
+        ],
+      ),
+    );
+    expect(find.byType(PrayerReminderScreen), findsNothing);
+    expect(coordinator.confirms, 0);
+  });
+
+  testRouting('manual confirmation remains available with an exception', (
+    tester,
+  ) async {
+    final notifications = _Notifications()
+      ..initial = Future.value(
+        _payload(action: PrayerNotificationAction.markPrayed),
+      );
+    final coordinator = _Coordinator()..entries[_entry().id] = _entry();
+    await _mount(
+      tester,
+      notifications,
+      coordinator,
+      prayerSettings: const PrayerSettings(
+        reminderExceptions: <ReminderException>[
+          ReminderException(prayer: PrayerType.isha),
+        ],
+      ),
+    );
+    expect(coordinator.confirms, 1);
+    expect(coordinator.entries[_entry().id]?.status, PrayerStatus.prayed);
   });
 
   testRouting('stop reminding saves a selected reason', (tester) async {

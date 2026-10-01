@@ -13,6 +13,7 @@ import 'package:salah_focus/features/prayer_times/domain/prayer_entry.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_settings.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_status.dart';
 import 'package:salah_focus/features/prayer_times/domain/prayer_type.dart';
+import 'package:salah_focus/features/prayer_times/domain/reminder_exception.dart';
 import 'package:salah_focus/features/prayer_times/presentation/home_screen.dart';
 import 'package:salah_focus/features/settings/application/settings_controller.dart';
 import 'package:salah_focus/features/settings/data/settings_repository.dart';
@@ -52,12 +53,14 @@ Widget _app({
   Locale locale = const Locale('en'),
   ThemeData? theme,
   bool use24HourFormat = true,
+  List<ReminderException> exceptions = const <ReminderException>[],
 }) => ProviderScope(
   overrides: [
     initialPreferencesProvider.overrideWithValue(
       AppPreferences(
         prayerSettings: PrayerSettings(
           fridayPrayer: FridayPrayerSettings(enabled: enabled),
+          reminderExceptions: exceptions,
         ),
         localeCode: locale.languageCode,
         themeMode: theme?.brightness == Brightness.dark ? 'dark' : 'light',
@@ -91,6 +94,35 @@ Widget _app({
 
 void main() {
   setUpAll(initializeDateFormatting);
+
+  testWidgets('Home shows a muted bell only for an affected prayer', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      _app(
+        date: '2026-09-19',
+        enabled: false,
+        exceptions: const <ReminderException>[
+          ReminderException(prayer: PrayerType.dhuhr),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    final Finder bell = find.byKey(
+      const ValueKey<String>('reminders-disabled-2026-09-19-dhuhr'),
+    );
+    await tester.scrollUntilVisible(bell, 180);
+    expect(bell, findsOneWidget);
+    expect(tester.widget<Tooltip>(bell).message, 'Reminders disabled');
+    expect(
+      find.byKey(const ValueKey<String>('reminders-disabled-2026-09-19-asr')),
+      findsNothing,
+    );
+  });
 
   testWidgets('enabled Friday Prayer appears between Dhuhr and Asr on Friday', (
     WidgetTester tester,

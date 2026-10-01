@@ -111,6 +111,7 @@ class PrayerCoordinator {
       );
       await _planner.reschedule(
         upcoming,
+        settings: settings,
         prayerName: (PrayerEntry entry) =>
             entry.type.localizedName(languageCode),
         languageCode: languageCode,
@@ -265,6 +266,9 @@ class PrayerCoordinator {
       await _database.prayerEntryById(prayer.id) ?? prayer,
       _clock.nowUtc(),
     );
+    if (settings.remindersDisabledFor(current.type, current.localDate)) {
+      return current;
+    }
     // Replayed actions and a second tap must not extend an active snooze.
     if (current.status == PrayerStatus.snoozed &&
         current.snoozedUntilUtc?.isAfter(_clock.nowUtc()) == true) {
@@ -302,7 +306,8 @@ class PrayerCoordinator {
     final PrayerEntry updated = _stateMachine.skip(current, reason: reason);
     await _repository.saveEntry(updated);
     await _notifications.cancelPrayer(prayer);
-    if (settings.softReminderAfterSkip) {
+    if (settings.softReminderAfterSkip &&
+        !settings.remindersDisabledFor(updated.type, updated.localDate)) {
       await _notifications.scheduleSoftReminder(
         updated,
         prayerName,

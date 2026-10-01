@@ -60,6 +60,7 @@ class TrackerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppStrings s = AppStrings.of(context);
+    ref.watch(settingsControllerProvider);
     final AsyncValue<TrackerData> tracker = ref.watch(trackerDataProvider);
 
     Future<void> refresh() async {
@@ -164,6 +165,9 @@ Future<void> _showDayDetails(
   context: context,
   builder: (BuildContext dialogContext) {
     final AppStrings s = AppStrings.of(dialogContext);
+    final settings = ProviderScope.containerOf(dialogContext)
+        .read(settingsControllerProvider)
+        .prayerSettings;
     final Map<PrayerType, PrayerEntry> byType = <PrayerType, PrayerEntry>{
       for (final PrayerEntry entry in entries) entry.type: entry,
     };
@@ -191,11 +195,33 @@ Future<void> _showDayDetails(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              Text(
-                                type.localizedName(s.locale.languageCode),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
+                              Row(
+                                children: <Widget>[
+                                  Flexible(
+                                    child: Text(
+                                      type.localizedName(s.locale.languageCode),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                  if (settings.remindersDisabledFor(
+                                    type,
+                                    _iso(date),
+                                  )) ...<Widget>[
+                                    const SizedBox(width: 6),
+                                    Tooltip(
+                                      message: s.t('remindersDisabled'),
+                                      child: Icon(
+                                        Icons.notifications_off_outlined,
+                                        size: 18,
+                                        color: Theme.of(dialogContext)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                               Text(
                                 byType[type] == null
@@ -576,6 +602,7 @@ class _DayCardState extends ConsumerState<_DayCard> {
   @override
   Widget build(BuildContext context) {
     final DateTime parsed = DateTime.parse(widget.date);
+    final settings = ref.watch(settingsControllerProvider).prayerSettings;
     final String locale = Localizations.localeOf(context).languageCode;
     final AppStrings s = AppStrings.of(context);
     final int prayed = widget.entries
@@ -675,6 +702,21 @@ class _DayCardState extends ConsumerState<_DayCard> {
                       _StatusIcon(status: entry.status),
                       const SizedBox(width: 10),
                       Expanded(child: Text(entry.type.localizedName(locale))),
+                      if (settings.remindersDisabledFor(
+                        entry.type,
+                        entry.localDate,
+                      ))
+                        Tooltip(
+                          key: ValueKey<String>(
+                            'tracker-reminders-disabled-${entry.id}',
+                          ),
+                          message: s.t('remindersDisabled'),
+                          child: Icon(
+                            Icons.notifications_off_outlined,
+                            size: 18,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
                       Expanded(
                         flex: 2,
                         child: Align(
