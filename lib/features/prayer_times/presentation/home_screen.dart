@@ -140,16 +140,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             sliver: SliverToBoxAdapter(
               child: Row(
                 children: <Widget>[
-                  Container(
-                    width: 46,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      Icons.nightlight_round,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/salahtrack_logo.png',
+                      key: const ValueKey<String>('home-app-logo'),
+                      width: 46,
+                      height: 46,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
+                      excludeFromSemantics: true,
                     ),
                   ),
                   const SizedBox(width: 12),

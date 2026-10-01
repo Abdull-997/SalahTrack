@@ -95,6 +95,40 @@ Widget _app({
 void main() {
   setUpAll(initializeDateFormatting);
 
+  for (final bool darkAndRtl in <bool>[false, true]) {
+    testWidgets(
+      'Home header uses the PNG logo on a small ${darkAndRtl ? 'dark RTL' : 'light LTR'} screen',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(320, 640);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        await tester.pumpWidget(
+          _app(
+            date: '2026-09-19',
+            enabled: false,
+            locale: Locale(darkAndRtl ? 'ar' : 'en'),
+            theme: darkAndRtl ? AppTheme.dark() : AppTheme.light(),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final Finder logo = find.byKey(const ValueKey<String>('home-app-logo'));
+        final Image image = tester.widget<Image>(logo);
+        expect(
+          (image.image as AssetImage).assetName,
+          'assets/salahtrack_logo.png',
+        );
+        expect(tester.getSize(logo), const Size(46, 46));
+        expect(image.fit, BoxFit.contain);
+        final double logoX = tester.getTopLeft(logo).dx;
+        final double nameX = tester.getTopLeft(find.text('SalahTrack')).dx;
+        expect(logoX > nameX, darkAndRtl);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets('Home shows a muted bell only for an affected prayer', (
     tester,
   ) async {
